@@ -1,0 +1,72 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Data files (large files - store in cloud/DVC)
+data/raw/*.csv
+data/raw/*.json
+data/raw/*.parquet
+data/embeddings/
+*.faiss
+*.pkl
+
+# Environment variables (NEVER commit secrets)
+.env
+.env.local
+.env.production
+*.env
+
+# Azure & Cloud configs
+.azure/
+azure.json
+
+# MLflow
+mlruns/
+mlartifacts/
+
+# Model files (large)
+*.pt
+*.pth
+*.bin
+*.onnx
+models/
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Test coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Docker
+.dockerignore
+
+# Distribution
+*.tar.gz
+*.zip
