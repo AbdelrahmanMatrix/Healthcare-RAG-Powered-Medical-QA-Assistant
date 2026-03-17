@@ -18,11 +18,14 @@ ENV/
 .ipynb_checkpoints/
 *.ipynb_checkpoints
 
-# Data files (large files - store in cloud/DVC)
+# Data files (large files - store externally or regenerate via notebooks)
+# Keep folder structure tracked via .gitkeep files
 data/raw/*.csv
 data/raw/*.json
 data/raw/*.parquet
-data/embeddings/
+
+# FAISS index (regenerate by running 04_embeddings_vectorstore.ipynb)
+data/embeddings/faiss_index/
 *.faiss
 *.pkl
 
@@ -40,12 +43,12 @@ azure.json
 mlruns/
 mlartifacts/
 
-# Model files (large)
-*.pt
-*.pth
-*.bin
-*.onnx
-models/
+# Model weight files (large) - folder structure is tracked via .gitkeep
+# Regenerate by running 06_classification_model.ipynb
+models/classifier/*.bin
+models/classifier/*.pt
+models/classifier/*.pth
+models/classifier/*.onnx
 
 # IDE
 .vscode/settings.json
