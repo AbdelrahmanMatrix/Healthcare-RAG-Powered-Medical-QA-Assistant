@@ -14,12 +14,13 @@ torch==2.3.0
 tokenizers==0.19.1
 
 # ─── RAG Pipeline ───────────────────────────────────────────────────────────
+openai==1.30.5
 langchain==0.2.3
 langchain-community==0.2.3
 faiss-cpu==1.8.0
 
-# ─── Classification ─────────────────────────────────────────────────────────
-scikit-learn==1.5.0
+# ─── Classification (FIXED for stability) ───────────────────────────────────
+scikit-learn==1.4.2
 
 # ─── Evaluation Metrics ─────────────────────────────────────────────────────
 nltk==3.8.1
@@ -48,3 +49,6 @@ wordcloud==1.9.3
 jupyter==1.0.0
 ipykernel==6.29.4
 tqdm==4.66.4
+
+# ─── Stability / Threading Fix ──────────────────────────────────────────────
+threadpoolctl==3.6.0
