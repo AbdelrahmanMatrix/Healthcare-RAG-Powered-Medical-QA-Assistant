@@ -37,7 +37,7 @@
         "distance": 1.0346442461013794
       }
     ],
-    "latency_ms": 647.5
+    "latency_ms": 646.95
   },
   {
     "query_num": 2,
@@ -77,7 +77,7 @@
         "distance": 0.9138088822364807
       }
     ],
-    "latency_ms": 1824.12
+    "latency_ms": 1776.81
   },
   {
     "query_num": 3,
@@ -117,7 +117,7 @@
         "distance": 0.9366753101348877
       }
     ],
-    "latency_ms": 564.72
+    "latency_ms": 564.0
   },
   {
     "query_num": 4,
@@ -157,7 +157,7 @@
         "distance": 1.362552523612976
       }
     ],
-    "latency_ms": 725.08
+    "latency_ms": 725.69
   },
   {
     "query_num": 5,
@@ -197,7 +197,7 @@
         "distance": 1.0239800214767456
       }
     ],
-    "latency_ms": 879.47
+    "latency_ms": 822.7
   },
   {
     "query_num": 6,
@@ -237,7 +237,7 @@
         "distance": 1.1258407831192017
       }
     ],
-    "latency_ms": 855.32
+    "latency_ms": 856.04
   },
   {
     "query_num": 7,
@@ -277,7 +277,7 @@
         "distance": 0.6632111072540283
       }
     ],
-    "latency_ms": 1085.7
+    "latency_ms": 1071.38
   },
   {
     "query_num": 8,
@@ -317,7 +317,7 @@
         "distance": 0.9289129972457886
       }
     ],
-    "latency_ms": 935.28
+    "latency_ms": 923.83
   },
   {
     "query_num": 9,
@@ -357,7 +357,7 @@
         "distance": 1.103818416595459
       }
     ],
-    "latency_ms": 1169.01
+    "latency_ms": 1128.32
   },
   {
     "query_num": 10,
@@ -397,6 +397,6 @@
         "distance": 0.935627818107605
       }
     ],
-    "latency_ms": 924.53
+    "latency_ms": 876.38
   }
 ]
