@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare RAG Medical Q&A — Complete Project Explanation</title>
+    <style>
+        :root {
+            --primary: #0ea5e9;
+            --primary-dark: #0369a1;
+            --primary-light: #0c1929;
+            --accent: #22d3ee;
+            --green: #4ade80;
+            --red: #f87171;
+            --orange: #fb923c;
+            --purple: #a78bfa;
+            --text: #e2e8f0;
+            --text-dim: #94a3b8;
+            --bg: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-hover: #253449;
+            --border: #334155;
+            --code-bg: #0d1117;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.8;
+        }
+
+        /* ── HERO ── */
+        .hero {
+            background: linear-gradient(135deg, #0c1929 0%, #1a1a3e 50%, #0c2929 100%);
+            padding: 80px 40px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(14,165,233,0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 50%, rgba(34,211,238,0.06) 0%, transparent 50%);
+            animation: pulse 8s ease-in-out infinite alternate;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+        .hero * { position: relative; z-index: 1; }
+        .hero .icon { font-size: 4em; margin-bottom: 20px; }
+        .hero h1 {
+            font-size: 2.8em;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+        }
+        .hero .subtitle {
+            font-size: 1.3em;
+            color: var(--text-dim);
+            max-width: 700px;
+            margin: 0 auto 24px;
+        }
+        .hero .badges {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .hero .badge {
+            background: rgba(14,165,233,0.15);
+            border: 1px solid rgba(14,165,233,0.3);
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            color: var(--accent);
+        }
+
+        /* ── CONTAINER ── */
+        .container {
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 20px 30px;
+        }
+
+        /* ── TOC ── */
+        .toc {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 32px 40px;
+            margin: 30px 0;
+            border-left: 4px solid var(--primary);
+        }
+        .toc h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.4em;
+        }
+        .toc ol { padding-left: 0; list-style: none; counter-reset: toc; }
+        .toc ol li {
+            counter-increment: toc;
+            margin-bottom: 10px;
+        }
+        .toc ol li a {
+            color: var(--text);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .toc ol li a:hover {
+            background: var(--bg-card-hover);
+            color: var(--accent);
+        }
+        .toc ol li a::before {
+            content: counter(toc, decimal-leading-zero);
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 0.8em;
+            padding: 4px 12px;
+            border-radius: 10px;
+            min-width: 36px;
+            text-align: center;
+        }
+
+        /* ── SECTION ── */
+        .section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 40px;
+            margin: 30px 0;
+        }
+        .section h2 {
+            color: var(--primary);
+            font-size: 1.8em;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .section h2 .num {
+            background: var(--primary);
+            color: var(--bg);
+            width: 38px; height: 38px;
+            line-height: 38px;
+            text-align: center;
+            border-radius: 50%;
+            font-size: 0.6em;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+        .section h3 {
+            color: var(--accent);
+            font-size: 1.2em;
+            margin-top: 28px;
+            margin-bottom: 12px;
+            padding-left: 14px;
+            border-left: 3px solid var(--primary);
+        }
+        .section p {
+            margin-bottom: 14px;
+            color: var(--text-dim);
+        }
+
+        /* ── ANALOGY BOX ── */
+        .analogy {
+            background: linear-gradient(135deg, rgba(14,165,233,0.08), rgba(34,211,238,0.05));
+            border: 1px solid rgba(14,165,233,0.2);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 20px 0;
+        }
+        .analogy .label {
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .analogy p { color: var(--text); margin-bottom: 0; }
+
+        /* ── TABLE ── */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.95em;
+        }
+        th {
+            background: var(--primary-light);
+            color: var(--primary);
+            text-align: left;
+            padding: 12px 16px;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+        }
+        td {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-dim);
+        }
+        tr:hover td { background: var(--bg-card-hover); }
+
+        /* ── CODE ── */
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            overflow-x: auto;
+            margin: 16px 0;
+            font-size: 0.9em;
+        }
+        code {
+            font-family: 'Cascadia Code', 'Fira Code', monospace;
+            color: #e6db74;
+        }
+        p code, li code, td code {
+            background: rgba(14,165,233,0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: var(--accent);
+        }
+
+        /* ── DIAGRAM ── */
+        .diagram {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .diagram pre {
+            background: none;
+            border: none;
+            padding: 0;
+            margin: 0;
+            display: inline-block;
+            text-align: left;
+        }
+
+        /* ── STEP FLOW ── */
+        .flow {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 16px 0;
+        }
+        .flow .step {
+            background: var(--primary-light);
+            border: 1px solid rgba(14,165,233,0.3);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .flow .arrow { color: var(--text-dim); font-size: 1.2em; }
+
+        /* ── HIGHLIGHT BOX ── */
+        .highlight {
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin: 16px 0;
+        }
+        .highlight.green {
+            background: rgba(74,222,128,0.08);
+            border: 1px solid rgba(74,222,128,0.2);
+        }
+        .highlight.orange {
+            background: rgba(251,146,60,0.08);
+            border: 1px solid rgba(251,146,60,0.2);
+        }
+        .highlight.blue {
+            background: rgba(14,165,233,0.08);
+            border: 1px solid rgba(14,165,233,0.2);
+        }
+        .highlight .title {
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .highlight.green .title { color: var(--green); }
+        .highlight.orange .title { color: var(--orange); }
+        .highlight.blue .title { color: var(--primary); }
+
+        /* ── FOOTER ── */
+        .footer {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-dim);
+            font-size: 0.9em;
+            border-top: 1px solid var(--border);
+            margin-top: 40px;
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            .hero { padding: 40px 20px; }
+            .hero h1 { font-size: 2em; }
+            .section { padding: 24px; }
+            .container { padding: 10px 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════ HERO ═══════════════════ -->
+<div class="hero">
+    <div class="icon">🏥</div>
+    <h1>Healthcare RAG Medical Q&A Assistant</h1>
+    <p class="subtitle">
+        A complete guide to understanding how AI answers medical questions
+        using retrieval, classification, and language generation —
+        explained for everyone, no AI background required.
+    </p>
+    <div class="badges">
+        <span class="badge">🎓 eyouth × DEPI</span>
+        <span class="badge">🧠 Machine Learning</span>
+        <span class="badge">☁️ Azure Deployed</span>
+        <span class="badge">📊 10,000 Medical Q&As</span>
+    </div>
+</div>
+
+<!-- ═══════════════════ TOC ═══════════════════ -->
+<div class="container">
+    <div class="toc">
+        <h2>📑 What You'll Learn</h2>
+        <ol>
+            <li><a href="#s1">The Problem — Why This Project Exists</a></li>
+            <li><a href="#s2">The Big Picture — How It Works (Simple Version)</a></li>
+            <li><a href="#s3">The Dataset — Where Medical Knowledge Comes From</a></li>
+            <li><a href="#s4">Step 1: Cleaning the Data</a></li>
+            <li><a href="#s5">Step 2: Categorising Medical Questions</a></li>
+            <li><a href="#s6">Step 3: Turning Text Into Numbers (Embeddings)</a></li>
+            <li><a href="#s7">Step 4: Building a Search Engine (FAISS)</a></li>
+            <li><a href="#s8">Step 5: The Brain — Language Model (flan-t5)</a></li>
+            <li><a href="#s9">Step 6: RAG — Retrieval-Augmented Generation</a></li>
+            <li><a href="#s10">Step 7: The Classifier — Smart Routing</a></li>
+            <li><a href="#s11">Step 8: The Full Pipeline — Everything Together</a></li>
+            <li><a href="#s12">Step 9: Measuring Quality</a></li>
+            <li><a href="#s13">Step 10: Deploying as a Web Service</a></li>
+            <li><a href="#s14">Step 11: Monitoring & MLOps</a></li>
+            <li><a href="#s15">Glossary — Key Terms Explained</a></li>
+        </ol>
+    </div>
+    <!-- ═══════════════════ SECTION 1 ═══════════════════ -->
+    <div class="section" id="s1">
+        <h2><span class="num">01</span> The Problem — Why This Project Exists</h2>
+
+        <p>Imagine you're feeling sick and you Google your symptoms. You get thousands of results — some from doctors, some from random blogs, some outdated. You don't know which to trust, and you can't read 50 medical papers to find your answer.</p>
+
+        <p><strong>This project solves that problem.</strong> We built an AI assistant that:</p>
+
+        <table>
+            <tr><th>What It Does</th><th>Why It Matters</th></tr>
+            <tr><td>Reads 10,000 real medical Q&As from PubMed</td><td>Uses trusted, peer-reviewed medical knowledge</td></tr>
+            <tr><td>Understands your question</td><td>Figures out if you're asking about symptoms, treatment, medication, etc.</td></tr>
+            <tr><td>Finds the most relevant medical evidence</td><td>Like a doctor looking up the right textbook page</td></tr>
+            <tr><td>Generates a clear answer</td><td>Summarises complex medical text into a readable response</td></tr>
+            <tr><td>Adds a safety disclaimer</td><td>Always reminds you to consult a real doctor</td></tr>
+        </table>
+
+        <div class="analogy">
+            <div class="label">🔍 Real-World Analogy</div>
+            <p>Think of it like a <strong>medical librarian</strong>. You ask a question, the librarian knows which shelf to look at (classification), finds the right books (retrieval), reads the relevant pages, and gives you a summary (generation). Our AI does the same thing — but in milliseconds.</p>
+        </div>
+    </div>
+
+    <!-- ═══════════════════ SECTION 2 ═══════════════════ -->
+    <div class="section" id="s2">
+        <h2><span class="num">02</span> The Big Picture — How It Works</h2>
+
+        <p>Before diving into details, here's the entire system at a glance. Don't worry if you don't understand every part yet — we'll explain each one.</p>
+
+        <div class="diagram">
+            <pre><code>
+    You ask: "What are the symptoms of diabetes?"
+                        │
+                        ▼
+            ┌───────────────────────┐
+            │   🏷️ CLASSIFIER       │  "This is a Symptoms question"
+            │   (DistilBERT model)  │
+            └───────────┬───────────┘
+                        │
+                        ▼
+            ┌───────────────────────┐
+            │   🔍 SEARCH ENGINE    │  Finds 5 most relevant
+            │   (FAISS vectors)     │  medical passages
+            └───────────┬───────────┘
+                        │
+                        ▼
+            ┌───────────────────────┐
+            │   🧠 LANGUAGE MODEL   │  Reads passages and
+            │   (flan-t5-base)      │  writes an answer
+            └───────────┬───────────┘
+                        │
+                        ▼
+            ┌───────────────────────┐
+            │   ⚠️ DISCLAIMER       │  "Consult a doctor"
+            └───────────────────────┘
+                        │
+                        ▼
+            Your answer appears! 💬
+            </code></pre>
+        </div>
+
+        <p>This architecture is called <strong>RAG</strong> — Retrieval-Augmented Generation. Instead of the AI making up answers from memory (which can be wrong), it <strong>looks up real evidence first</strong>, then generates an answer based on that evidence.</p>
+
+        <div class="highlight green">
+            <div class="title">✅ Why RAG Is Better Than Just Asking ChatGPT</div>
+            <p>A regular chatbot generates answers from what it memorised during training — it can "hallucinate" (make up facts). Our RAG system always cites real medical papers, so you can verify the information. It's like the difference between asking someone who <em>thinks</em> they know vs. someone who <em>checks the textbook</em> before answering.</p>
+        </div>
+    </div>
+
+    <!-- ═══════════════════ SECTION 3 ═══════════════════ -->
+    <div class="section" id="s3">
+        <h2><span class="num">03</span> The Dataset — Where Medical Knowledge Comes From</h2>
+
+        <p>Every AI system needs data to learn from. Ours uses <strong>PubMedQA</strong> — a dataset of 10,000 real medical questions and answers derived from PubMed, the world's largest database of biomedical research.</p>
+
+        <h3>What's In Each Row?</h3>
+
+        <table>
+            <tr><th>Column</th><th>What It Contains</th><th>Example (Shortened)</th></tr>
+            <tr>
+                <td><code>question</code></td>
+                <td>A medical question</td>
+                <td>"Is naturopathy effective for menopausal symptoms?"</td>
+            </tr>
+            <tr>
+                <td><code>context</code></td>
+                <td>The medical research abstract (evidence)</td>
+                <td>"A retrospective cohort study compared naturopathic therapy with conventional medical therapy for treatment of menopausal symptoms..."</td>
+            </tr>
+            <tr>
+                <td><code>answer</code></td>
+                <td>The conclusion from the research</td>
+                <td>"Naturopathy appears to be an effective alternative for relief of specific menopausal symptoms."</td>
+            </tr>
+            <tr>
+                <td><code>category</code></td>
+                <td>The medical topic (we added this)</td>
+                <td>"Treatment"</td>
+            </tr>
+        </table>
+
+        <div class="analogy">
+            <div class="label">📚 Analogy</div>
+            <p>Think of the dataset as a <strong>medical encyclopedia with 10,000 entries</strong>. Each entry has a question someone asked, the research paper that answers it, and a short conclusion. Our AI learns to search this encyclopedia and summarise answers.</p>
+        </div>
+
+        <h3>The 6 Medical Categories</h3>
+
+        <table>
+            <tr><th>Category</th><th>What It Covers</th><th>Example Question</th></tr>
+            <tr><td>🤒 Symptoms</td><td>Signs, pain, manifestations of disease</td><td>"What are the symptoms of diabetes?"</td></tr>
+            <tr><td>🔬 Diagnosis</td><td>Tests, screening, detection methods</td><td>"How is pneumonia diagnosed?"</td></tr>
+            <tr><td>🏥 Treatment</td><td>Surgeries, therapies, procedures</td><td>"What is the treatment for hypertension?"</td></tr>
+            <tr><td>💊 Medication</td><td>Drugs, dosages, side effects</td><td>"What are the side effects of metformin?"</td></tr>
+            <tr><td>🛡️ Prevention</td><td>Lifestyle, vaccines, risk reduction</td><td>"How can heart disease be prevented?"</td></tr>
+            <tr><td>📋 General</td><td>Everything else</td><td>"What is the role of antibodies?"</td></tr>
+        </table>
+    </div>
+
+    <!-- ═══════════════════ SECTION 4 ═══════════════════ -->
+    <div class="section" id="s4">
+        <h2><span class="num">04</span> Step 1: Cleaning the Data</h2>
+
+        <p>Raw data from the internet is messy — like a book with typos, random formatting, and pages in the wrong language. Before the AI can learn from it, we need to clean it up.</p>
+
+        <h3>What We Clean</h3>
+
+        <table>
+            <tr><th>Problem</th><th>What We Do</th><th>Why</th></tr>
+            <tr><td>HTML tags (<code>&lt;p&gt;</code>, <code>&lt;br&gt;</code>)</td><td>Strip them out</td><td>AI needs plain text, not web code</td></tr>
+            <tr><td>Special characters (#@$%)</td><td>Remove non-useful ones</td><td>Keep only meaningful text</td></tr>
+            <tr><td>UPPERCASE text</td><td>Convert to lowercase</td><td>"Diabetes" and "diabetes" should match</td></tr>
+            <tr><td>Extra spaces and newlines</td><td>Collapse to single space</td><td>Consistent formatting</td></tr>
+            <tr><td>Non-English rows</td><td>Detect and remove</td><td>Our system only works in English</td></tr>
+            <tr><td>Duplicate rows</td><td>Remove exact copies</td><td>Don't want the AI seeing the same thing twice</td></tr>
+            <tr><td>Missing values</td><td>Drop rows with empty fields</td><td>Can't learn from nothing</td></tr>
+        </table>
+
+        <div class="flow">
+            <span class="step">Raw Data (10,000 rows)</span>
+            <span class="arrow">→</span>
+            <span class="step">Strip HTML</span>
+            <span class="arrow">→</span>
+            <span class="step">Lowercase</span>
+            <span class="arrow">→</span>
+            <span class="step">Remove Non-English</span>
+            <span class="arrow">→</span>
+            <span class="step">Deduplicate</span>
+            <span class="arrow">→</span>
+            <span class="step">Clean Data (~9,990 rows)</span>
+        </div>
+
+        <div class="analogy">
+            <div class="label">🧹 Analogy</div>
+            <p>Imagine you're organising a library. Before shelving books, you'd remove damaged pages, make sure all books are in the same language, throw out duplicates, and fix the catalogue entries. That's what data cleaning does for our AI.</p>
+        </div>
+
+        <div class="highlight blue">
+            <div class="title">🔧 Technical Detail</div>
+            <p>This step is handled by <code>src/data/preprocessor.py</code> and Notebook 02. The cleaning function processes all 10,000 rows and logs exactly how many rows were removed at each step — for reproducibility and transparency.</p>
+        </div>
+    </div>
+    <!-- ═══════════════════ SECTION 5 ═══════════════════ -->
+    <div class="section" id="s5">
+        <h2><span class="num">05</span> Step 2: Categorising Medical Questions</h2>
+
+        <p>Not all medical questions are the same. A question about symptoms needs different evidence than one about medication side effects. So we <strong>label every question with a category</strong>.</p>
+
+        <h3>How Labelling Works</h3>
+
+        <p>We use <strong>keyword matching with smart word boundaries</strong>. The system scans each question and its context for medical keywords:</p>
+
+        <table>
+            <tr><th>If text contains...</th><th>Category assigned</th></tr>
+            <tr><td>"symptom", "pain", "fever", "nausea", "fatigue", "bleeding"...</td><td>🤒 Symptoms</td></tr>
+            <tr><td>"diagnos", "screen", "biopsy", "imaging", "detect"...</td><td>🔬 Diagnosis</td></tr>
+            <tr><td>"drug", "medication", "dose", "antibiotic", "vaccine"...</td><td>💊 Medication</td></tr>
+            <tr><td>"treat", "surgery", "therapy", "procedure", "radiation"...</td><td>🏥 Treatment</td></tr>
+            <tr><td>"prevent", "lifestyle", "exercise", "diet", "vaccination"...</td><td>🛡️ Prevention</td></tr>
+            <tr><td>None of the above</td><td>📋 General</td></tr>
+        </table>
+
+        <div class="analogy">
+            <div class="label">📁 Analogy</div>
+            <p>It's like sorting mail at a post office. Each letter (question) gets stamped with a department (category) based on keywords in the address. "Pain in chest" → Symptoms department. "Best antibiotic for infection" → Medication department. This way, when a new question arrives, we know which shelf of our library to search first.</p>
+        </div>
+
+        <div class="highlight orange">
+            <div class="title">⚠️ Quality Check</div>
+            <p>We verify that every category has at least 1% of the data. If a category is too small, our AI won't have enough examples to learn from. We expanded the keyword lists until all 6 categories met this threshold.</p>
+        </div>
+    </div>
+
+    <!-- ═══════════════════ SECTION 6 ═══════════════════ -->
+    <div class="section" id="s6">
+        <h2><span class="num">06</span> Step 3: Turning Text Into Numbers (Embeddings)</h2>
+
+        <p>Here's a fundamental problem: <strong>computers don't understand words</strong>. They only understand numbers. So how do we let a computer "search" for similar medical text?</p>
+
+        <p>The answer is <strong>embeddings</strong> — a way to convert text into a list of numbers (a "vector") where <strong>similar meanings get similar numbers</strong>.</p>
+
+        <h3>How It Works</h3>
+
+        <div class="diagram">
+            <pre><code>
+    "What are the symptoms of diabetes?"
+                    │
+                    ▼
+        ┌─────────────────────┐
+        │  Embedding Model    │
+        │  (all-MiniLM-L6-v2) │
+        └─────────┬───────────┘
+                    │
+                    ▼
+    [0.23, -0.41, 0.87, 0.12, ..., -0.33]
+    ← ─ ─ ─ ─  384 numbers  ─ ─ ─ ─ →
+            </code></pre>
+        </div>
+
+        <p>Each piece of text becomes a list of <strong>384 numbers</strong>. The magic is that:</p>
+
+        <table>
+            <tr><th>Text A</th><th>Text B</th><th>Numbers Are...</th></tr>
+            <tr><td>"symptoms of diabetes"</td><td>"signs of high blood sugar"</td><td>Very similar (close together)</td></tr>
+            <tr><td>"symptoms of diabetes"</td><td>"best Italian restaurants"</td><td>Very different (far apart)</td></tr>
+        </table>
+
+        <div class="analogy">
+            <div class="label">📍 Analogy</div>
+            <p>Think of it like GPS coordinates. Every city has coordinates (latitude, longitude). Cities that are <em>near each other</em> have <em>similar coordinates</em>. Embeddings are like GPS coordinates for meaning — sentences with similar meaning have similar coordinates in a 384-dimensional space.</p>
+        </div>
+
+        <p>We convert all 10,000 medical Q&A pairs into embeddings. Each one becomes a 384-number vector. Now we can mathematically measure how "similar" any two pieces of medical text are.</p>
+
+        <div class="highlight blue">
+            <div class="title">🔧 Technical Detail</div>
+            <p>We use the model <code>sentence-transformers/all-MiniLM-L6-v2</code>. It's small (80MB), fast, and specifically trained to produce good embeddings. Each text chunk combines question + context + answer for maximum signal.</p>
+        </div>
+    </div>
+
+    <!-- ═══════════════════ SECTION 7 ═══════════════════ -->
+    <div class="section" id="s7">
+        <h2><span class="num">07</span> Step 4: Building a Search Engine (FAISS)</h2>
+
+        <p>Now that every medical text is a list of numbers, we need a way to <strong>quickly find the most similar ones</strong> when a new question arrives. That's where FAISS comes in.</p>
+
+        <p><strong>FAISS</strong> (Facebook AI Similarity Search) is a tool built by Meta that can search through millions of vectors in milliseconds. We use it as our "search engine" for medical knowledge.</p>
+
+        <h3>How Search Works</h3>
+
+        <div class="diagram">
+            <pre><code>
+    Your question: "What causes high blood pressure?"
+                            │
+                            ▼
+                   Convert to 384 numbers
+                            │
+                            ▼
+            ┌──────────────────────────────┐
+            │     FAISS Index              │
+            │     (10,000 vectors stored)  │
+            │                              │
+            │  🔍 Find 5 closest vectors   │
+            │     using L2 distance        │
+            └──────────────┬───────────────┘
+                            │
+                            ▼
+            Top 5 most relevant medical passages
+            </code></pre>
+        </div>
+
+        <p><strong>L2 distance</strong> is just a fancy way of saying "how far apart are two points?" — like measuring the distance between two cities on a map. Smaller distance = more similar meaning.</p>
+
+        <div class="analogy">
+            <div class="label">🗺️ Analogy</div>
+            <p>Imagine you're at a party and you want to find people with similar interests. FAISS is like an app that instantly tells you "these 5 people in the room are most similar to you" — but instead of hobbies, it matches medical topics, and instead of a room, it searches 10,000 entries in under 1 millisecond.</p>
+        </div>
+
+        <div class="highlight green">
+            <div class="title">⚡ Speed</div>
+            <p>Our FAISS index returns results in under 5 milliseconds. That's faster than a blink of an eye (which takes about 300ms). This is critical because we want the system to feel instant when a user asks a question.</p>
+        </div>
+    </div>
+
+    <!-- ═══════════════════ SECTION 8 ═══════════════════ -->
+    <div class="section" id="s8">
+        <h2><span class="num">08</span> Step 5: The Brain — Language Model</h2>
+
+        <p>We've found the relevant medical passages. Now we need something to <strong>read them and write a clear answer</strong>. That's the job of the Language Model (LLM).</p>
+
+        <p>We use <strong>Google's flan-t5-base</strong> — a model trained to follow instructions and generate text. Think of it as the "writer" in our system.</p>
+
+        <h3>What Happens Inside</h3>
+
+        <div class="diagram">
+            <pre><code>
+    INPUT (Prompt):
+    ┌────────────────────────────────────────────┐
+    │ You are a medical assistant. Answer based   │
+    │ ONLY on the provided context.               │
+    │                                             │
+    │ Context:                                    │
+    │ [Source 1] Study shows that patients with   │
+    │ type 2 diabetes commonly present with       │
+    │ increased thirst, frequent urination...     │
+    │                                             │
+    │ [Source 2] Early symptoms include fatigue,  │
+    │ blurred vision, and slow wound healing...   │
+    │                                             │
+    │ Question: What are symptoms of diabetes?    │
+    └────────────────────────────────────────────┘
+                        │
+                        ▼
+                  flan-t5-base
+                        │
+                        ▼
+    OUTPUT:
+    "Common symptoms of type 2 diabetes include
+     increased thirst, frequent urination, fatigue,
+     blurred vision, and slow wound healing."
+            </code></pre>
+        </div>
+
+        <h3>Why flan-t5-base?</h3>
+
+        <table>
+            <tr><th>Reason</th><th>Explanation</th></tr>
+            <tr><td>Free</td><td>No API key, no costs, no rate limits</td></tr>
+            <tr><td>Local</td><td>Runs on your computer — works offline, no data sent to cloud</td></tr>
+            <tr><td>Instruction-tuned</td><td>Specifically trained to follow prompts like "answer this question"</td></tr>
+            <tr><td>Reproducible</td><td>Anyone can download and run it — same results every time</td></tr>
+        </table>
+
+        <div class="highlight orange">
+            <div class="title">⚠️ Important Limitation</div>
+            <p>flan-t5-base is a small model (250M parameters). It won't write essays or handle complex reasoning like GPT-4. But for our task — summarising medical passages into short answers — it works well. Think of it as a specialist, not a generalist.</p>
+        </div>
+    </div>
+    <!-- ═══════════════════ SECTION 9 ═══════════════════ -->
+    <div class="section" id="s9">
+        <h2><span class="num">09</span> Step 6: RAG — Retrieval-Augmented Generation</h2>
+
+        <p>This is the <strong>core innovation</strong> of the project. RAG combines search (retrieval) with text generation. Let's see why this matters.</p>
+
+        <h3>The Problem With Regular AI</h3>
+
+        <table>
+            <tr><th>Approach</th><th>How It Works</th><th>Problem</th></tr>
+            <tr>
+                <td>Regular LLM</td>
+                <td>Generates answer from memory (training data)</td>
+                <td>Can "hallucinate" — make up facts that sound real but aren't</td>
+            </tr>
+            <tr>
+                <td>Search only</td>
+                <td>Returns relevant documents</td>
+                <td>User has to read long medical papers themselves</td>
+            </tr>
+            <tr>
+                <td><strong>RAG (our approach)</strong></td>
+                <td><strong>Search first, then generate from found evidence</strong></td>
+                <td><strong>Grounded in real data + easy to read answer</strong></td>
+            </tr>
+        </table>
+
+        <h3>The RAG Chain</h3>
+
+        <div class="flow">
+            <span class="step">1. Embed Query</span>
+            <span class="arrow">→</span>
+            <span class="step">2. Search FAISS (top 5)</span>
+            <span class="arrow">→</span>
+            <span class="step">3. Build Prompt</span>
+            <span class="arrow">→</span>
+            <span class="step">4. Generate Answer</span>
+            <span class="arrow">→</span>
+            <span class="step">5. Add Disclaimer</span>
+        </div>
+
+        <div class="analogy">
+            <div class="label">📝 Analogy</div>
+            <p>RAG is like writing a university essay with a <strong>requirement to cite sources</strong>. You can't just write what you "feel" is true. You must first find relevant papers (retrieval), read them (context), and then write your answer based on what you found (generation). Our AI does exactly this — every answer is backed by retrieved medical evidence.</p>
+        </div>
+
+        <div class="highlight green">
+            <div class="title">🛡️ Medical Disclaimer</div>
+            <p>Every single response includes: <em>"⚠️ MEDICAL DISCLAIMER: This response is for educational purposes only. Always consult a qualified healthcare provider."</em> — This is hardcoded into the pipeline and cannot be skipped. Responsible AI is non-negotiable in healthcare.</p>
+        </div>
+    </div>
+
+    <!-- ═══════════════════ SECTION 10 ═══════════════════ -->
+    <div class="section" id="s10">
+        <h2><span class="num">10</span> Step 7: The Classifier — Smart Routing</h2>
+
+        <p>Remember the 6 categories? The classifier is a separate AI model that <strong>reads your question and predicts which category it belongs to</strong>. This makes the search more accurate.</p>
+
+        <h3>How Classification Improves Search</h3>
+
+        <div class="diagram">
+            <pre><code>
+    WITHOUT Classifier:
+    "Side effects of aspirin?" → Search ALL 10,000 entries
+                                  (might return surgery results)
+
+    WITH Classifier:
+    "Side effects of aspirin?" → Classified as "Medication"
+                                → Search prioritises Medication entries
+                                  (returns drug-related results) ✅
+            </code></pre>
+        </div>
+
+        <h3>The DistilBERT Model</h3>
+
+        <p>We use <strong>DistilBERT</strong> — a smaller, faster version of Google's BERT model. We "fine-tune" it on our 10,000 labelled questions so it learns to classify medical queries.</p>
+
+        <table>
+            <tr><th>Term</th><th>What It Means</th></tr>
+            <tr><td>DistilBERT</td><td>A pre-trained language model that already understands English — like a medical student who already knows grammar</td></tr>
+            <tr><td>Fine-tuning</td><td>Teaching it our specific task (6 medical categories) — like that student specialising in medical triage</td></tr>
+            <tr><td>80/10/10 split</td><td>80% of data for training, 10% for validation (tuning), 10% for final testing</td></tr>
+            <tr><td>Macro F1 ≥ 78%</td><td>Our accuracy target — the model must correctly classify at least 78% of questions across all categories equally</td></tr>
+        </table>
+
+        <div class="analogy">
+            <div class="label">🏥 Analogy</div>
+            <p>The classifier is like a <strong>hospital receptionist</strong>. When a patient walks in and describes their issue, the receptionist doesn't treat them — they direct them to the right department (Cardiology, Dermatology, etc.). Our classifier does the same: it reads the question and routes it to the right category, so the search engine looks in the right place.</p>
+        </div>
+    </div>
+
+    <!-- ═══════════════════ SECTION 11 ═══════════════════ -->
+    <div class="section" id="s11">
+        <h2><span class="num">11</span> Step 8: The Full Pipeline — Everything Together</h2>
+
+        <p>Now let's see every component working together. Here's what happens when you ask a question:</p>
+
+        <div class="diagram">
+            <pre><code>
+    YOU: "What are the side effects of metformin?"
+     │
+     │  ① CLASSIFY
+     ▼
+    DistilBERT says: "Medication" (confidence: 94%)
+     │
+     │  ② SEARCH (category-boosted)
+     ▼
+    FAISS retrieves 15 candidates, prioritises "Medication" ones
+    Returns top 5 most relevant passages
+     │
+     │  ③ GENERATE
+     ▼
+    flan-t5-base reads the 5 passages and writes:
+    "Common side effects of metformin include gastrointestinal
+     issues such as nausea, diarrhea, and abdominal discomfort.
+     Lactic acidosis is a rare but serious side effect."
+     │
+     │  ④ DISCLAIMER
+     ▼
+    "⚠️ MEDICAL DISCLAIMER: This response is for educational
+     purposes only..."
+     │
+     │  ⑤ RESPOND
+     ▼
+    Complete answer delivered to you! ✅
+            </code></pre>
+        </div>
+
+        <h3>Why Category Routing Matters</h3>
+
+        <p>Without routing, FAISS searches ALL 10,000 entries equally. With routing:</p>
+
+        <table>
+            <tr><th>Step</th><th>What Happens</th><th>Benefit</th></tr>
+            <tr><td>1. Retrieve 3× candidates</td><td>Ask FAISS for 15 results instead of 5</td><td>Larger pool to filter from</td></tr>
+            <tr><td>2. Prioritise matches</td><td>Move "Medication" results to the top</td><td>Domain-relevant context for the LLM</td></tr>
+            <tr><td>3. Select top 5</td><td>Best category-matched + closest distance</td><td>Higher quality, more focused answer</td></tr>
+        </table>
+    </div>
+
+    <!-- ═══════════════════ SECTION 12 ═══════════════════ -->
+    <div class="section" id="s12">
+        <h2><span class="num">12</span> Step 9: Measuring Quality</h2>
+
+        <p>How do we know our AI is actually good? We can't just trust that it "seems right." We need <strong>measurable metrics</strong>.</p>
+
+        <h3>Our Evaluation Setup</h3>
+
+        <p>We take <strong>200 medical questions the AI has never seen before</strong> (not in the search engine). We ask both our RAG system and a plain LLM (same model, no retrieval) to answer them. Then we compare.</p>
+
+        <h3>The Metrics</h3>
+
+        <table>
+            <tr><th>Metric</th><th>What It Measures</th><th>How It Works (Simply)</th><th>Our Target</th></tr>
+            <tr>
+                <td><strong>ROUGE-L</strong></td>
+                <td>Overlap with reference answer</td>
+                <td>How many of the same words/phrases appear in both the AI's answer and the real answer</td>
+                <td>≥ 0.38</td>
+            </tr>
+            <tr>
+                <td><strong>BLEU</strong></td>
+                <td>Translation-style accuracy</td>
+                <td>How closely the AI's word sequences match the reference (borrowed from translation research)</td>
+                <td>≥ 20% improvement over baseline</td>
+            </tr>
+            <tr>
+                <td><strong>Hallucination Rate</strong></td>
+                <td>How often the AI makes stuff up</td>
+                <td>We manually read 30 answers and check if any claims aren't in the source material</td>
+                <td>≤ 15%</td>
+            </tr>
+        </table>
+
+        <div class="analogy">
+            <div class="label">📊 Analogy</div>
+            <p>Imagine grading a student's exam. <strong>ROUGE-L</strong> checks if they used the right keywords. <strong>BLEU</strong> checks if their sentences are structured correctly. <strong>Hallucination rate</strong> checks if they made up any answers. A good student (and a good AI) scores well on all three.</p>
+        </div>
+
+        <h3>RAG vs Plain LLM — The Comparison</h3>
+
+        <table>
+            <tr><th>Metric</th><th>RAG (Our System)</th><th>Plain LLM (No Retrieval)</th><th>Winner</th></tr>
+            <tr><td>ROUGE-L</td><td>Higher</td><td>Lower</td><td>🏆 RAG</td></tr>
+            <tr><td>BLEU</td><td>Higher</td><td>Lower</td><td>🏆 RAG</td></tr>
+            <tr><td>Hallucination</td><td>Lower (fewer made-up facts)</td><td>Higher</td><td>🏆 RAG</td></tr>
+        </table>
+
+        <div class="highlight green">
+            <div class="title">✅ Key Takeaway</div>
+            <p>RAG significantly outperforms a plain language model. By giving the AI real evidence to work with, it produces more accurate, more relevant, and less hallucinated answers. This is why RAG is the gold standard for knowledge-intensive AI applications.</p>
+        </div>
+    </div>
+    <!-- ═══════════════════ SECTION 13 ═══════════════════ -->
+    <div class="section" id="s13">
+        <h2><span class="num">13</span> Step 10: Deploying as a Web Service</h2>
+
+        <p>A model on your laptop is useful for research. But to let <strong>anyone in the world</strong> use it, we need to deploy it as a web service — an API that accepts questions over the internet and returns answers.</p>
+
+        <h3>The Deployment Stack</h3>
+
+        <div class="diagram">
+            <pre><code>
+    User's Browser / App
+            │
+            │  HTTP Request: {"question": "..."}
+            ▼
+    ┌──────────────────────┐
+    │   FastAPI Server     │  Receives question,
+    │   (Python web app)   │  calls pipeline,
+    │                      │  returns JSON answer
+    └──────────┬───────────┘
+               │
+               │  Packaged inside
+               ▼
+    ┌──────────────────────┐
+    │   Docker Container   │  Bundles everything:
+    │   (portable box)     │  code + models + data
+    │                      │  Works anywhere
+    └──────────┬───────────┘
+               │
+               │  Hosted on
+               ▼
+    ┌──────────────────────┐
+    │   Azure App Service  │  Microsoft's cloud
+    │   (cloud hosting)    │  Always online
+    │                      │  Public URL
+    └──────────────────────┘
+            </code></pre>
+        </div>
+
+        <h3>Key Concepts</h3>
+
+        <table>
+            <tr><th>Technology</th><th>What It Is (Simply)</th><th>Why We Use It</th></tr>
+            <tr>
+                <td><strong>FastAPI</strong></td>
+                <td>A Python tool for building web APIs</td>
+                <td>Fast, modern, auto-generates documentation</td>
+            </tr>
+            <tr>
+                <td><strong>Docker</strong></td>
+                <td>A "shipping container" for software — packages everything needed to run the app</td>
+                <td>Works identically on any computer — no "it works on my machine" problems</td>
+            </tr>
+            <tr>
+                <td><strong>Azure App Service</strong></td>
+                <td>Microsoft's cloud hosting — like renting a computer that's always on</td>
+                <td>Free tier available, reliable, professional deployment</td>
+            </tr>
+        </table>
+
+        <h3>API Endpoints</h3>
+
+        <table>
+            <tr><th>Endpoint</th><th>Method</th><th>What It Does</th></tr>
+            <tr><td><code>/health</code></td><td>GET</td><td>Returns "OK" — confirms the server is running</td></tr>
+            <tr><td><code>/query</code></td><td>POST</td><td>Accepts a question, returns the AI's answer with sources and disclaimer</td></tr>
+        </table>
+
+        <div class="analogy">
+            <div class="label">📱 Analogy</div>
+            <p><strong>FastAPI</strong> is like a waiter at a restaurant — it takes your order (question) and brings back food (answer). <strong>Docker</strong> is like a food truck — the entire kitchen packed into a portable box that works anywhere. <strong>Azure</strong> is the parking lot where the food truck is permanently stationed so anyone can find it.</p>
+        </div>
+    </div>
+
+    <!-- ═══════════════════ SECTION 14 ═══════════════════ -->
+    <div class="section" id="s14">
+        <h2><span class="num">14</span> Step 11: Monitoring & MLOps</h2>
+
+        <p>Deploying is not the end — it's the beginning. We need to <strong>monitor</strong> the system to make sure it keeps working well over time.</p>
+
+        <h3>MLflow — Experiment Tracking</h3>
+
+        <p>When building AI, you try many different configurations. MLflow is a tool that <strong>records every experiment</strong> so you can compare them.</p>
+
+        <table>
+            <tr><th>What We Track</th><th>Why</th></tr>
+            <tr><td>Which embedding model was used</td><td>Compare different models' impact on search quality</td></tr>
+            <tr><td>How many results retrieved (top-3 vs top-5)</td><td>Find the optimal number</td></tr>
+            <tr><td>BLEU and ROUGE-L scores</td><td>Measure answer quality across experiments</td></tr>
+            <tr><td>Latency (response time)</td><td>Ensure the system stays fast</td></tr>
+            <tr><td>Classification F1 score</td><td>Monitor classifier accuracy</td></tr>
+        </table>
+
+        <h3>Streamlit Dashboard — Visual Monitoring</h3>
+
+        <p>A live dashboard with 4 sections that anyone can view:</p>
+
+        <table>
+            <tr><th>Section</th><th>What It Shows</th></tr>
+            <tr><td>🖥️ System Overview</td><td>Total queries handled, uptime, last deployment date</td></tr>
+            <tr><td>📊 Model Performance</td><td>BLEU/ROUGE-L scores over time — are they getting better or worse?</td></tr>
+            <tr><td>🔍 Query Analytics</td><td>Which categories are asked most, average response time</td></tr>
+            <tr><td>🗂️ Data Quality</td><td>How many rows were cleaned, null values handled, etc.</td></tr>
+        </table>
+
+        <h3>When to Retrain</h3>
+
+        <p>AI models can "drift" — their quality degrades over time as medical knowledge changes. We define specific thresholds:</p>
+
+        <table>
+            <tr><th>Metric</th><th>Threshold</th><th>Action</th></tr>
+            <tr><td>ROUGE-L drops below 0.32</td><td>For 7+ days</td><td>Re-embed updated corpus, retrain</td></tr>
+            <tr><td>Classifier F1 drops below 0.70</td><td>On new data</td><td>Fine-tune classifier with new examples</td></tr>
+            <tr><td>Latency exceeds 5,000ms</td><td>Consistently</td><td>Optimise FAISS index or scale Azure resources</td></tr>
+        </table>
+
+        <div class="analogy">
+            <div class="label">🏭 Analogy</div>
+            <p>MLOps is like quality control in a factory. You don't just build a car and forget about it — you monitor production quality, track defects, and improve the process. MLflow is the quality log, the Streamlit dashboard is the factory floor monitor, and the retraining thresholds are the "stop the line" signals.</p>
+        </div>
+    </div>
+
+    <!-- ═══════════════════ SECTION 15 ═══════════════════ -->
+    <div class="section" id="s15">
+        <h2><span class="num">15</span> Glossary — Key Terms Explained</h2>
+
+        <p>A quick reference for every technical term used in this guide.</p>
+
+        <table>
+            <tr><th>Term</th><th>Simple Explanation</th></tr>
+            <tr><td><strong>AI (Artificial Intelligence)</strong></td><td>Software that can perform tasks that normally require human intelligence — like understanding language or making decisions</td></tr>
+            <tr><td><strong>LLM (Large Language Model)</strong></td><td>An AI trained on massive amounts of text that can read, understand, and generate human language</td></tr>
+            <tr><td><strong>RAG (Retrieval-Augmented Generation)</strong></td><td>A technique where the AI searches for relevant information first, then generates an answer based on what it found — reducing hallucination</td></tr>
+            <tr><td><strong>Embedding</strong></td><td>Converting text into a list of numbers that capture its meaning — similar texts get similar numbers</td></tr>
+            <tr><td><strong>Vector</strong></td><td>A list of numbers — in our case, 384 numbers representing the meaning of a piece of text</td></tr>
+            <tr><td><strong>FAISS</strong></td><td>Facebook AI Similarity Search — a tool that can find the most similar vectors out of millions in milliseconds</td></tr>
+            <tr><td><strong>Fine-tuning</strong></td><td>Taking a pre-trained AI model and teaching it a specific new task with your own data</td></tr>
+            <tr><td><strong>DistilBERT</strong></td><td>A smaller, faster version of Google's BERT model — understands English text and can classify it</td></tr>
+            <tr><td><strong>flan-t5</strong></td><td>Google's instruction-following language model — reads a prompt and generates a response</td></tr>
+            <tr><td><strong>Hallucination</strong></td><td>When an AI generates information that sounds real but is actually made up — a major risk in healthcare</td></tr>
+            <tr><td><strong>BLEU Score</strong></td><td>A metric that measures how closely generated text matches a reference text — originally from translation research</td></tr>
+            <tr><td><strong>ROUGE-L Score</strong></td><td>A metric that measures the longest common sequence of words between generated and reference text</td></tr>
+            <tr><td><strong>F1 Score (Macro)</strong></td><td>A classification accuracy metric that balances precision and recall equally across all categories</td></tr>
+            <tr><td><strong>API (Application Programming Interface)</strong></td><td>A way for software to talk to other software — our API lets any app send questions and receive answers</td></tr>
+            <tr><td><strong>FastAPI</strong></td><td>A Python tool for building web APIs quickly</td></tr>
+            <tr><td><strong>Docker</strong></td><td>A tool that packages an entire application into a portable "container" that works on any computer</td></tr>
+            <tr><td><strong>Azure</strong></td><td>Microsoft's cloud computing platform — we host our API there</td></tr>
+            <tr><td><strong>MLflow</strong></td><td>A tool for tracking AI experiments — logs parameters, metrics, and models</td></tr>
+            <tr><td><strong>Streamlit</strong></td><td>A Python tool for building interactive dashboards and web apps with minimal code</td></tr>
+            <tr><td><strong>MLOps</strong></td><td>Machine Learning Operations — practices for deploying, monitoring, and maintaining AI systems in production</td></tr>
+            <tr><td><strong>PubMed</strong></td><td>The world's largest database of biomedical and life sciences research papers</td></tr>
+            <tr><td><strong>HuggingFace</strong></td><td>A platform for sharing AI models and datasets — like GitHub but for AI</td></tr>
+        </table>
+    </div>
+
+    <!-- ═══════════════════ FOOTER ═══════════════════ -->
+    <div class="footer">
+        <p>🏥 Healthcare RAG-Powered Medical Q&A Assistant</p>
+        <p>eyouth × DEPI | Microsoft Machine Learning Track | 2026</p>
+        <p style="margin-top: 12px; font-size: 0.85em;">
+            Team: Abdelrahman Mostafa · Ziad Ahmed · Youssef George · Doha Khaled · Eman Khalid
+        </p>
+        <p style="margin-top: 8px; font-size: 0.85em;">
+            <a href="https://github.com/AbdooMatrix/Healthcare-RAG-Powered-Medical-QA-Assistant" style="color: var(--primary); text-decoration: none;">GitHub</a> ·
+            <a href="https://huggingface.co/AbdoMatrix/distilbert-medical-classifier" style="color: var(--primary); text-decoration: none;">HuggingFace Model</a>
+        </p>
+    </div>
+
+</div> <!-- end container -->
+</body>
+</html>
