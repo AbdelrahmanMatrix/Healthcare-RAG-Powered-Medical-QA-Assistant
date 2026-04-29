@@ -1,85 +1,81 @@
-from nltk.translate.bleu_score import corpus_bleu, SmoothingFunction
-import evaluate
+"""
+Evaluation metrics for RAG pipeline.
 
-# Load once at module level (important for efficiency)
-_rouge = evaluate.load("rouge")
+Computes BLEU, ROUGE-L, and improvement percentages.
+
+Usage:
+    from src.evaluation.metrics import compute_bleu, compute_rouge, compute_improvement
+"""
+
+import numpy as np
+from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
+from rouge_score import rouge_scorer
 
 
-# =========================
-# BLEU (Corpus-level)
-# =========================
-def compute_bleu(predictions: list, references: list) -> float:
+def compute_bleu(predictions: list[str], references: list[str]) -> float:
     """
-    Compute corpus-level BLEU score.
-
-    Args:
-        predictions (list[str]): model outputs
-        references (list[str]): ground-truth answers
-
-    Returns:
-        float: BLEU score
+    Compute average BLEU score across all prediction-reference pairs.
+    Uses smoothing to handle short sentences.
     """
-    smoothie = SmoothingFunction().method4
+    smoother = SmoothingFunction().method1
+    scores = []
 
-    # BLEU expects tokenized sentences
-    tokenized_refs = [[ref.split()] for ref in references]
-    tokenized_preds = [pred.split() for pred in predictions]
+    for pred, ref in zip(predictions, references):
+        pred_tokens = pred.lower().split()
+        ref_tokens = ref.lower().split()
 
-    return corpus_bleu(tokenized_refs, tokenized_preds, smoothing_function=smoothie)
+        if len(pred_tokens) == 0 or len(ref_tokens) == 0:
+            scores.append(0.0)
+            continue
+
+        score = sentence_bleu(
+            [ref_tokens],
+            pred_tokens,
+            smoothing_function=smoother
+        )
+        scores.append(score)
+
+    return float(np.mean(scores))
 
 
-# =========================
-# ROUGE-L (Corpus-level)
-# =========================
-def compute_rouge(predictions: list, references: list) -> float:
+def compute_rouge(predictions: list[str], references: list[str]) -> float:
     """
-    Compute corpus-level ROUGE-L F1 score.
-
-    Args:
-        predictions (list[str])
-        references (list[str])
-
-    Returns:
-        float: ROUGE-L F1
+    Compute average ROUGE-L F1 score across all prediction-reference pairs.
     """
-    result = _rouge.compute(
-        predictions=predictions,
-        references=references
-    )
+    scorer = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
+    scores = []
 
-    return result["rougeL"]
+    for pred, ref in zip(predictions, references):
+        result = scorer.score(ref, pred)
+        scores.append(result['rougeL'].fmeasure)
+
+    return float(np.mean(scores))
 
 
-# =========================
-# Improvement metric
-# =========================
 def compute_improvement(baseline: float, improved: float) -> float:
     """
-    Compute percentage improvement.
-
-    Args:
-        baseline (float)
-        improved (float)
-
-    Returns:
-        float: percentage improvement
+    Compute percentage improvement from baseline to improved score.
+    Returns percentage (e.g. 25.0 means 25% improvement).
     """
     if baseline == 0:
-        return 0.0
-
+        return float('inf') if improved > 0 else 0.0
     return ((improved - baseline) / baseline) * 100
 
 
-# =========================
-# Optional: per-sample BLEU (for debugging / analysis)
-# =========================
-def compute_sentence_bleu(reference: str, prediction: str) -> float:
+def evaluate_pair(
+    predictions: list[str],
+    references: list[str],
+    label: str = "Model"
+) -> dict:
     """
-    Sentence-level BLEU (useful for debugging hallucinations).
+    Run full evaluation (BLEU + ROUGE-L) and return results dict.
     """
-    smoothie = SmoothingFunction().method4
+    bleu = compute_bleu(predictions, references)
+    rouge = compute_rouge(predictions, references)
 
-    ref_tokens = [reference.split()]
-    pred_tokens = prediction.split()
-
-    return corpus_bleu([ref_tokens], [pred_tokens], smoothing_function=smoothie)
+    return {
+        "label": label,
+        "bleu": round(bleu, 4),
+        "rouge_l": round(rouge, 4),
+        "n_samples": len(predictions),
+    }

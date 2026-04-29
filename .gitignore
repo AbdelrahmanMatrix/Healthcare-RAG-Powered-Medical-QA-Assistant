@@ -1,4 +1,8 @@
-# Python
+# ═══════════════════════════════════════════════════════════════════════════════
+# Healthcare RAG-Powered Medical Q&A Assistant — .gitignore
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ─── Python ─────────────────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *$py.class
@@ -7,69 +11,82 @@ __pycache__/
 *.egg-info/
 dist/
 build/
-.eggs/
-.Python
-env/
-venv/
+healthcare_rag.egg-info/
+
+# ─── Virtual Environments ───────────────────────────────────────────────────
 .venv/
+venv/
+env/
 ENV/
 
-# Jupyter Notebooks
+# ─── Environment Variables / Secrets ────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ─── Model Weights (too large for GitHub — reproducible from notebooks) ────
+models/classifier/distilbert_classifier/*.bin
+models/classifier/distilbert_classifier/*.safetensors
+models/classifier/distilbert_classifier/model.safetensors
+models/classifier/distilbert_classifier/pytorch_model.bin
+models/classifier/distilbert_classifier/tokenizer.json
+models/classifier/distilbert_classifier/vocab.txt
+models/classifier/checkpoints/
+
+# ─── Data Files (reproducible from notebooks) ──────────────────────────────
+data/raw/*.csv
+data/processed/*.csv
+
+# ─── FAISS Index & Embeddings (reproducible from notebook 05) ──────────────
+data/embeddings/faiss_index/*.faiss
+data/embeddings/faiss_index/*.pkl
+data/embeddings/faiss_index/*.csv
+
+# ─── Jupyter Notebook ──────────────────────────────────────────────────────
 .ipynb_checkpoints/
 *.ipynb_checkpoints
 
-# Data files (large files - store externally or regenerate via notebooks)
-# Keep folder structure tracked via .gitkeep files
-data/raw/*.csv
-data/raw/*.json
-data/raw/*.parquet
+# ─── IDE / Editor ──────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
 
-# FAISS index (regenerate by running 04_embeddings_vectorstore.ipynb)
-data/embeddings/faiss_index/
-*.faiss
-*.pkl
+# ─── OS Files ──────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+Thumbs.db
+ehthumbs.db
+Desktop.ini
 
-# Environment variables (NEVER commit secrets)
-.env
-.env.local
-.env.production
-*.env
+# ─── Logs & Temp ───────────────────────────────────────────────────────────
+*.log
+*.tmp
+*.bak
+*.orig
 
-# Azure & Cloud configs
-.azure/
-azure.json
-
-# MLflow
+# ─── MLflow (local tracking — can be large) ────────────────────────────────
 mlruns/
 mlartifacts/
 
-# Model weight files (large) - folder structure is tracked via .gitkeep
-# Regenerate by running 06_classification_model.ipynb
-models/classifier/*.bin
-models/classifier/*.pt
-models/classifier/*.pth
-models/classifier/*.onnx
+# ─── Docker ────────────────────────────────────────────────────────────────
+docker/.env
 
-# IDE
-.vscode/settings.json
-.idea/
-*.swp
-*.swo
-.DS_Store
-Thumbs.db
+# ─── Distribution / Packaging ──────────────────────────────────────────────
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
 
-# Logs
-*.log
-logs/
-
-# Test coverage
+# ─── Testing ───────────────────────────────────────────────────────────────
+.pytest_cache/
 .coverage
 htmlcov/
-.pytest_cache/
+.tox/
 
-# Docker
-.dockerignore
-
-# Distribution
-*.tar.gz
-*.zip
+# ─── HuggingFace Cache (large model downloads) ────────────────────────────
+.cache/
+~/.cache/huggingface/

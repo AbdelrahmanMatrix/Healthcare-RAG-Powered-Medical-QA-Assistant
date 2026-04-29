@@ -1,4 +1,4 @@
-,instruction_length,context_length,output_length
+,question_length,context_length,answer_length
 count,10000.0,10000.0,10000.0
 mean,13.3216,197.2583,42.3144
 std,4.5631848204483845,57.567308262659466,20.41140894699629

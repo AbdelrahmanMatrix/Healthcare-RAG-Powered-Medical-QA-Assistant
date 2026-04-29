@@ -1,42 +1,92 @@
-# M1 Task 4 - Exploratory Data Analysis Report
+# EDA Report — M1 Task 4
+**Healthcare RAG-Powered Medical Q&A Assistant**
 **Owner:** Doha Khaled Mahmoud
-**Generated on:** 2026-04-23 23:48:19
+**Generated:** 2026-04-29 14:42:41
+
+---
 
 ## Dataset Overview
-- Total rows after preprocessing and labeling: **9,994**
+- **Source:** `pubmedqa_labelled.csv`
+- **Total rows:** 10,000
+- **Columns:** ['question', 'context', 'answer', 'category', 'question_length', 'context_length', 'answer_length']
 
-## 1. Category Distribution (KPI Check)
-All 6 medical categories are present:
+## 1. Category Distribution
 
-| Category     | Count | Percentage |
-|--------------|-------|------------|
-| Symptoms     | 3767  | ~37.7%    |
-| Treatment    | 2259  | ~22.6%    |
-| General      | 2069  | ~20.7%    |
-| Medication   | 1337  | ~13.4%    |
-| Diagnosis    | 461   | ~4.6%     |
-| Prevention   | 101   | ~1.0%     |
+| Category | Count | Percentage | Flag |
+|----------|-------|------------|------|
+| Symptoms | 5,893 | 58.9% |  |
+| Diagnosis | 3,043 | 30.4% |  |
+| Treatment | 330 | 3.3% |  |
+| Medication | 295 | 2.9% |  |
+| General | 290 | 2.9% |  |
+| Prevention | 149 | 1.5% |  ⚠️ borderline |
 
-✅ **All categories have ≥ 1% representation** — No skewed categories.
+**KPI Check:** All 6 categories present with ≥ 1% representation ✅
+**Skew Analysis:** ⚠️ Borderline categories (< 2%): ['Prevention']
 
-## 2. Text Length Analysis
-- Average question length : **13.3 words**
-- Average context length  : **197.2 words**
-- Average answer length   : **42.3 words**
+## 2. Text Length Statistics (Word Count)
 
-Longest texts are in the 'context' column (expected for PubMed abstracts).
+| Metric | Question | Context | Answer |
+|--------|----------|---------|--------|
+| Mean | 13.3 | 197.3 | 42.3 |
+| Median | 13.0 | 195.0 | 39.0 |
+| Min | 3 | 26 | 6 |
+| Max | 45 | 606 | 313 |
 
-## 3. Key Findings
-- Strongest correlation is between context and output length (0.147)
-- Top medical terms reflect clinical language (treatment, symptoms, patients, study, etc.)
-- Dataset is well-balanced across the 6 medical labels
+## 3. Top 20 Medical Terms
+
+| Term | Frequency |
+|------|-----------|
+| treatment | 4,354 |
+| clinical | 4,097 |
+| health | 3,511 |
+| disease | 3,440 |
+| care | 3,265 |
+| both | 3,176 |
+| patient | 3,145 |
+| whether | 3,078 |
+| cancer | 3,068 |
+| surgery | 3,060 |
+| those | 2,959 |
+| only | 2,762 |
+| levels | 2,733 |
+| been | 2,567 |
+| other | 2,511 |
+| factors | 2,499 |
+| when | 2,468 |
+| followup | 2,242 |
+| blood | 2,168 |
+| studies | 2,143 |
+
+## 4. Average Answer Length per Category
+
+| Category | Avg Words |
+|----------|-----------|
+| General | 45.8 |
+| Treatment | 43.1 |
+| Diagnosis | 42.6 |
+| Medication | 42.2 |
+| Symptoms | 42.0 |
+| Prevention | 41.2 |
+
+## 5. Key Findings
+- Strongest length correlation: context ↔ answer (0.147)
+- Dataset is dominated by Symptoms (58.9%) and Diagnosis (30.4%)
+- ⚠️ Borderline categories (< 2%): ['Prevention']
 - Dataset is ready for RAG + Classification training
 
-## 4. M1 KPI Status
-- Missing values handled: ✅
-- Data accuracy after preprocessing: ✅
-- All 6 categories present with ≥1%: ✅
-- EDA report generated with required visualizations: ✅
-- Pipeline reproducible: In progress (Task 5)
+## 6. Visualisations Produced
+1. `01_category_frequency.png` — Category distribution bar chart
+2. `02_length_histograms.png` — Question, context, answer length histograms
+3. `03_top20_medical_terms_wordcloud.png` — Top 20 terms wordcloud + bar chart
+4. `04_avg_answer_length_per_category.png` — Average answer length per category
+5. `05_length_boxplot_correlation.png` — Boxplot + correlation heatmap (bonus)
 
-**Status: M1 Task 4 Completed Successfully**
+## 7. M1 KPI Status
+- [x] Missing values handled ≥ 90%
+- [x] Data accuracy after preprocessing ≥ 85%
+- [x] All 6 categories present with ≥ 1% each
+- [x] EDA report contains all 4 required visualisations
+- [ ] Full pipeline reproducible (Task 5)
+
+**Status: M1 Task 4 — Completed ✅**

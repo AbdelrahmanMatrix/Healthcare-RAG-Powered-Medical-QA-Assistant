@@ -1,109 +1,114 @@
 # Model Development Documentation
-## Healthcare RAG-Powered Medical Q&A Assistant — Milestone 2
-
-**Author:** Abdelrahman Mostafa Sayed (Task 5 — Pipeline Integration)
-**Date:** [today's date]
-**Milestone:** M2 — Model Development & Evaluation
+**Healthcare RAG-Powered Medical Q&A Assistant**
+**Owner:** Abdelrahman Mostafa Sayed
+**Generated:** 2026-04-29 14:55:01
 
 ---
 
 ## 1. Architecture Overview
+User Query
+│
+▼
+┌─────────────────────────┐
+│ DistilBERT Classifier │ → Predicts medical category
+└────────────┬────────────┘
+│ category
+▼
+┌─────────────────────────┐
+│ FAISS Vector Store │ → Retrieves top-5 chunks
+│ (category-prioritised) │ (matching category boosted)
+└────────────┬────────────┘
+│ context chunks
+▼
+┌─────────────────────────┐
+│ flan-t5-base LLM │ → Generates answer from context
+└────────────┬────────────┘
+│
+▼
+┌─────────────────────────┐
+│ Medical Disclaimer │ → Appended to every response
+└─────────────────────────┘
 
-The system consists of three integrated components:
 
-**Component 1 — DistilBERT Classifier (Doha, T3)**
-Fine-tuned distilbert-base-uncased on pubmedqa_labelled.csv. Classifies each
-incoming query into one of 6 medical categories: Symptoms, Diagnosis, Treatment,
-Medication, Prevention, General. This runs first, before retrieval, as a routing
-layer.
+## 2. Component Details
 
-**Component 2 — FAISS Vector Store (Ziad, T1)**
-10,000 sentence embeddings generated with all-MiniLM-L6-v2 and stored in a
-FAISS IndexFlatL2 index. On each query, the top-5 nearest neighbours are
-retrieved in under 500ms.
+### 2a. Embedding Model
+| Item | Value |
+|---|---|
+| Model | `sentence-transformers/all-MiniLM-L6-v2` |
+| Dimension | 384 |
+| Purpose | Encode text chunks and queries for semantic similarity |
+| Rationale | Lightweight, fast inference, strong semantic quality. Good balance between speed and accuracy for a medical Q&A system. |
 
-**Component 3 — LangChain RAG Pipeline (Youssef, T2)**
-Retrieved chunks are injected as context into a structured prompt. The LLM
-(Llama 3.1 8B via Groq) generates an answer grounded in the retrieved context.
-A mandatory medical disclaimer is appended to every response.
+### 2b. Vector Store
+| Item | Value |
+|---|---|
+| Type | FAISS `IndexFlatL2` |
+| Vectors | 10,000 |
+| Chunk format | Question + Context + Answer |
+| Rationale | Exact search (no approximation errors). IndexFlatL2 chosen for correctness — acceptable for 10K vectors. |
 
----
+### 2c. Classifier (Routing Layer)
+| Item | Value |
+|---|---|
+| Model | `distilbert-base-uncased` (fine-tuned) |
+| Classes | 6 (Symptoms, Diagnosis, Treatment, Medication, Prevention, General) |
+| Purpose | Route queries to category-relevant chunks |
+| Rationale | Lightweight transformer, fast inference. Category routing improves retrieval precision by prioritising domain-relevant sources. |
 
-## 2. Why these components were chosen
-
-**Embedding model: all-MiniLM-L6-v2**
-Chosen for its balance of speed (fast inference, small model size) and quality
-(strong sentence-level semantic similarity). Outperforms basic TF-IDF while
-remaining practical on free-tier infrastructure. BioBERT was considered but
-its size made it impractical for Azure Free Tier deployment.
-
-**FAISS IndexFlatL2**
-Exact nearest-neighbour search. Appropriate for our dataset size (10,000 vectors).
-Approximate methods (HNSW, IVF) offer speed gains only above ~100,000 vectors —
-not needed here. This choice ensures retrieval accuracy is maximised.
-
-**DistilBERT for classification**
-Smaller and faster than BERT (40% fewer parameters) with 97% of BERT's accuracy
-on GLUE. Suitable for deployment on Azure Free Tier. Fine-tuned for 6 epochs
-with weighted loss to address category imbalance.
-
-**Llama 3.1 8B via Groq API**
-Free API access, fast inference (<2s per call), strong instruction-following
-capability. Chosen over GPT-4 (cost) and flan-t5-base (weaker reasoning).
-
----
+### 2d. Language Model
+| Item | Value |
+|---|---|
+| Model | `google/flan-t5-base` |
+| Type | Text-to-text generation |
+| Max tokens | 256 |
+| Rationale | Free, local (no API key needed), instruction-tuned, good at following prompts. Chosen over paid APIs for reproducibility and reliability during demos. |
 
 ## 3. Evaluation Methodology
 
-**Test set:** 200 held-out queries from PubMedQA, not included in the FAISS index.
+### 3a. Classification
+- **Split:** 80/10/10 (train/val/test), stratified
+- **Metric:** Macro F1 (target ≥ 78%)
+- **Class weights:** Applied via custom WeightedTrainer
 
-**Metrics used:**
-- BLEU (NLTK corpus_bleu with smoothing method 4) — response quality vs reference
-- ROUGE-L (HuggingFace evaluate library) — retrieval + summarisation quality
-- Hallucination rate — manual review of 30 random responses by 2 team members
+### 3b. RAG Pipeline
+- **Held-out set:** 200 queries NOT in FAISS index
+- **Baseline:** Same LLM (flan-t5-base) without retrieval context
+- **Metrics:** BLEU (NLTK), ROUGE-L (rouge-score library)
+- **Targets:** ROUGE-L ≥ 0.38, BLEU improvement ≥ 20%
 
-**Comparison methodology:**
-Two pipelines ran on identical queries:
-1. Plain LLM baseline — same LLM, no retrieved context
-2. RAG pipeline — same LLM + FAISS-retrieved context
+### 3c. Hallucination
+- **Method:** Manual review of 30 random RAG responses
+- **Criteria:** Response contains medical claims not supported by reference or retrieved context
+- **Target:** ≤ 15% hallucination rate
 
----
+## 4. Category Routing Strategy
 
-## 4. Results
+The classifier doesn't just label queries — it improves retrieval:
+1. FAISS retrieves 3× more candidates than needed
+2. Candidates matching the predicted category are prioritised
+3. Top-5 results returned (category matches first, then by distance)
 
-| Metric | Target | RAG Result | Status |
-|---|---|---|---|
-| Classification F1 | ≥ 78% | [fill from Doha's notebook output] | ✅ |
-| ROUGE-L | ≥ 0.38 | 0.720 | ✅ |
-| BLEU improvement | ≥ 20% | 54.5% (avg RAG BLEU) | ✅ |
-| Hallucination rate | ≤ 15% | 0.0% | ✅ |
-| Disclaimer present | 100% | 100% | ✅ |
+**Integrated test results:**
+- Queries tested: 10
+- Category routing match rate: 42.0%
+- All disclaimers present: True
 
-All KPI targets were met or significantly exceeded.
+## 5. Design Decisions
 
----
-
-## 5. Integration Design
-
-The classifier and RAG pipeline are wired together in `src/rag/pipeline.py` and
-`src/classification/classifier.py`. The full integrated flow:
-User query
-→ DistilBERT classifier → category label
-→ FAISS retrieval (top-5 chunks)
-→ LLM generation (query + context)
-→ Answer + category + disclaimer
-
-This integration was validated on 10 diverse queries (see
-`reports/integrated_pipeline_test_results.json`), covering all 6 categories.
-Every response included the medical disclaimer. Category classification was
-verified to be plausible for each query type.
-
----
+| Decision | Rationale |
+|---|---|
+| Chunk = Q + Context + Answer | Maximises semantic signal for retrieval |
+| Top-5 retrieval | Balances context richness with prompt length limits |
+| Category routing | Improves precision for specialised medical queries |
+| Medical disclaimer | Mandatory for responsible AI in healthcare domain |
+| Local LLM (no API) | Ensures reproducibility, no cost, no rate limits |
 
 ## 6. Known Limitations
+- flan-t5-base has limited generation quality compared to larger models
+- FAISS IndexFlatL2 is exact search — may need IVF for larger datasets
+- Category routing depends on classifier accuracy
+- Free-tier Azure deployment has cold-start latency
+- Medical disclaimer is static — doesn't adapt to confidence level
 
-- The FAISS index uses only PubMedQA (10,000 pairs). Supplementary datasets
-  (ChatDoctor, MedQA) were planned but not included in the index for M2.
-- The Groq API has rate limits that may affect high-concurrency testing.
-- DistilBERT classification may struggle with queries spanning multiple categories
-  (e.g. "What are the symptoms and treatment of diabetes?").
+**Status: M2 Task 5 — Completed ✅**
