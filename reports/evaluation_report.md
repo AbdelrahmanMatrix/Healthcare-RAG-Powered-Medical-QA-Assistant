@@ -1,7 +1,7 @@
 # RAG Evaluation Report
 **Healthcare RAG-Powered Medical Q&A Assistant**
 **Owner:** Eman Khalid Ismail
-**Generated:** 2026-04-29 21:40:32
+**Generated:** 2026-04-30 17:45:06
 
 ---
 
@@ -18,15 +18,15 @@
 
 | Metric | RAG | Plain LLM | Improvement |
 |--------|-----|-----------|-------------|
-| BLEU | 0.1876 | 0.0008 | 23350.0% |
-| ROUGE-L | 0.2897 | 0.0263 | 1001.5% |
+| BLEU | 0.0053 | 0.0008 | 562.5% |
+| ROUGE-L | 0.0670 | 0.0263 | 154.8% |
 
 ## KPI Status
 
 | KPI | Target | Actual | Status |
 |-----|--------|--------|--------|
-| ROUGE-L | ≥ 0.38 | 0.2897 | ⚠️ NOT MET |
-| BLEU improvement | ≥ 20% | 23350.0% | ✅ MET |
+| ROUGE-L | ≥ 0.38 | 0.0670 | ⚠️ NOT MET |
+| BLEU improvement | ≥ 20% | 562.5% | ✅ MET |
 | Hallucination rate | ≤ 15% | 10.0% | ✅ MET |
 
 ## Hallucination Review
@@ -35,8 +35,8 @@
 - Hallucination rate: 10.0%
 
 ## RAG Latency
-- Mean: 3475ms
-- Min: 514ms
-- Max: 19341ms
+- Mean: 595ms
+- Min: 268ms
+- Max: 1421ms
 
 **Status: M2 Task 4 — Completed**

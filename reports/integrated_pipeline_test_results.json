@@ -2,18 +2,12 @@
   {
     "question": "What are the early symptoms of type 2 diabetes?",
     "category": "Symptoms",
-    "answer_raw": "Disabling symptoms, but also by relevant co-morbidities. Insulin resistance, leading to glucose intolerance is one of the most important contributory factors to the cardiovascular mortality in acromegaly. In patients with type 2 diabetes, beliefs about insulin and current medications, and diabetes-related emotional distress are strongly linked to positive and negative insulin beliefs, and may also reflect a broader discomfort with medications and with diabetes in general. Of note, however, PIR is strongly linked to positive and negative insulin beliefs, and may also reflect a broader discomfort with medications and with diabetes in general. Of note, however, PIR is a marker of behavioral intent only; it is not known whether this predicts actual behavior at the time when insulin is prescribed. When addressing patients who are reluctant to initiate insulin therapy, clinicians may find it valuable to inquire about their beliefs about insulin and their current medications.",
+    "answer_raw": "impaired glucose metabolism and type 2 diabetes. ---",
     "disclaimer_present": true,
     "top_k": 5,
-    "category_matched_sources": 5,
-    "latency_ms": 5552.95,
+    "category_matched_sources": 1,
+    "latency_ms": 781.77,
     "sources": [
-      {
-        "chunk_id": 4555,
-        "question": "Is there a link between components of health-related functioning and incident impaired glucose metabolism and type 2 diabetes?",
-        "category": "Symptoms",
-        "distance": 0.9689173698425293
-      },
       {
         "chunk_id": 9676,
         "question": "Abnormalities in glucose homeostasis in acromegaly. Does the prevalence of glucose intolerance depend on the level of activity of the disease and the duration of the symptoms?",
@@ -21,92 +15,98 @@
         "distance": 0.9847972393035889
       },
       {
+        "chunk_id": 6693,
+        "question": "Do the new criteria of the American Diabetes Association lead to earlier diagnosis of type-2 diabetes mellitus?",
+        "category": "Diagnosis",
+        "distance": 0.9376745820045471
+      },
+      {
+        "chunk_id": 4555,
+        "question": "Is there a link between components of health-related functioning and incident impaired glucose metabolism and type 2 diabetes?",
+        "category": "Prevention",
+        "distance": 0.9689173698425293
+      },
+      {
         "chunk_id": 2772,
         "question": "Are patients' initial experiences at the diagnosis of type 2 diabetes associated with attitudes and self-management over time?",
-        "category": "Symptoms",
+        "category": "Diagnosis",
         "distance": 0.9918888807296753
       },
       {
-        "chunk_id": 8368,
-        "question": "Number of non-diabetic drugs: a simple comorbidity indicator for diabetes?",
-        "category": "Symptoms",
-        "distance": 1.0607545375823975
-      },
-      {
-        "chunk_id": 7947,
-        "question": "Are patients with type 2 diabetes reluctant to start insulin therapy?",
-        "category": "Symptoms",
-        "distance": 1.0919585227966309
+        "chunk_id": 5319,
+        "question": "Type 2 diabetes care and insulin intensification: is a more multidisciplinary approach needed?",
+        "category": "Medication",
+        "distance": 1.0346442461013794
       }
     ]
   },
   {
     "question": "What are the symptoms of diaphragmatic herniation?",
     "category": "Symptoms",
-    "answer_raw": "respiratory distress. [Source 4]",
+    "answer_raw": "The retrieved medical literature does not contain enough information to answer this question confidently. Please consult the listed sources directly or rephrase your question.",
     "disclaimer_present": true,
     "top_k": 5,
-    "category_matched_sources": 5,
-    "latency_ms": 830.95,
+    "category_matched_sources": 2,
+    "latency_ms": 431.84,
     "sources": [
+      {
+        "chunk_id": 7908,
+        "question": "Thoracic actinomycosis: Thinking of it earlier?",
+        "category": "Symptoms",
+        "distance": 1.2758058309555054
+      },
+      {
+        "chunk_id": 3412,
+        "question": "Choking during sleep: can it be expression of arousal disorder?",
+        "category": "Symptoms",
+        "distance": 1.2790861129760742
+      },
       {
         "chunk_id": 1731,
         "question": "Diaphragmatic herniation following esophagogastric resectional surgery: an increasing problem with minimally invasive techniques?",
-        "category": "Symptoms",
+        "category": "Treatment",
         "distance": 1.099663257598877
-      },
-      {
-        "chunk_id": 9886,
-        "question": "Is surgical plication necessary in diaphragm eventration?",
-        "category": "Symptoms",
-        "distance": 1.1198612451553345
       },
       {
         "chunk_id": 7094,
         "question": "MDCT of abdominal wall hernias: is there a role for valsalva's maneuver?",
-        "category": "Symptoms",
+        "category": "Diagnosis",
         "distance": 1.1819584369659424
       },
       {
-        "chunk_id": 2940,
-        "question": "Risk of contralateral manifestation in children with unilateral inguinal hernia: should hernia in children be treated contralaterally?",
-        "category": "Symptoms",
-        "distance": 1.1924853324890137
-      },
-      {
-        "chunk_id": 3297,
-        "question": "Congenital diaphragmatic hernia with or without extracorporeal membrane oxygenation: are we making progress?",
-        "category": "Symptoms",
-        "distance": 1.195216417312622
+        "chunk_id": 8252,
+        "question": "Occult hernias and bilateral endoscopic total extraperitoneal inguinal hernia repair: is there a need for prophylactic repair?",
+        "category": "Treatment",
+        "distance": 1.1839181184768677
       }
     ]
   },
   {
     "question": "How is pneumonia diagnosed in elderly patients?",
     "category": "Diagnosis",
-    "answer_raw": "with antibiotics or without antibiotics",
+    "answer_raw": "The retrieved medical literature does not contain enough information to answer this question confidently. Please consult the listed sources directly or rephrase your question.",
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 3,
-    "latency_ms": 1297.06,
+    "latency_ms": 417.45,
     "sources": [
       {
-        "chunk_id": 8126,
-        "question": "Early nonbronchoscopic bronchoalveolar lavage: predictor of ventilator-associated pneumonia?",
+        "chunk_id": 5821,
+        "question": "Can history and exam alone reliably predict pneumonia?",
         "category": "Diagnosis",
-        "distance": 1.0281612873077393
+        "distance": 0.8519814014434814
       },
       {
-        "chunk_id": 1024,
-        "question": "Do clinical findings in lower respiratory tract infection help general practitioners prescribe antibiotics appropriately?",
+        "chunk_id": 649,
+        "question": "Can we predict pneumococcal bacteremia in patients with severe community-acquired pneumonia?",
         "category": "Diagnosis",
-        "distance": 1.0579638481140137
+        "distance": 1.0026177167892456
       },
       {
-        "chunk_id": 3605,
-        "question": "Cephalosporin-resistant pneumococcal pneumonia: does it, affect outcome?",
+        "chunk_id": 9693,
+        "question": "Do family physicians' records fit guideline diagnosed COPD?",
         "category": "Diagnosis",
-        "distance": 1.0600553750991821
+        "distance": 1.0445263385772705
       },
       {
         "chunk_id": 8358,
@@ -125,23 +125,23 @@
   {
     "question": "How accurate is diagnosis of acute otitis media in primary care?",
     "category": "Diagnosis",
-    "answer_raw": "discrepancy",
+    "answer_raw": "The retrieved medical literature does not contain enough information to answer this question confidently. Please consult the listed sources directly or rephrase your question.",
     "disclaimer_present": true,
     "top_k": 5,
-    "category_matched_sources": 3,
-    "latency_ms": 1705.92,
+    "category_matched_sources": 4,
+    "latency_ms": 433.23,
     "sources": [
       {
-        "chunk_id": 2006,
-        "question": "Does choosing a treatment depend on making a diagnosis?",
+        "chunk_id": 27,
+        "question": "Is it possible to diagnose acute otitis media accurately in primary health care?",
         "category": "Diagnosis",
-        "distance": 0.840985119342804
+        "distance": 0.3321940302848816
       },
       {
-        "chunk_id": 102,
-        "question": "Is the healthy middle ear a normally sterile site?",
+        "chunk_id": 6420,
+        "question": "Tympanometry by general practitioners: reliable?",
         "category": "Diagnosis",
-        "distance": 0.9127745628356934
+        "distance": 0.8090527057647705
       },
       {
         "chunk_id": 2185,
@@ -150,10 +150,10 @@
         "distance": 0.9867182970046997
       },
       {
-        "chunk_id": 27,
-        "question": "Is it possible to diagnose acute otitis media accurately in primary health care?",
-        "category": "Symptoms",
-        "distance": 0.3321940302848816
+        "chunk_id": 4051,
+        "question": "Is very early hearing assessment always reliable in selecting patients for cochlear implants?",
+        "category": "Diagnosis",
+        "distance": 1.0004481077194214
       },
       {
         "chunk_id": 7758,
@@ -166,53 +166,59 @@
   {
     "question": "What are the current treatment options for hypertension?",
     "category": "Treatment",
-    "answer_raw": "pharmacotherapy",
+    "answer_raw": "The retrieved medical literature does not contain enough information to answer this question confidently. Please consult the listed sources directly or rephrase your question.",
     "disclaimer_present": true,
     "top_k": 5,
-    "category_matched_sources": 0,
-    "latency_ms": 1852.94,
+    "category_matched_sources": 5,
+    "latency_ms": 439.32,
     "sources": [
-      {
-        "chunk_id": 76,
-        "question": "Is the action taken by Catalonian primary care doctors adequate in view of the insufficient reduction in blood pressure levels in hypertensive patients?",
-        "category": "Diagnosis",
-        "distance": 0.7508343458175659
-      },
-      {
-        "chunk_id": 9089,
-        "question": "Treating hypertension. Are the right drugs given to the right patients?",
-        "category": "Diagnosis",
-        "distance": 0.7511365413665771
-      },
-      {
-        "chunk_id": 2468,
-        "question": "Do primary care physicians follow the current recommendations for hypertensive pharmacotherapy?",
-        "category": "Diagnosis",
-        "distance": 0.7808796167373657
-      },
       {
         "chunk_id": 3105,
         "question": "Is a targeted intensive intervention effective for improvements in hypertension control?",
-        "category": "Symptoms",
+        "category": "Treatment",
         "distance": 0.8301724195480347
       },
       {
         "chunk_id": 5952,
         "question": "Hypertension management in a student-run free clinic: meeting national standards?",
-        "category": "Diagnosis",
+        "category": "Treatment",
         "distance": 0.9366753101348877
+      },
+      {
+        "chunk_id": 3037,
+        "question": "Arterial hypertension: a clinically relevant problem in physical medicine and rehabilitation?",
+        "category": "Treatment",
+        "distance": 0.9585883617401123
+      },
+      {
+        "chunk_id": 3255,
+        "question": "Atenolol as a comparator in outcome trials in hypertension: a correct choice in the past, but not for the future?",
+        "category": "Treatment",
+        "distance": 0.968696653842926
+      },
+      {
+        "chunk_id": 7533,
+        "question": "Is hypertension changing?",
+        "category": "Treatment",
+        "distance": 0.9800319075584412
       }
     ]
   },
   {
     "question": "Is laparoscopic surgery better than open surgery for prostatectomy?",
     "category": "Treatment",
-    "answer_raw": "Laparoscopic radical prostatectomy does not provide significant advantages in terms of peri-operative morbidity compared with the traditional retropubic approach. [Source 4]",
+    "answer_raw": "The retrieved medical literature does not contain enough information to answer this question confidently. Please consult the listed sources directly or rephrase your question.",
     "disclaimer_present": true,
     "top_k": 5,
-    "category_matched_sources": 2,
-    "latency_ms": 4824.74,
+    "category_matched_sources": 5,
+    "latency_ms": 497.16,
     "sources": [
+      {
+        "chunk_id": 3995,
+        "question": "Is previous experience in laparoscopic necessary to perform robotic radical prostatectomy?",
+        "category": "Treatment",
+        "distance": 0.529941976070404
+      },
       {
         "chunk_id": 2690,
         "question": "Does prior abdominal surgery influence outcomes or complications of robotic-assisted laparoscopic radical prostatectomy?",
@@ -220,40 +226,52 @@
         "distance": 0.631240963935852
       },
       {
-        "chunk_id": 9773,
-        "question": "Emergency laparoscopic colectomy: does it measure up to open?",
-        "category": "Treatment",
-        "distance": 0.8298112154006958
-      },
-      {
-        "chunk_id": 3995,
-        "question": "Is previous experience in laparoscopic necessary to perform robotic radical prostatectomy?",
-        "category": "Diagnosis",
-        "distance": 0.529941976070404
-      },
-      {
         "chunk_id": 2111,
         "question": "Robot-assisted vs pure laparoscopic radical prostatectomy: are there any differences?",
-        "category": "Symptoms",
+        "category": "Treatment",
         "distance": 0.6410550475120544
       },
       {
         "chunk_id": 2,
         "question": "Is laparoscopic radical prostatectomy better than traditional retropubic radical prostatectomy?",
-        "category": "Symptoms",
+        "category": "Treatment",
         "distance": 0.6562027931213379
+      },
+      {
+        "chunk_id": 4255,
+        "question": "Transperitoneal or extraperitoneal laparoscopic radical prostatectomy: does the approach matter?",
+        "category": "Treatment",
+        "distance": 0.6632111072540283
       }
     ]
   },
   {
     "question": "What are the side effects of metformin?",
     "category": "Medication",
-    "answer_raw": "Metformin may be useful for inducing ovulation in anovulatory women who do not have hyperandrogenism and classic polycystic ovary syndrome. [Source 4]",
+    "answer_raw": "The retrieved medical literature does not contain enough information to answer this question confidently. Please consult the listed sources directly or rephrase your question.",
     "disclaimer_present": true,
     "top_k": 5,
-    "category_matched_sources": 2,
-    "latency_ms": 2621.88,
+    "category_matched_sources": 5,
+    "latency_ms": 821.66,
     "sources": [
+      {
+        "chunk_id": 4298,
+        "question": "Does metformin induce ovulation in normoandrogenic anovulatory women?",
+        "category": "Medication",
+        "distance": 1.274321436882019
+      },
+      {
+        "chunk_id": 6953,
+        "question": "Does switching from oral to subcutaneous administration of methotrexate influence on patient reported gastro-intestinal adverse effects?",
+        "category": "Medication",
+        "distance": 1.277693510055542
+      },
+      {
+        "chunk_id": 186,
+        "question": "Does continuous use of metformin throughout pregnancy improve pregnancy outcomes in women with polycystic ovarian syndrome?",
+        "category": "Medication",
+        "distance": 1.305964469909668
+      },
       {
         "chunk_id": 8529,
         "question": "Do metoprolol and carvedilol have equivalent effects on diurnal heart rate in patients with chronic heart failure?",
@@ -261,44 +279,26 @@
         "distance": 1.362552523612976
       },
       {
-        "chunk_id": 4250,
-        "question": "Recurrent acute pancreatitis possibly induced by atorvastatin and rosuvastatin. Is statin induced pancreatitis a class effect?",
+        "chunk_id": 7199,
+        "question": "Metformin, but not pioglitazone, decreases postchallenge plasma ghrelin levels in type 2 diabetic patients: a possible role in weight stability?",
         "category": "Medication",
-        "distance": 1.4438655376434326
-      },
-      {
-        "chunk_id": 4298,
-        "question": "Does metformin induce ovulation in normoandrogenic anovulatory women?",
-        "category": "Diagnosis",
-        "distance": 1.274321436882019
-      },
-      {
-        "chunk_id": 6953,
-        "question": "Does switching from oral to subcutaneous administration of methotrexate influence on patient reported gastro-intestinal adverse effects?",
-        "category": "Symptoms",
-        "distance": 1.277693510055542
-      },
-      {
-        "chunk_id": 186,
-        "question": "Does continuous use of metformin throughout pregnancy improve pregnancy outcomes in women with polycystic ovarian syndrome?",
-        "category": "Symptoms",
-        "distance": 1.305964469909668
+        "distance": 1.4123260974884033
       }
     ]
   },
   {
     "question": "How can cardiovascular disease be prevented through lifestyle changes?",
-    "category": "General",
-    "answer_raw": "Consumer use of community services that promote healthier lifestyles. [Source 4]",
+    "category": "Prevention",
+    "answer_raw": "The retrieved medical literature does not contain enough information to answer this question confidently. Please consult the listed sources directly or rephrase your question.",
     "disclaimer_present": true,
     "top_k": 5,
-    "category_matched_sources": 0,
-    "latency_ms": 905.42,
+    "category_matched_sources": 5,
+    "latency_ms": 1146.06,
     "sources": [
       {
         "chunk_id": 333,
         "question": "Can dietary interventions change diet and cardiovascular risk factors?",
-        "category": "Diagnosis",
+        "category": "Prevention",
         "distance": 0.960873007774353
       },
       {
@@ -310,36 +310,54 @@
       {
         "chunk_id": 2852,
         "question": "Study of Patient Information after percutaneous Coronary Intervention (SPICI): should prevention programmes become more effective?",
-        "category": "Diagnosis",
+        "category": "Prevention",
         "distance": 0.9926095008850098
-      },
-      {
-        "chunk_id": 628,
-        "question": "Analysis of medications dispensed to control the main cardiovascular risks in the Murcia Region: are there gender differences?",
-        "category": "Medication",
-        "distance": 0.9989418387413025
       },
       {
         "chunk_id": 7966,
         "question": "Can general practitioners provide effective cardiovascular disease (CVD) prevention?",
-        "category": "Diagnosis",
+        "category": "Prevention",
         "distance": 1.0239800214767456
+      },
+      {
+        "chunk_id": 7125,
+        "question": "Can adoption of regular exercise later in life prevent metabolic risk for cardiovascular disease?",
+        "category": "Prevention",
+        "distance": 1.0300617218017578
       }
     ]
   },
   {
     "question": "What is the role of the immune system in fighting infections?",
-    "category": "General",
-    "answer_raw": "Controlling immunity to hepatitis C virus",
+    "category": "Prevention",
+    "answer_raw": "The retrieved medical literature does not contain enough information to answer this question confidently. Please consult the listed sources directly or rephrase your question.",
     "disclaimer_present": true,
     "top_k": 5,
-    "category_matched_sources": 0,
-    "latency_ms": 955.95,
+    "category_matched_sources": 3,
+    "latency_ms": 1179.63,
     "sources": [
+      {
+        "chunk_id": 4799,
+        "question": "Staphylococcal enterotoxin induced IL-5 stimulation as a cofactor in the pathogenesis of atopic disease: the hygiene hypothesis in reverse?",
+        "category": "Prevention",
+        "distance": 1.126909852027893
+      },
+      {
+        "chunk_id": 7098,
+        "question": "Does prolonged cycling of moderate intensity affect immune cell function?",
+        "category": "Prevention",
+        "distance": 1.2008086442947388
+      },
+      {
+        "chunk_id": 528,
+        "question": "Does progesterone inhibit bacteria-stimulated interleukin-8 production by lower genital tract epithelial cells?",
+        "category": "Prevention",
+        "distance": 1.2377080917358398
+      },
       {
         "chunk_id": 4873,
         "question": "Functional and phenotypical impairment of polymorphonuclear cells in atopic dermatitis: an additional cause for the known susceptibility to infections?",
-        "category": "Symptoms",
+        "category": "Medication",
         "distance": 1.063851237297058
       },
       {
@@ -347,65 +365,47 @@
         "question": "Post-stroke infection: a role for IL-1ra?",
         "category": "Symptoms",
         "distance": 1.0936121940612793
-      },
-      {
-        "chunk_id": 2025,
-        "question": "Neonatal immune responses to microbial stimuli: is there an influence of maternal allergy?",
-        "category": "Symptoms",
-        "distance": 1.1246814727783203
-      },
-      {
-        "chunk_id": 2985,
-        "question": "Increase in T-cell subsets of oral mucosa: a late immune response in patients with treated coeliac disease?",
-        "category": "Symptoms",
-        "distance": 1.125030279159546
-      },
-      {
-        "chunk_id": 7204,
-        "question": "Expansion of hepatitis C-specific CD4+CD25+ regulatory T cells after viral clearance: a mechanism to limit collateral damage?",
-        "category": "Diagnosis",
-        "distance": 1.1258407831192017
       }
     ]
   },
   {
     "question": "Are there advantages of induction therapy in renal transplantation?",
     "category": "Treatment",
-    "answer_raw": "No. [Source 4]",
+    "answer_raw": "The retrieved medical literature does not contain enough information to answer this question confidently. Please consult the listed sources directly or rephrase your question.",
     "disclaimer_present": true,
     "top_k": 5,
-    "category_matched_sources": 1,
-    "latency_ms": 725.05,
+    "category_matched_sources": 5,
+    "latency_ms": 907.34,
     "sources": [
-      {
-        "chunk_id": 4374,
-        "question": "Does defibrotide induce a delay to polymorphonuclear neutrophil engraftment after hematopoietic stem cell transplantation?",
-        "category": "Treatment",
-        "distance": 1.0896892547607422
-      },
       {
         "chunk_id": 6252,
         "question": "Are there real advantages of induction therapy with basiliximab in renal transplantation?",
-        "category": "Diagnosis",
+        "category": "Treatment",
         "distance": 0.7342262268066406
       },
       {
         "chunk_id": 6250,
         "question": "Does a predialysis education program increase the number of pre-emptive renal transplantations?",
-        "category": "Symptoms",
+        "category": "Treatment",
         "distance": 0.9166244864463806
       },
       {
         "chunk_id": 2034,
         "question": "Cyclosporine prolongs delayed graft function in kidney transplantation: are rabbit anti-human thymocyte globulins the answer?",
-        "category": "Symptoms",
+        "category": "Treatment",
         "distance": 0.956688404083252
       },
       {
         "chunk_id": 6861,
         "question": "Can preemptive kidney transplantation guarantee longer graft survival in living-donor kidney transplantation?",
-        "category": "Symptoms",
+        "category": "Treatment",
         "distance": 1.0066769123077393
+      },
+      {
+        "chunk_id": 1098,
+        "question": "Non-heart-beating donors: is it worthwhile?",
+        "category": "Treatment",
+        "distance": 1.0136597156524658
       }
     ]
   }

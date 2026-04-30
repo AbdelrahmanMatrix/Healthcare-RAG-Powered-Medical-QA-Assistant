@@ -1,7 +1,7 @@
 # EDA Report — M1 Task 4
 **Healthcare RAG-Powered Medical Q&A Assistant**
 **Owner:** Doha Khaled Mahmoud
-**Generated:** 2026-04-29 21:16:54
+**Generated:** 2026-04-30 17:30:29
 
 ---
 
@@ -14,15 +14,15 @@
 
 | Category | Count | Percentage | Flag |
 |----------|-------|------------|------|
-| Symptoms | 5,893 | 58.9% |  |
-| Diagnosis | 3,043 | 30.4% |  |
-| Treatment | 330 | 3.3% |  |
-| Medication | 295 | 2.9% |  |
-| General | 290 | 2.9% |  |
-| Prevention | 149 | 1.5% |  ⚠️ borderline |
+| Treatment | 3,634 | 36.3% |  |
+| Diagnosis | 1,833 | 18.3% |  |
+| Medication | 1,492 | 14.9% |  |
+| General | 1,350 | 13.5% |  |
+| Prevention | 1,151 | 11.5% |  |
+| Symptoms | 540 | 5.4% |  |
 
 **KPI Check:** All 6 categories present with ≥ 1% representation ✅
-**Skew Analysis:** ⚠️ Borderline categories (< 2%): ['Prevention']
+**Skew Analysis:** ✅ No critically skewed categories
 
 ## 2. Text Length Statistics (Word Count)
 
@@ -62,17 +62,17 @@
 
 | Category | Avg Words |
 |----------|-----------|
-| General | 45.8 |
-| Treatment | 43.1 |
-| Diagnosis | 42.6 |
-| Medication | 42.2 |
-| Symptoms | 42.0 |
-| Prevention | 41.2 |
+| General | 43.0 |
+| Treatment | 42.8 |
+| Medication | 42.5 |
+| Prevention | 42.0 |
+| Symptoms | 41.3 |
+| Diagnosis | 41.2 |
 
 ## 5. Key Findings
 - Strongest length correlation: context ↔ answer (0.147)
-- Dataset is dominated by Symptoms (58.9%) and Diagnosis (30.4%)
-- ⚠️ Borderline categories (< 2%): ['Prevention']
+- Dataset is dominated by Symptoms (36.3%) and Diagnosis (18.3%)
+- ✅ No critically skewed categories
 - Dataset is ready for RAG + Classification training
 
 ## 6. Visualisations Produced

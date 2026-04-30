@@ -2,7 +2,7 @@
   {
     "query_num": 1,
     "question": "What are the early symptoms of type 2 diabetes?",
-    "answer_raw": "T2D",
+    "answer_raw": "disabling symptoms, but also by relevant co-morbidities",
     "disclaimer_present": true,
     "top_k": 5,
     "sources": [
@@ -15,7 +15,7 @@
       {
         "chunk_id": 4555,
         "question": "Is there a link between components of health-related functioning and incident impaired glucose metabolism and type 2 diabetes?",
-        "category": "Symptoms",
+        "category": "Prevention",
         "distance": 0.9689173698425293
       },
       {
@@ -27,22 +27,22 @@
       {
         "chunk_id": 2772,
         "question": "Are patients' initial experiences at the diagnosis of type 2 diabetes associated with attitudes and self-management over time?",
-        "category": "Symptoms",
+        "category": "Diagnosis",
         "distance": 0.9918888807296753
       },
       {
         "chunk_id": 5319,
         "question": "Type 2 diabetes care and insulin intensification: is a more multidisciplinary approach needed?",
-        "category": "Diagnosis",
+        "category": "Medication",
         "distance": 1.0346442461013794
       }
     ],
-    "latency_ms": 646.95
+    "latency_ms": 879.32
   },
   {
     "query_num": 2,
     "question": "How is pneumonia diagnosed in elderly patients?",
-    "answer_raw": "A survival analysis using PaO(2) and FEV(1)/FVC ratio values proved to be statistically significant, but a prospective trial is needed to determine the clinical relevance of these parameters for predicting survival in patients with idiopathic interstitial pneumonia. [Source 4]",
+    "answer_raw": "Prediction rules based on clinical information",
     "disclaimer_present": true,
     "top_k": 5,
     "sources": [
@@ -61,93 +61,93 @@
       {
         "chunk_id": 5821,
         "question": "Can history and exam alone reliably predict pneumonia?",
-        "category": "Symptoms",
+        "category": "Diagnosis",
         "distance": 0.8519814014434814
       },
       {
         "chunk_id": 3416,
         "question": "Is there a potential role for echocardiography in adult patients with CAP?",
-        "category": "Symptoms",
+        "category": "General",
         "distance": 0.8814706206321716
       },
       {
         "chunk_id": 9003,
         "question": "Predicting survival of lung transplantation candidates with idiopathic interstitial pneumonia: does PaO(2) predict survival?",
-        "category": "Symptoms",
+        "category": "Treatment",
         "distance": 0.9138088822364807
       }
     ],
-    "latency_ms": 1776.81
+    "latency_ms": 1584.99
   },
   {
     "query_num": 3,
     "question": "What are the current treatment options for hypertension?",
-    "answer_raw": "pharmacotherapy",
+    "answer_raw": "combination of -blocker and diuretic ---",
     "disclaimer_present": true,
     "top_k": 5,
     "sources": [
       {
         "chunk_id": 76,
         "question": "Is the action taken by Catalonian primary care doctors adequate in view of the insufficient reduction in blood pressure levels in hypertensive patients?",
-        "category": "Diagnosis",
+        "category": "Medication",
         "distance": 0.7508343458175659
       },
       {
         "chunk_id": 9089,
         "question": "Treating hypertension. Are the right drugs given to the right patients?",
-        "category": "Diagnosis",
+        "category": "Medication",
         "distance": 0.7511365413665771
       },
       {
         "chunk_id": 2468,
         "question": "Do primary care physicians follow the current recommendations for hypertensive pharmacotherapy?",
-        "category": "Diagnosis",
+        "category": "Medication",
         "distance": 0.7808796167373657
       },
       {
         "chunk_id": 3105,
         "question": "Is a targeted intensive intervention effective for improvements in hypertension control?",
-        "category": "Symptoms",
+        "category": "Treatment",
         "distance": 0.8301724195480347
       },
       {
         "chunk_id": 5952,
         "question": "Hypertension management in a student-run free clinic: meeting national standards?",
-        "category": "Diagnosis",
+        "category": "Treatment",
         "distance": 0.9366753101348877
       }
     ],
-    "latency_ms": 564.0
+    "latency_ms": 697.36
   },
   {
     "query_num": 4,
     "question": "What are the side effects of metformin?",
-    "answer_raw": "mortality. [Source 4]",
+    "answer_raw": "The retrieved medical literature does not contain enough information to answer this question confidently. Please consult the listed sources directly or rephrase your question.",
     "disclaimer_present": true,
     "top_k": 5,
     "sources": [
       {
         "chunk_id": 4298,
         "question": "Does metformin induce ovulation in normoandrogenic anovulatory women?",
-        "category": "Diagnosis",
+        "category": "Medication",
         "distance": 1.274321436882019
       },
       {
         "chunk_id": 6953,
         "question": "Does switching from oral to subcutaneous administration of methotrexate influence on patient reported gastro-intestinal adverse effects?",
-        "category": "Symptoms",
+        "category": "Medication",
         "distance": 1.277693510055542
       },
       {
         "chunk_id": 186,
         "question": "Does continuous use of metformin throughout pregnancy improve pregnancy outcomes in women with polycystic ovarian syndrome?",
-        "category": "Symptoms",
+        "category": "Medication",
         "distance": 1.305964469909668
       },
       {
         "chunk_id": 9047,
         "question": "Metoprolol in dilated cardiomyopathy: is it possible to identify factors predictive of improvement?",
-        "category": "Symptoms",
+        "category": "Treatment",
         "distance": 1.3613795042037964
       },
       {
@@ -157,19 +157,19 @@
         "distance": 1.362552523612976
       }
     ],
-    "latency_ms": 725.69
+    "latency_ms": 353.24
   },
   {
     "query_num": 5,
     "question": "How can cardiovascular disease be prevented through lifestyle changes?",
-    "answer_raw": "Consumer use of community services that promote healthier lifestyles. [Source 4]",
+    "answer_raw": "The retrieved medical literature does not contain enough information to answer this question confidently. Please consult the listed sources directly or rephrase your question.",
     "disclaimer_present": true,
     "top_k": 5,
     "sources": [
       {
         "chunk_id": 333,
         "question": "Can dietary interventions change diet and cardiovascular risk factors?",
-        "category": "Diagnosis",
+        "category": "Prevention",
         "distance": 0.960873007774353
       },
       {
@@ -181,7 +181,7 @@
       {
         "chunk_id": 2852,
         "question": "Study of Patient Information after percutaneous Coronary Intervention (SPICI): should prevention programmes become more effective?",
-        "category": "Diagnosis",
+        "category": "Prevention",
         "distance": 0.9926095008850098
       },
       {
@@ -193,23 +193,23 @@
       {
         "chunk_id": 7966,
         "question": "Can general practitioners provide effective cardiovascular disease (CVD) prevention?",
-        "category": "Diagnosis",
+        "category": "Prevention",
         "distance": 1.0239800214767456
       }
     ],
-    "latency_ms": 822.7
+    "latency_ms": 369.45
   },
   {
     "query_num": 6,
     "question": "What is the role of the immune system in fighting infections?",
-    "answer_raw": "Controlling immunity to hepatitis C virus",
+    "answer_raw": "immune system of the baby",
     "disclaimer_present": true,
     "top_k": 5,
     "sources": [
       {
         "chunk_id": 4873,
         "question": "Functional and phenotypical impairment of polymorphonuclear cells in atopic dermatitis: an additional cause for the known susceptibility to infections?",
-        "category": "Symptoms",
+        "category": "Medication",
         "distance": 1.063851237297058
       },
       {
@@ -221,35 +221,35 @@
       {
         "chunk_id": 2025,
         "question": "Neonatal immune responses to microbial stimuli: is there an influence of maternal allergy?",
-        "category": "Symptoms",
+        "category": "Medication",
         "distance": 1.1246814727783203
       },
       {
         "chunk_id": 2985,
         "question": "Increase in T-cell subsets of oral mucosa: a late immune response in patients with treated coeliac disease?",
-        "category": "Symptoms",
+        "category": "Treatment",
         "distance": 1.125030279159546
       },
       {
         "chunk_id": 7204,
         "question": "Expansion of hepatitis C-specific CD4+CD25+ regulatory T cells after viral clearance: a mechanism to limit collateral damage?",
-        "category": "Diagnosis",
+        "category": "General",
         "distance": 1.1258407831192017
       }
     ],
-    "latency_ms": 856.04
+    "latency_ms": 418.89
   },
   {
     "query_num": 7,
     "question": "Is laparoscopic surgery better than open surgery for prostatectomy?",
-    "answer_raw": "Laparoscopic surgery is superior to open surgery in terms of operative time, hospitalization and early continence. [Source 4]",
+    "answer_raw": "The retrieved medical literature does not contain enough information to answer this question confidently. Please consult the listed sources directly or rephrase your question.",
     "disclaimer_present": true,
     "top_k": 5,
     "sources": [
       {
         "chunk_id": 3995,
         "question": "Is previous experience in laparoscopic necessary to perform robotic radical prostatectomy?",
-        "category": "Diagnosis",
+        "category": "Treatment",
         "distance": 0.529941976070404
       },
       {
@@ -261,47 +261,47 @@
       {
         "chunk_id": 2111,
         "question": "Robot-assisted vs pure laparoscopic radical prostatectomy: are there any differences?",
-        "category": "Symptoms",
+        "category": "Treatment",
         "distance": 0.6410550475120544
       },
       {
         "chunk_id": 2,
         "question": "Is laparoscopic radical prostatectomy better than traditional retropubic radical prostatectomy?",
-        "category": "Symptoms",
+        "category": "Treatment",
         "distance": 0.6562027931213379
       },
       {
         "chunk_id": 4255,
         "question": "Transperitoneal or extraperitoneal laparoscopic radical prostatectomy: does the approach matter?",
-        "category": "Symptoms",
+        "category": "Treatment",
         "distance": 0.6632111072540283
       }
     ],
-    "latency_ms": 1071.38
+    "latency_ms": 354.11
   },
   {
     "query_num": 8,
     "question": "Can bacterial gastroenteritis lead to irritable bowel syndrome?",
-    "answer_raw": "IBS is a bacterial gastroenteritis. [Source 4]",
+    "answer_raw": "The retrieved medical literature does not contain enough information to answer this question confidently. Please consult the listed sources directly or rephrase your question.",
     "disclaimer_present": true,
     "top_k": 5,
     "sources": [
       {
         "chunk_id": 3,
         "question": "Does bacterial gastroenteritis predispose people to functional gastrointestinal disorders?",
-        "category": "Symptoms",
+        "category": "Medication",
         "distance": 0.5918920040130615
       },
       {
         "chunk_id": 1198,
         "question": "Aeromonas species: an opportunistic enteropathogen in patients with inflammatory bowel diseases?",
-        "category": "Symptoms",
+        "category": "Medication",
         "distance": 0.7844080924987793
       },
       {
         "chunk_id": 6504,
         "question": "Chlamydia trachomatis infection: is it relevant in irritable bowel syndrome?",
-        "category": "Symptoms",
+        "category": "Treatment",
         "distance": 0.8340768814086914
       },
       {
@@ -317,52 +317,52 @@
         "distance": 0.9289129972457886
       }
     ],
-    "latency_ms": 923.83
+    "latency_ms": 360.33
   },
   {
     "query_num": 9,
     "question": "Does naturopathy effectively treat menopausal symptoms?",
-    "answer_raw": "Naturopathy appears to be an effective alternative for relief of specific menopausal symptoms compared to conventional therapy. [Source 4]",
+    "answer_raw": "The retrieved medical literature does not contain enough information to answer this question confidently. Please consult the listed sources directly or rephrase your question.",
     "disclaimer_present": true,
     "top_k": 5,
     "sources": [
       {
         "chunk_id": 0,
         "question": "Is naturopathy as effective as conventional therapy for treatment of menopausal symptoms?",
-        "category": "Symptoms",
+        "category": "Treatment",
         "distance": 0.3162907361984253
       },
       {
         "chunk_id": 1267,
         "question": "Chinese medicine treatment for menopausal symptoms in the UK health service: is a clinical trial warranted?",
-        "category": "Symptoms",
+        "category": "Treatment",
         "distance": 0.9816070795059204
       },
       {
         "chunk_id": 9461,
         "question": "Do estradiol levels influence on the cognitive function during antidepressant treatments in post-menopausal women with major depressive disorder?",
-        "category": "Symptoms",
+        "category": "Medication",
         "distance": 1.071415662765503
       },
       {
         "chunk_id": 6123,
         "question": "Health characteristics of women beginning postmenopausal hormone therapy: have they changed since the publication of the Women's Health Initiative?",
-        "category": "Symptoms",
+        "category": "Treatment",
         "distance": 1.0816407203674316
       },
       {
         "chunk_id": 2768,
         "question": "Is acupuncture in addition to conventional medicine effective as pain treatment for endometriosis?",
-        "category": "Symptoms",
+        "category": "Treatment",
         "distance": 1.103818416595459
       }
     ],
-    "latency_ms": 1128.32
+    "latency_ms": 313.75
   },
   {
     "query_num": 10,
     "question": "Is urgent colonoscopy needed for acute diverticular bleeding?",
-    "answer_raw": "Urgent colonoscopy for these patients does not seem advantageous. [Source 2]",
+    "answer_raw": "The retrieved medical literature does not contain enough information to answer this question confidently. Please consult the listed sources directly or rephrase your question.",
     "disclaimer_present": true,
     "top_k": 5,
     "sources": [
@@ -381,13 +381,13 @@
       {
         "chunk_id": 7173,
         "question": "A single training center's experience with 200 consecutive cases of diverticulitis: can all patients be approached laparoscopically?",
-        "category": "Symptoms",
+        "category": "Treatment",
         "distance": 0.8806498646736145
       },
       {
         "chunk_id": 5380,
         "question": "Is incidental Meckel's diverticulum resected safely?",
-        "category": "Symptoms",
+        "category": "Treatment",
         "distance": 0.9090079665184021
       },
       {
@@ -397,6 +397,6 @@
         "distance": 0.935627818107605
       }
     ],
-    "latency_ms": 876.38
+    "latency_ms": 309.73
   }
 ]

@@ -31,9 +31,9 @@ Fine-tuned distilbert-base-uncased for classifying medical questions into 6 cate
 ## Results
 | Metric | Score |
 |--------|-------|
-| Macro F1 | 0.7228 |
-| Weighted F1 | 0.8291 |
-| Accuracy | 0.8250 |
+| Macro F1 | 0.8491 |
+| Weighted F1 | 0.8588 |
+| Accuracy | 0.8580 |
 
 ## Training Config
 | Item | Value |

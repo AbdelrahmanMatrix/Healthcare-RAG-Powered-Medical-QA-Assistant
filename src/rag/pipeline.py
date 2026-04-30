@@ -1,18 +1,26 @@
 """
-LangChain RAG Pipeline for Healthcare Medical Q&A.
+RAG Pipeline for Healthcare Medical Q&A.
 
-Chain: embed query → retrieve top-5 FAISS chunks → inject context
-       into prompt → generate answer via flan-t5-base → append disclaimer.
+Chain: embed query → retrieve top-K FAISS chunks → inject top-N truncated
+       contexts into prompt → generate answer via flan-t5-base
+       → clean output → empty-answer guard → append disclaimer.
 
-Usage:
-    from src.rag.pipeline import build_rag_pipeline, answer
+Public API (stable — used by notebooks 06, 08, 09, 10 and by the M3 FastAPI):
+    build_rag_pipeline(**kwargs) -> RAGPipeline
+    answer(query, pipeline=None, **kwargs) -> dict
+    retrieve(query, pipeline=None, **kwargs) -> list[dict]
 
-    pipeline = build_rag_pipeline()
-    result = answer("What are the symptoms of diabetes?", pipeline=pipeline)
+    class RAGPipeline:
+        retrieve(query, top_k=None) -> list[dict]
+        retrieve_by_category(query, category, top_k=None) -> list[dict]
+        generate(query, retrieved_chunks) -> str
+        answer(query, top_k=None) -> dict
+        answer_with_routing(query, category=None, top_k=None) -> dict
 """
 
 import os
 import pickle
+import re
 from pathlib import Path
 
 import faiss
@@ -30,14 +38,66 @@ DISCLAIMER = (
     "a qualified healthcare provider for medical decisions."
 )
 
+INSUFFICIENT_CONTEXT_MESSAGE = (
+    "The retrieved medical literature does not contain enough information "
+    "to answer this question confidently. Please consult the listed sources "
+    "directly or rephrase your question."
+)
+
 DEFAULT_EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 DEFAULT_LLM_MODEL = "google/flan-t5-base"
-DEFAULT_TOP_K = 5
+
+# Retrieval / generation knobs (tunable from M3 config/settings.py later)
+DEFAULT_TOP_K = 5            # chunks returned to the API caller
+DEFAULT_INJECT_K = 3         # chunks actually fed to the LLM
+DEFAULT_MAX_CONTEXT_WORDS = 80   # per-chunk context truncation
+DEFAULT_MAX_NEW_TOKENS = 256
+DEFAULT_MIN_ANSWER_WORDS = 3     # under this → use insufficient-context fallback
 
 # Resolve paths relative to project root
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 FAISS_INDEX_PATH = PROJECT_ROOT / "data" / "embeddings" / "faiss_index" / "pubmedqa_index_flatl2.faiss"
 CHUNK_MAPPING_PATH = PROJECT_ROOT / "data" / "embeddings" / "faiss_index" / "chunk_mapping.pkl"
+
+
+# ── Helper functions ────────────────────────────────────────────────────────
+
+_SOURCE_MARKER_RE = re.compile(r'\s*$$\s*sources?\s*\d+\s*$$\s*', re.IGNORECASE)
+_MULTISPACE_RE = re.compile(r'\s+')
+_LEADING_PUNCT_RE = re.compile(r'^[\W_]+')
+
+
+def _truncate_words(text: str, max_words: int) -> str:
+    """Truncate text to at most max_words words; add '...' if truncated."""
+    if not text:
+        return ""
+    words = text.split()
+    if len(words) <= max_words:
+        return text
+    return " ".join(words[:max_words]) + "..."
+
+
+def _clean_answer(text: str) -> str:
+    """
+    Post-process an LLM answer:
+      - Strip [Source N] markers anywhere in the text
+      - Collapse whitespace
+      - Strip leading punctuation/whitespace
+    """
+    if not text:
+        return ""
+    text = _SOURCE_MARKER_RE.sub(" ", text)
+    text = _MULTISPACE_RE.sub(" ", text).strip()
+    text = _LEADING_PUNCT_RE.sub("", text).strip()
+    return text
+
+
+def _is_insufficient(answer: str, min_words: int) -> bool:
+    """True if the cleaned answer has fewer than min_words alphabetic tokens."""
+    if not answer:
+        return True
+    word_count = sum(1 for tok in answer.split() if any(c.isalpha() for c in tok))
+    return word_count < min_words
 
 
 # ── RAG Pipeline Class ──────────────────────────────────────────────────────
@@ -47,10 +107,10 @@ class RAGPipeline:
     Retrieval-Augmented Generation pipeline.
 
     Components:
-    1. SentenceTransformer encoder (query embedding)
-    2. FAISS index (vector retrieval)
-    3. Chunk mapping (id → text)
-    4. HuggingFace LLM (answer generation)
+      1. SentenceTransformer encoder (query embedding)
+      2. FAISS index (vector retrieval)
+      3. Chunk mapping (id → text)
+      4. HuggingFace LLM (answer generation)
     """
 
     def __init__(
@@ -58,10 +118,17 @@ class RAGPipeline:
         embedding_model: str = DEFAULT_EMBEDDING_MODEL,
         llm_model: str = DEFAULT_LLM_MODEL,
         top_k: int = DEFAULT_TOP_K,
+        inject_k: int = DEFAULT_INJECT_K,
+        max_context_words: int = DEFAULT_MAX_CONTEXT_WORDS,
+        max_new_tokens: int = DEFAULT_MAX_NEW_TOKENS,
+        min_answer_words: int = DEFAULT_MIN_ANSWER_WORDS,
         faiss_index_path: str = None,
         chunk_mapping_path: str = None,
     ):
         self.top_k = top_k
+        self.inject_k = inject_k
+        self.max_context_words = max_context_words
+        self.min_answer_words = min_answer_words
 
         # ── Load embedding model ─────────────────────────────────────
         print(f"Loading embedding model: {embedding_model}")
@@ -84,17 +151,31 @@ class RAGPipeline:
         self.generator = hf_pipeline(
             "text2text-generation",
             model=llm_model,
-            max_new_tokens=256,
+            max_new_tokens=max_new_tokens,
             do_sample=False,
         )
         print("✅ RAG Pipeline ready")
+
+    # ── Retrieval ────────────────────────────────────────────────────
+
+    def _row_to_dict(self, idx: int, dist: float) -> dict:
+        row = self.mapping_df.iloc[idx]
+        return {
+            "chunk_id": idx,
+            "question": row["question"],
+            "context": row["context"],
+            "answer": row["answer"],
+            "category": row.get("category", "Unknown"),
+            "text_chunk": row["text_chunk"],
+            "distance": dist,
+        }
 
     def retrieve(self, query: str, top_k: int = None) -> list[dict]:
         """
         Embed query and retrieve top-k chunks from FAISS.
 
         Returns list of dicts with keys: chunk_id, question, context,
-        answer, category, text_chunk, distance
+        answer, category, text_chunk, distance.
         """
         k = top_k or self.top_k
 
@@ -104,34 +185,21 @@ class RAGPipeline:
 
         D, I = self.index.search(query_vector, k)
 
-        results = []
-        for rank in range(k):
-            idx = int(I[0, rank])
-            dist = float(D[0, rank])
-            row = self.mapping_df.iloc[idx]
-            results.append({
-                "chunk_id": idx,
-                "question": row["question"],
-                "context": row["context"],
-                "answer": row["answer"],
-                "category": row.get("category", "Unknown"),
-                "text_chunk": row["text_chunk"],
-                "distance": dist,
-            })
+        return [self._row_to_dict(int(I[0, r]), float(D[0, r])) for r in range(k)]
 
-        return results
-
-    def retrieve_by_category(self, query: str, category: str, top_k: int = None) -> list[dict]:
+    def retrieve_by_category(
+        self, query: str, category: str, top_k: int = None
+    ) -> list[dict]:
         """
-        Retrieve top-k chunks, then filter/boost results matching the given category.
+        Retrieve top-k chunks, prioritising those that match `category`.
 
         Strategy:
-        1. Retrieve top_k * 3 candidates from FAISS
-        2. Prioritise chunks matching the predicted category
-        3. Return top_k results (category matches first, then others)
+          1. Retrieve top_k * 3 candidates from FAISS
+          2. Re-order: chunks matching the category come first (preserving distance order)
+          3. Return top_k results
         """
         k = top_k or self.top_k
-        search_k = min(k * 3, self.index.ntotal)  # retrieve more candidates
+        search_k = min(k * 3, self.index.ntotal)
 
         query_vector = self.encoder.encode(
             [query], convert_to_numpy=True
@@ -139,45 +207,74 @@ class RAGPipeline:
 
         D, I = self.index.search(query_vector, search_k)
 
-        # Build candidate list
-        candidates = []
-        for rank in range(search_k):
-            idx = int(I[0, rank])
-            dist = float(D[0, rank])
-            row = self.mapping_df.iloc[idx]
-            candidates.append({
-                "chunk_id": idx,
-                "question": row["question"],
-                "context": row["context"],
-                "answer": row["answer"],
-                "category": row.get("category", "Unknown"),
-                "text_chunk": row["text_chunk"],
-                "distance": dist,
-            })
+        candidates = [
+            self._row_to_dict(int(I[0, r]), float(D[0, r]))
+            for r in range(search_k)
+        ]
 
-        # Sort: category matches first (same distance order), then others
         matched = [c for c in candidates if c["category"] == category]
         unmatched = [c for c in candidates if c["category"] != category]
+        return (matched + unmatched)[:k]
 
-        results = (matched + unmatched)[:k]
-        return results
+    # ── Generation ───────────────────────────────────────────────────
 
-    def answer_with_routing(self, query: str, category: str = None, top_k: int = None) -> dict:
+    def _build_prompt(self, query: str, chunks: list[dict]) -> str:
         """
-        Full pipeline with classifier routing:
-        query → classify (external) → category-filtered retrieve → generate → disclaimer.
+        Build the LLM prompt from the top `inject_k` chunks.
 
-        If category is provided, retrieval is filtered by that category.
-        If not, falls back to standard retrieval.
+        Design notes:
+          - We deliberately do NOT label chunks "[Source 1]", "[Source 2]",
+            because flan-t5-base learned to copy those markers into its
+            output. Plain '---' separators avoid that failure mode.
+          - Each chunk's context is truncated to max_context_words words
+            so the full prompt stays under the 512-token encoder limit.
         """
-        if category:
-            retrieved = self.retrieve_by_category(query, category, top_k)
-        else:
-            retrieved = self.retrieve(query, top_k)
+        evidence_blocks = []
+        for chunk in chunks[: self.inject_k]:
+            ctx = _truncate_words(chunk["context"], self.max_context_words)
+            evidence_blocks.append(
+                f"Context: {ctx}\n"
+                f"Conclusion: {chunk['answer']}"
+            )
+        evidence = "\n---\n".join(evidence_blocks)
 
-        raw_answer = self.generate(query, retrieved)
+        return (
+            "You are a medical assistant. Use the medical evidence below to "
+            "answer the question concisely. If the evidence does not contain "
+            "enough information, reply: \"insufficient evidence\".\n\n"
+            f"Evidence:\n{evidence}\n\n"
+            f"Question: {query}\n\n"
+            "Answer:"
+        )
 
-        sources = [
+    def generate(self, query: str, retrieved_chunks: list[dict]) -> str:
+        """
+        Build prompt from retrieved context and generate a cleaned answer.
+
+        Returns the cleaned answer string (no disclaimer).
+        Empty/nonsense outputs are replaced with INSUFFICIENT_CONTEXT_MESSAGE.
+        """
+        if not retrieved_chunks:
+            return INSUFFICIENT_CONTEXT_MESSAGE
+
+        prompt = self._build_prompt(query, retrieved_chunks)
+        raw = self.generator(prompt)[0]["generated_text"]
+        cleaned = _clean_answer(raw)
+
+        # Detect explicit insufficient-evidence reply
+        if cleaned.lower().startswith("insufficient evidence"):
+            return INSUFFICIENT_CONTEXT_MESSAGE
+
+        # Detect empty / single-token / nonsense outputs
+        if _is_insufficient(cleaned, self.min_answer_words):
+            return INSUFFICIENT_CONTEXT_MESSAGE
+
+        return cleaned
+
+    # ── Public answer methods ────────────────────────────────────────
+
+    def _format_sources(self, retrieved: list[dict]) -> list[dict]:
+        return [
             {
                 "chunk_id": r["chunk_id"],
                 "question": r["question"],
@@ -186,6 +283,49 @@ class RAGPipeline:
             }
             for r in retrieved
         ]
+
+    def answer(self, query: str, top_k: int = None) -> dict:
+        """
+        Full RAG pipeline (no classifier routing): retrieve → generate
+        → clean → guard → append disclaimer.
+
+        Returns dict: question, answer, answer_raw, retrieved_sources,
+                      disclaimer_present, top_k.
+        """
+        retrieved = self.retrieve(query, top_k)
+        raw_answer = self.generate(query, retrieved)
+
+        return {
+            "question": query,
+            "answer": raw_answer + DISCLAIMER,
+            "answer_raw": raw_answer,
+            "retrieved_sources": self._format_sources(retrieved),
+            "disclaimer_present": True,
+            "top_k": len(retrieved),
+        }
+
+    def answer_with_routing(
+        self, query: str, category: str = None, top_k: int = None
+    ) -> dict:
+        """
+        Full pipeline with optional classifier routing:
+          query → (optional category-filtered) retrieve → generate
+          → clean → guard → append disclaimer.
+
+        If `category` is provided, retrieval prioritises chunks of that
+        category; otherwise falls back to standard top-k retrieval.
+
+        Returns dict: question, category, answer, answer_raw,
+                      retrieved_sources, disclaimer_present, top_k,
+                      category_matched_sources.
+        """
+        if category:
+            retrieved = self.retrieve_by_category(query, category, top_k)
+        else:
+            retrieved = self.retrieve(query, top_k)
+
+        raw_answer = self.generate(query, retrieved)
+        sources = self._format_sources(retrieved)
 
         return {
             "question": query,
@@ -195,69 +335,15 @@ class RAGPipeline:
             "retrieved_sources": sources,
             "disclaimer_present": True,
             "top_k": len(retrieved),
-            "category_matched_sources": sum(1 for s in sources if s["category"] == category),
-        }
-
-    def generate(self, query: str, retrieved_chunks: list[dict]) -> str:
-        """
-        Build prompt from retrieved context and generate answer.
-        """
-        # Build context block from retrieved chunks
-        context_parts = []
-        for i, chunk in enumerate(retrieved_chunks, 1):
-            context_parts.append(
-                f"[Source {i}]\n"
-                f"Question: {chunk['question']}\n"
-                f"Context: {chunk['context'][:500]}\n"
-                f"Answer: {chunk['answer']}"
-            )
-        context_block = "\n\n".join(context_parts)
-
-        prompt = (
-            f"You are a medical assistant. Answer the question based ONLY on "
-            f"the provided context. If the context doesn't contain enough "
-            f"information, say so.\n\n"
-            f"Context:\n{context_block}\n\n"
-            f"Question: {query}\n\n"
-            f"Answer:"
-        )
-
-        output = self.generator(prompt)[0]["generated_text"]
-        return output.strip()
-
-    def answer(self, query: str, top_k: int = None) -> dict:
-        """
-        Full RAG pipeline: retrieve → generate → add disclaimer.
-
-        Returns dict with: question, answer, answer_with_disclaimer,
-        retrieved_sources, disclaimer_present
-        """
-        retrieved = self.retrieve(query, top_k)
-        raw_answer = self.generate(query, retrieved)
-
-        sources = [
-            {
-                "chunk_id": r["chunk_id"],
-                "question": r["question"],
-                "category": r["category"],
-                "distance": r["distance"],
-            }
-            for r in retrieved
-        ]
-
-        return {
-            "question": query,
-            "answer": raw_answer + DISCLAIMER,
-            "answer_raw": raw_answer,
-            "retrieved_sources": sources,
-            "disclaimer_present": True,
-            "top_k": len(retrieved),
+            "category_matched_sources": sum(
+                1 for s in sources if s["category"] == category
+            ),
         }
 
 
-# ── Module-level convenience functions ───────────────────────────────────────
+# ── Module-level convenience functions (cached singleton) ───────────────────
 
-_pipeline_instance = None
+_pipeline_instance: RAGPipeline | None = None
 
 
 def build_rag_pipeline(**kwargs) -> RAGPipeline:
@@ -268,10 +354,7 @@ def build_rag_pipeline(**kwargs) -> RAGPipeline:
 
 
 def answer(query: str, pipeline: RAGPipeline = None, **kwargs) -> dict:
-    """
-    Answer a query using the RAG pipeline.
-    Builds the pipeline on first call if not provided.
-    """
+    """Answer a query; lazily build the pipeline on first call."""
     global _pipeline_instance
     if pipeline is None:
         if _pipeline_instance is None:
@@ -281,12 +364,10 @@ def answer(query: str, pipeline: RAGPipeline = None, **kwargs) -> dict:
 
 
 def retrieve(query: str, pipeline: RAGPipeline = None, **kwargs) -> list[dict]:
-    """Retrieve chunks for a query."""
+    """Retrieve chunks for a query; lazily build the pipeline on first call."""
     global _pipeline_instance
     if pipeline is None:
         if _pipeline_instance is None:
             _pipeline_instance = build_rag_pipeline()
         pipeline = _pipeline_instance
     return pipeline.retrieve(query, **kwargs)
-
-
