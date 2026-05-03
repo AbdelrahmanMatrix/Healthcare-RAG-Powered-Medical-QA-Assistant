@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Milestone 3 — Complete Guide v3 (Final)</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080b10;--sur:#0f131c;--sur2:#141a26;--sur3:#1a2133;--bdr:#1e2940;--bdr2:#263450;--acc:#00c8f0;--acc2:#0055ff;--grn:#00e5a0;--ylw:#ffd60a;--red:#ff4757;--txt:#dde4f0;--mut:#5a6880;--mut2:#8898aa;--cbg:#060910;}
+*{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--txt);font-family:'Syne',sans-serif;line-height:1.7;overflow-x:hidden;}
+::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:3px;}
+.nav{position:sticky;top:0;z-index:200;background:rgba(8,11,16,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--bdr);padding:0 40px;display:flex;align-items:center;height:50px;overflow-x:auto;gap:0;white-space:nowrap;}
+.nb{font-weight:800;font-size:13px;color:var(--acc);margin-right:24px;flex-shrink:0;}
+.nav a{font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);text-decoration:none;padding:0 10px;height:50px;display:flex;align-items:center;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;flex-shrink:0;}
+.nav a:hover{color:var(--acc);border-bottom-color:var(--acc);}
+.hero{padding:56px 52px 48px;border-bottom:1px solid var(--bdr);position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-200px;right:-200px;width:700px;height:700px;background:radial-gradient(circle,rgba(0,85,255,.09) 0%,transparent 65%);pointer-events:none;}
+.htag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--acc);background:rgba(0,200,240,.07);border:1px solid rgba(0,200,240,.2);padding:4px 12px;display:inline-block;margin-bottom:18px;}
+.hero h1{font-size:clamp(38px,5.5vw,70px);font-weight:800;line-height:.95;letter-spacing:-.04em;margin-bottom:14px;}
+.hero h1 span{display:block;background:linear-gradient(100deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-sub{font-size:14px;color:var(--mut2);max-width:680px;margin-bottom:28px;line-height:1.75;}
+.sts{display:flex;flex-wrap:wrap;border:1px solid var(--bdr);}
+.st{padding:12px 22px;border-right:1px solid var(--bdr);display:flex;flex-direction:column;gap:3px;}.st:last-child{border-right:none;}
+.sl{font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--mut);}
+.sv{font-size:13px;font-weight:700;}.sv.g{color:var(--grn);}.sv.a{color:var(--acc);}
+.sec{padding:48px 52px;border-bottom:1px solid var(--bdr);}
+.sh{display:flex;align-items:baseline;gap:12px;margin-bottom:20px;}
+.sn{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--acc2);letter-spacing:.2em;text-transform:uppercase;padding:3px 9px;border:1px solid rgba(0,85,255,.2);background:rgba(0,85,255,.06);flex-shrink:0;}
+.sh h2{font-size:24px;font-weight:800;letter-spacing:-.02em;}
+.intro{font-size:13px;color:var(--mut2);max-width:760px;line-height:1.8;margin-bottom:18px;}
+.h3{font-size:14px;font-weight:700;margin:20px 0 8px;display:flex;align-items:center;gap:8px;}
+.h3::before{content:'';display:block;width:3px;height:14px;background:var(--acc2);}
+.fb{margin:10px 0;}
+.fl{display:flex;align-items:center;justify-content:space-between;background:var(--sur3);border:1px solid var(--bdr2);border-bottom:none;padding:6px 13px;}
+.fn{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--acc);}
+.fn::before{content:'📄 ';}
+.lg{font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);}
+.cw{background:var(--cbg);border:1px solid var(--bdr2);border-top:none;overflow-x:auto;}
+.cw pre{padding:15px 20px;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.75;color:#d4dae8;white-space:pre;min-width:max-content;}
+.kw{color:#c792ea;}.fn2{color:#82aaff;}.st2{color:#c3e88d;}.cm{color:#546e7a;font-style:italic;}.vr{color:#80cbc4;}.nm{color:#f78c6c;}.tp{color:#ffcb6b;}
+.bb{margin:10px 0;}
+.bl{display:flex;align-items:center;gap:6px;background:rgba(0,229,160,.06);border:1px solid rgba(0,229,160,.15);border-bottom:none;padding:5px 13px;font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--grn);}
+.bw{background:var(--cbg);border:1px solid rgba(0,229,160,.12);border-top:none;overflow-x:auto;}
+.bw pre{padding:13px 20px;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.8;color:#b2d8b2;white-space:pre;}
+.bw .p{color:var(--grn);}.bw .c{color:#546e7a;font-style:italic;}.bw .d{color:#dde4f0;}.bw .f{color:var(--acc);}.bw .v{color:#c3e88d;}
+.bx{padding:10px 14px;display:flex;gap:10px;margin:10px 0;}
+.bx-i{font-size:13px;flex-shrink:0;margin-top:1px;}.bx-b{flex:1;font-size:12px;line-height:1.7;}
+.bx-b strong{display:block;margin-bottom:1px;font-size:10px;text-transform:uppercase;letter-spacing:.07em;}
+.bx.danger{background:rgba(255,71,87,.05);border:1px solid rgba(255,71,87,.2);}.bx.danger .bx-b strong{color:var(--red);}.bx.danger .bx-b{color:#fca5a5;}
+.bx.warn{background:rgba(255,214,10,.05);border:1px solid rgba(255,214,10,.18);}.bx.warn .bx-b strong{color:var(--ylw);}.bx.warn .bx-b{color:#fef3c7;}
+.bx.info{background:rgba(0,200,240,.05);border:1px solid rgba(0,200,240,.15);}.bx.info .bx-b strong{color:var(--acc);}.bx.info .bx-b{color:#bae6fd;}
+.bx.ok{background:rgba(0,229,160,.05);border:1px solid rgba(0,229,160,.18);}.bx.ok .bx-b strong{color:var(--grn);}.bx.ok .bx-b{color:#a7f3d0;}
+.dl{background:rgba(0,229,160,.05);border:1px solid rgba(0,229,160,.18);padding:11px 15px;margin-top:15px;display:flex;gap:10px;align-items:flex-start;}
+.dl-i{font-size:16px;flex-shrink:0;}.dl-l{font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--grn);margin-bottom:3px;}
+.dl-t{font-size:12px;line-height:1.7;}
+ic{font-family:'JetBrains Mono',monospace;font-size:11px;background:rgba(255,255,255,.07);padding:1px 5px;border-radius:2px;color:var(--acc);}
+.tb{margin-bottom:44px;border:1px solid var(--bdr);overflow:hidden;}
+.th{display:flex;align-items:stretch;border-bottom:1px solid var(--bdr);}
+.tc{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 18px;min-width:68px;border-right:1px solid var(--bdr);font-family:'JetBrains Mono',monospace;}
+.tc .tn{font-size:22px;font-weight:800;line-height:1;}.tc .tl{font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);margin-top:2px;}
+.ti{flex:1;padding:16px 22px;}.ti h3{font-size:18px;font-weight:800;letter-spacing:-.01em;margin-bottom:4px;}
+.pi{font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 8px;border-radius:2px;text-transform:uppercase;letter-spacing:.07em;}
+.po{background:rgba(0,200,240,.08);border:1px solid rgba(0,200,240,.18);color:var(--acc);}
+.pd{background:rgba(255,255,255,.04);border:1px solid var(--bdr2);color:var(--mut2);}
+.tbody{padding:24px 26px;}
+.tg{font-size:13px;color:var(--mut2);line-height:1.8;margin-bottom:20px;border-left:2px solid var(--acc2);padding-left:12px;}
+.steps{margin-bottom:20px;}
+.sth{font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--acc2);margin-bottom:8px;}
+.sr{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--bdr);}
+.sr:last-child{border-bottom:none;}
+.snum{flex-shrink:0;width:22px;height:22px;background:var(--sur3);border:1px solid var(--bdr2);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--mut2);margin-top:1px;}
+.sr p{font-size:13px;line-height:1.7;}
+.kgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:1px;background:var(--bdr);border:1px solid var(--bdr);margin-top:20px;}
+.kc{background:var(--sur);padding:20px 24px;}
+.kn{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;letter-spacing:-.03em;line-height:1;margin-bottom:7px;background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.kt{font-size:13px;font-weight:700;margin-bottom:3px;}.kh{font-size:11px;color:var(--mut2);font-family:'JetBrains Mono',monospace;line-height:1.5;}
+.tl-w{position:relative;margin-top:20px;}
+.tl-w::before{content:'';position:absolute;left:21px;top:0;bottom:0;width:1px;background:var(--bdr2);}
+.tli{display:flex;gap:20px;margin-bottom:18px;}
+.tld{flex-shrink:0;width:43px;display:flex;justify-content:center;padding-top:15px;}
+.tldot{width:8px;height:8px;border-radius:50%;background:var(--acc);z-index:1;position:relative;flex-shrink:0;}
+.tlc{flex:1;background:var(--sur);border:1px solid var(--bdr);padding:14px 18px;}
+.tld-t{font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--acc);margin-bottom:2px;}
+.tl-ti{font-size:13px;font-weight:700;margin-bottom:2px;}.tl-wh{font-size:11px;color:var(--mut2);margin-bottom:5px;}
+.tl-li{list-style:none;}.tl-li li{font-size:11px;color:var(--mut2);display:flex;gap:5px;padding:1px 0;}.tl-li li::before{content:'›';color:var(--acc2);flex-shrink:0;}
+.ftbl{width:100%;border-collapse:collapse;margin-top:16px;}
+.ftbl th{font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);padding:8px 12px;text-align:left;background:var(--sur3);border:1px solid var(--bdr2);}
+.ftbl td{font-size:11px;padding:8px 12px;border:1px solid var(--bdr);vertical-align:top;}
+.ftbl tr:hover td{background:var(--sur);}
+.fp{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--acc);}
+footer{padding:32px 52px;border-top:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+.fb2{font-weight:800;font-size:13px;color:var(--acc);margin-bottom:3px;}.fi{font-size:11px;color:var(--mut);font-family:'JetBrains Mono',monospace;}
+.ftgs{display:flex;gap:5px;flex-wrap:wrap;}
+.tg2{font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 8px;border-radius:2px;}
+.tb2{background:rgba(0,85,255,.1);border:1px solid rgba(0,85,255,.2);color:#93c5fd;}
+.tg2{background:rgba(0,229,160,.1);border:1px solid rgba(0,229,160,.2);color:#6ee7b7;}
+@media(max-width:700px){.hero,.sec,footer,.nav{padding-left:16px;padding-right:16px;}.hero h1{font-size:36px;}.tbody{padding:16px;}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="nb">M3 v3 — Final</span>
+  <a href="#infra">Infrastructure</a>
+  <a href="#m2iface">M2 Interfaces</a>
+  <a href="#pipeline">Pipeline</a>
+  <a href="#task1">Task 1 FastAPI</a>
+  <a href="#task2">Task 2 Docker</a>
+  <a href="#task3">Task 3 Azure</a>
+  <a href="#task4">Task 4 Testing</a>
+  <a href="#task5">Task 5 Docs</a>
+  <a href="#verify">Verify</a>
+  <a href="#kpis">KPIs</a>
+  <a href="#timeline">Timeline</a>
+  <a href="#files">All Files</a>
+</nav>
+
+<section class="hero">
+  <div class="htag">eyouth × DEPI · Microsoft ML Track · Project 5 · M3 Complete v3 (Final)</div>
+  <h1>Milestone 3<br><span>Azure Deployment</span></h1>
+  <p class="hero-sub">Self-contained. Every file written in full. Every __init__.py. Every interface. Every command. No references to other documents. Read this once, implement it, and M3 is done.</p>
+  <div class="sts">
+    <div class="st"><span class="sl">Period</span><span class="sv">May 5 – May 25, 2026</span></div>
+    <div class="st"><span class="sl">Weeks</span><span class="sv">8 – 10</span></div>
+    <div class="st"><span class="sl">Deadline</span><span class="sv g">May 25, 2026</span></div>
+    <div class="st"><span class="sl">Total files</span><span class="sv a">38 files</span></div>
+    <div class="st"><span class="sl">Tasks</span><span class="sv">5</span></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 0 — INFRASTRUCTURE (ALL __init__ + shared files)
+═══════════════════════════════════════════════ -->
+<section class="sec" id="infra">
+  <div class="sh"><span class="sn">00</span><h2>Infrastructure — Create Everything First</h2></div>
+  <p class="intro">Before any M3 task code is written, every file in this section must exist. Do this in one commit on Day 1. These are shared across M3 and M4 — create them all now.</p>
+
+  <div class="bx warn"><span class="bx-i">⚠️</span><div class="bx-b"><strong>Why __init__.py files matter</strong>Python treats a directory as a package only if it contains an __init__.py file. Without them, every import like <ic>from src.pipeline import run_pipeline</ic> or <ic>from config.settings import settings</ic> fails with ModuleNotFoundError. Create all of them first, before writing any other code.</div></div>
+
+  <div class="bb">
+    <div class="bl">▶ Step 1 — Create ALL __init__.py files and empty directories at once</div>
+    <div class="bw"><pre><span class="c"># From project root — run this entire block at once</span>
+<span class="c"># Creates all package __init__.py files and required empty directories</span>
+
+<span class="p">$</span> <span class="d">mkdir -p</span> <span class="v">scripts dashboard mlops</span>
+
+<span class="p">$</span> <span class="d">touch</span> \
+    config/__init__.py \
+    src/__init__.py \
+    src/data/__init__.py \
+    src/rag/__init__.py \
+    src/classification/__init__.py \
+    src/evaluation/__init__.py \
+    mlops/__init__.py \
+    dashboard/__init__.py \
+    tests/__init__.py \
+    scripts/__init__.py
+
+<span class="c"># Create .gitkeep files for empty directories git would otherwise ignore</span>
+<span class="p">$</span> <span class="d">touch</span> \
+    data/embeddings/faiss_index/.gitkeep \
+    models/classifier/.gitkeep \
+    models/classifier/checkpoints/.gitkeep
+
+<span class="p">$</span> <span class="d">git add</span> <span class="v">.</span>
+<span class="p">$</span> <span class="d">git commit -m</span> <span class="v">"infra: all __init__.py files, directories, gitkeep files"</span></pre></div>
+  </div>
+
+  <div class="h3">All __init__.py files — content (all intentionally minimal)</div>
+  <div class="fb"><div class="fl"><span class="fn">config/__init__.py</span><span class="lg">python</span></div><div class="cw"><pre><span class="cm"># config package — provides centralised settings via config.settings</span></pre></div></div>
+  <div class="fb"><div class="fl"><span class="fn">src/__init__.py</span><span class="lg">python</span></div><div class="cw"><pre><span class="cm"># src package — root of all project source modules</span></pre></div></div>
+  <div class="fb"><div class="fl"><span class="fn">src/data/__init__.py</span><span class="lg">python</span></div><div class="cw"><pre><span class="cm"># src.data package — data loading, preprocessing, labelling</span></pre></div></div>
+  <div class="fb"><div class="fl"><span class="fn">src/rag/__init__.py</span><span class="lg">python</span></div><div class="cw"><pre><span class="cm"># src.rag package — embeddings, FAISS vector store, RAG chain</span></pre></div></div>
+  <div class="fb"><div class="fl"><span class="fn">src/classification/__init__.py</span><span class="lg">python</span></div><div class="cw"><pre><span class="cm"># src.classification package — DistilBERT fine-tuning and inference</span></pre></div></div>
+  <div class="fb"><div class="fl"><span class="fn">src/evaluation/__init__.py</span><span class="lg">python</span></div><div class="cw"><pre><span class="cm"># src.evaluation package — BLEU, ROUGE-L, F1 metric helpers</span></pre></div></div>
+  <div class="fb"><div class="fl"><span class="fn">mlops/__init__.py</span><span class="lg">python</span></div><div class="cw"><pre><span class="cm"># mlops package — MLflow tracking and model registry (M4)</span></pre></div></div>
+  <div class="fb"><div class="fl"><span class="fn">dashboard/__init__.py</span><span class="lg">python</span></div><div class="cw"><pre><span class="cm"># dashboard package — Streamlit KPI dashboard (M4)</span></pre></div></div>
+  <div class="fb"><div class="fl"><span class="fn">tests/__init__.py</span><span class="lg">python</span></div><div class="cw"><pre><span class="cm"># tests package — pytest discovers tests automatically</span></pre></div></div>
+  <div class="fb"><div class="fl"><span class="fn">scripts/__init__.py</span><span class="lg">python</span></div><div class="cw"><pre><span class="cm"># scripts package — utility scripts for testing and deployment</span></pre></div></div>
+
+  <div class="h3">config/settings.py — Centralised configuration</div>
+  <div class="fb"><div class="fl"><span class="fn">config/settings.py</span><span class="lg">python</span></div><div class="cw"><pre><span class="cm">"""
+Centralised configuration. Import this everywhere instead of hardcoding paths.
+Usage: from config.settings import settings
+"""</span>
+<span class="kw">import</span> os
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+
+ROOT = Path(__file__).parent.parent  <span class="cm"># project root</span>
+
+<span class="kw">class</span> <span class="tp">Settings</span>:
+    <span class="cm"># Data paths</span>
+    raw_data_path:      Path = ROOT / <span class="st2">"data"</span> / <span class="st2">"raw"</span> / <span class="st2">"pubmedqa_raw.csv"</span>
+    cleaned_data_path:  Path = ROOT / <span class="st2">"data"</span> / <span class="st2">"processed"</span> / <span class="st2">"pubmedqa_cleaned.csv"</span>
+    labelled_data_path: Path = ROOT / <span class="st2">"data"</span> / <span class="st2">"processed"</span> / <span class="st2">"pubmedqa_labelled.csv"</span>
+    faiss_index_path:   Path = ROOT / <span class="st2">"data"</span> / <span class="st2">"embeddings"</span> / <span class="st2">"faiss_index"</span>
+    classifier_path:    Path = ROOT / <span class="st2">"models"</span> / <span class="st2">"classifier"</span>
+    eval_csv_path:      Path = ROOT / <span class="st2">"reports"</span> / <span class="st2">"rag_evaluation_results.csv"</span>
+
+    <span class="cm"># Model names</span>
+    embedding_model:  str = <span class="st2">"sentence-transformers/all-MiniLM-L6-v2"</span>
+    classifier_model: str = <span class="st2">"distilbert-base-uncased"</span>
+    llm_model:        str = <span class="st2">"google/flan-t5-base"</span>
+
+    <span class="cm"># RAG hyperparameters</span>
+    retrieval_top_k: int = <span class="nm">5</span>
+    chunk_size:      int = <span class="nm">256</span>
+    chunk_overlap:   int = <span class="nm">32</span>
+    max_new_tokens:  int = <span class="nm">256</span>
+
+    <span class="cm"># API settings — read from environment with safe defaults</span>
+    api_port:    int = int(os.getenv(<span class="st2">"WEBSITE_PORT"</span>, <span class="st2">"8000"</span>))
+    api_workers: int = int(os.getenv(<span class="st2">"API_WORKERS"</span>, <span class="st2">"1"</span>))
+
+    <span class="cm"># Azure / credentials — always read from environment, never hardcoded</span>
+    azure_app_url:            str = os.getenv(<span class="st2">"AZURE_APP_URL"</span>,            <span class="st2">""</span>)
+    hf_token:                 str = os.getenv(<span class="st2">"HF_TOKEN"</span>,                 <span class="st2">""</span>)
+    azure_storage_connection: str = os.getenv(<span class="st2">"AZURE_STORAGE_CONNECTION"</span>, <span class="st2">""</span>)
+    azure_storage_container:  str = os.getenv(<span class="st2">"AZURE_STORAGE_CONTAINER"</span>,  <span class="st2">"model-weights"</span>)
+
+    <span class="cm"># Medical disclaimer — appended to EVERY /query response by the API layer</span>
+    disclaimer: str = (
+        <span class="st2">"This is an informational assistant only. "</span>
+        <span class="st2">"Always consult a qualified healthcare professional for medical decisions. "</span>
+        <span class="st2">"Do not use this information as a substitute for professional medical advice, "</span>
+        <span class="st2">"diagnosis, or treatment."</span>
+    )
+
+    <span class="cm"># Valid medical categories (must match classifier training labels)</span>
+    categories: list = [
+        <span class="st2">"Symptoms"</span>, <span class="st2">"Diagnosis"</span>, <span class="st2">"Treatment"</span>,
+        <span class="st2">"Medication"</span>, <span class="st2">"Prevention"</span>, <span class="st2">"General"</span>
+    ]
+
+settings = Settings()  <span class="cm"># single shared instance — import this everywhere</span></pre></div></div>
+
+  <div class="h3">setup.py — Required for pip install -e . and Docker</div>
+  <div class="fb"><div class="fl"><span class="fn">setup.py</span><span class="lg">python</span></div><div class="cw"><pre><span class="cm">"""
+Makes src/ installable as a Python package.
+The Dockerfile runs 'pip install -e .' using this file.
+Without it, 'from src.rag.pipeline import ...' only works from the project root.
+With it, that import works from anywhere — including inside Docker at /app/.
+"""</span>
+<span class="kw">from</span> setuptools <span class="kw">import</span> setup, find_packages
+
+setup(
+    name=<span class="st2">"healthcare-rag"</span>,
+    version=<span class="st2">"1.0.0"</span>,
+    description=<span class="st2">"Healthcare RAG-Powered Medical Q&A Assistant — eyouth × DEPI 2025"</span>,
+    packages=find_packages(exclude=[<span class="st2">"tests*"</span>, <span class="st2">"notebooks*"</span>, <span class="st2">"docs*"</span>]),
+    python_requires=<span class="st2">">=3.10"</span>,
+    install_requires=[],  <span class="cm"># all deps in requirements.txt</span>
+)</pre></div></div>
+
+  <div class="h3">Makefile — One-word shortcuts for every common operation</div>
+  <div class="fb"><div class="fl"><span class="fn">Makefile</span><span class="lg">makefile</span></div><div class="cw"><pre><span class="cm"># Healthcare RAG Makefile — run 'make help' to see all commands</span>
+APP_NAME   := healthcare-rag
+API_PORT   := 8000
+ACR_NAME   := healthcareragacr
+IMAGE_TAG  := v1
+.DEFAULT_GOAL := help
+
+.PHONY: install
+install:  <span class="cm">## Install all dependencies and project</span>
+	pip install --upgrade pip
+	pip install -r requirements.txt
+	pip install -e .
+	cp -n .env.example .env || true
+	@echo "Done. Edit .env with your credentials."
+
+.PHONY: test
+test:  <span class="cm">## Run all pytest tests</span>
+	pytest tests/ -v --tb=short
+
+.PHONY: test-api
+test-api:  <span class="cm">## Run API tests only (fast)</span>
+	pytest tests/test_api.py -v
+
+.PHONY: test-e2e
+test-e2e:  <span class="cm">## Run M4 end-to-end test</span>
+	python scripts/e2e_test.py
+
+.PHONY: run
+run:  <span class="cm">## Start FastAPI with hot-reload</span>
+	uvicorn api.main:app --reload --host 0.0.0.0 --port $(API_PORT)
+
+.PHONY: lint
+lint:  <span class="cm">## Run flake8 code style check</span>
+	flake8 src/ api/ mlops/ scripts/ --max-line-length 120 --exclude __pycache__
+
+.PHONY: docker-build
+docker-build:  <span class="cm">## Build Docker image</span>
+	docker build -f docker/Dockerfile -t $(APP_NAME):latest .
+
+.PHONY: docker-run
+docker-run:  <span class="cm">## Run Docker container locally</span>
+	docker run -p $(API_PORT):$(API_PORT) --env-file .env --rm $(APP_NAME):latest
+
+.PHONY: docker-push
+docker-push:  <span class="cm">## Push image to Azure Container Registry</span>
+	docker tag $(APP_NAME):latest $(ACR_NAME).azurecr.io/$(APP_NAME):$(IMAGE_TAG)
+	docker push $(ACR_NAME).azurecr.io/$(APP_NAME):$(IMAGE_TAG)
+
+.PHONY: mlflow
+mlflow:  <span class="cm">## Start MLflow UI (M4)</span>
+	mlflow ui --port 5000
+
+.PHONY: dashboard
+dashboard:  <span class="cm">## Start Streamlit dashboard (M4)</span>
+	streamlit run dashboard/app.py
+
+.PHONY: verify-faiss
+verify-faiss:  <span class="cm">## Check FAISS index health</span>
+	python scripts/verify_faiss.py
+
+.PHONY: latency-test
+latency-test:  <span class="cm">## Run 20-query latency test against live Azure API</span>
+	python scripts/latency_test.py
+
+.PHONY: clean
+clean:  <span class="cm">## Remove Python cache files</span>
+	find . -type f -name "*.pyc" -delete
+	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name ".pytest_cache" -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
+
+.PHONY: freeze
+freeze:  <span class="cm">## Pin current packages to requirements.txt</span>
+	pip freeze > requirements.txt
+
+.PHONY: help
+help:  <span class="cm">## Show available commands</span>
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
+		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-18s\033[0m %s\n", $$1, $$2}'</pre></div></div>
+
+  <div class="h3">.env.example — Complete template</div>
+  <div class="fb"><div class="fl"><span class="fn">.env.example</span><span class="lg">env</span></div><div class="cw"><pre><span class="cm"># Copy to .env and fill in values. NEVER commit .env to git.</span>
+
+<span class="cm"># API</span>
+WEBSITE_PORT=8000
+API_WORKERS=1
+
+<span class="cm"># HuggingFace token (get at huggingface.co/settings/tokens)</span>
+HF_TOKEN=hf_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+<span class="cm"># Azure deployment URL (filled after M3 Task 3 completes)</span>
+AZURE_APP_URL=https://healthcare-rag-app.azurewebsites.net
+
+<span class="cm"># Azure Blob Storage — only needed if model weights exceed 100MB (Option A)
+# Leave blank if using Git LFS (Option B)</span>
+AZURE_STORAGE_CONNECTION=DefaultEndpointsProtocol=https;AccountName=...;AccountKey=...
+AZURE_STORAGE_CONTAINER=model-weights
+
+<span class="cm"># MLflow (used in M4)</span>
+MLFLOW_TRACKING_URI=./mlruns</pre></div></div>
+
+  <div class="h3">.gitignore — Complete file including model weight protection</div>
+  <div class="fb"><div class="fl"><span class="fn">.gitignore</span><span class="lg">gitignore</span></div><div class="cw"><pre><span class="cm"># Environment — NEVER commit</span>
+.env
+.env.*
+
+<span class="cm"># Model weight files — use Git LFS or Azure Blob instead</span>
+*.bin
+*.pt
+*.pth
+*.onnx
+*.safetensors
+
+<span class="cm"># FAISS binary index files (large)</span>
+data/embeddings/faiss_index/*.faiss
+data/embeddings/faiss_index/*.pkl
+
+<span class="cm"># Model checkpoints folder</span>
+models/classifier/checkpoints/
+models/classifier/*.bin
+models/classifier/*.safetensors
+
+<span class="cm"># MLflow tracking data (local)</span>
+mlruns/
+
+<span class="cm"># Python</span>
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.Python
+
+<span class="cm"># Jupyter</span>
+.ipynb_checkpoints/
+
+<span class="cm"># IDE</span>
+.idea/
+.vscode/
+*.iml
+
+<span class="cm"># OS</span>
+.DS_Store
+Thumbs.db
+
+<span class="cm"># Testing</span>
+.pytest_cache/
+htmlcov/
+.coverage</pre></div></div>
+
+  <div class="h3">requirements.txt — All packages pinned (M1 through M3)</div>
+  <div class="fb"><div class="fl"><span class="fn">requirements.txt</span><span class="lg">text</span></div><div class="cw"><pre><span class="cm"># Run 'make freeze' after any pip install to update this file</span>
+<span class="cm"># M1/M2 dependencies</span>
+datasets==2.18.0
+transformers==4.40.0
+torch==2.2.2
+sentence-transformers==2.7.0
+faiss-cpu==1.8.0
+langchain==0.1.20
+langchain-community==0.0.38
+pandas==2.2.1
+numpy==1.26.4
+scikit-learn==1.4.2
+nltk==3.8.1
+evaluate==0.4.1
+langdetect==1.0.9
+<span class="cm"># M3 additions</span>
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+pydantic==2.7.1
+httpx==0.27.0
+requests==2.31.0
+pytest==8.2.0
+pytest-asyncio==0.23.6
+python-dotenv==1.0.1
+azure-storage-blob==12.19.0
+flake8==7.0.0
+<span class="cm"># M4 additions (install now to avoid breaking M4 Day 1)</span>
+mlflow==2.12.2
+streamlit==1.33.0
+plotly==5.22.0</pre></div></div>
+
+  <div class="h3">README.md — Project skeleton (finalized in M5)</div>
+  <div class="fb"><div class="fl"><span class="fn">README.md</span><span class="lg">markdown</span></div><div class="cw"><pre><span class="cm"># Healthcare RAG-Powered Medical Q&A Assistant</span>
+
+**eyouth × DEPI 2025 | Microsoft Machine Learning Track | Project 5**
+
+A production-grade RAG system that answers medical questions by grounding
+responses in verified PubMedQA peer-reviewed knowledge.
+
+## Quick Start
+
+```bash
+git clone https://github.com/AbdooMatrix/Healthcare-RAG-Powered-Medical-QA-Assistant.git
+cd Healthcare-RAG-Powered-Medical-QA-Assistant
+make install          # install all dependencies
+make run              # start API at http://localhost:8000/docs
+make dashboard        # start Streamlit dashboard at http://localhost:8501
+mlflow ui --port 5000 # view MLflow experiments at http://localhost:5000
+```
+
+## Live API
+**URL:** https://healthcare-rag-app.azurewebsites.net
+- `POST /query` — ask a medical question
+- `GET /health` — health check
+- `GET /docs`   — Swagger UI
+
+## Team
+| Name | Role |
+|---|---|
+| Abdelrahman Mostafa Sayed (Matrix) | Team Leader, RAG Pipeline |
+| Ziad Ahmed El-Nady | ML Engineer, FAISS + Embeddings |
+| Youssef George Youssef | Data Engineer, FastAPI |
+| Doha Khaled Mahmoud | Backend & Deployment, Docker |
+| Eman Khalid Ismail | MLOps & Dashboard |
+
+## GitHub
+https://github.com/AbdooMatrix/Healthcare-RAG-Powered-Medical-QA-Assistant
+
+*This README will be finalized in M5 Task 3.*</pre></div></div>
+
+  <div class="bb">
+    <div class="bl">▶ Step 2 — Install everything and verify</div>
+    <div class="bw"><pre><span class="c"># From project root in a fresh virtual environment</span>
+<span class="p">$</span> <span class="d">python -m venv .venv</span>
+<span class="p">$</span> <span class="d">source .venv/bin/activate</span>   <span class="c"># Linux/macOS</span>
+<span class="c"># .venv\Scripts\activate      # Windows</span>
+
+<span class="p">$</span> <span class="d">make install</span>
+
+<span class="c"># Verify all package imports work</span>
+<span class="p">$</span> <span class="d">python -c</span> <span class="v">"
+import config, src, src.data, src.rag
+import src.classification, src.evaluation
+import mlops, tests, scripts
+from config.settings import settings
+print('All imports OK. API port:', settings.api_port)
+"</span>
+<span class="c"># Expected: All imports OK. API port: 8000</span></pre></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 1 — M2 INTERFACES
+═══════════════════════════════════════════════ -->
+<section class="sec" id="m2iface">
+  <div class="sh"><span class="sn">01</span><h2>M2 Interfaces — What src/pipeline.py Calls</h2></div>
+  <p class="intro">src/pipeline.py calls three M2 classes. These are the exact method signatures they must expose. Your M2 implementations may already match — if so, nothing to change. If your method names differ, update either the M2 file or src/pipeline.py to match.</p>
+
+  <div class="h3">src/classification/classifier.py — Required interface</div>
+  <div class="fb"><div class="fl"><span class="fn">src/classification/classifier.py — interface (M2 T3, Owner: Doha)</span><span class="lg">python</span></div><div class="cw"><pre><span class="cm">"""
+DistilBERT medical query classifier.
+Written in M2 Task 3 by Doha. This shows the interface src/pipeline.py expects.
+If your M2 implementation uses different method names, update to match.
+
+src/pipeline.py calls:
+    from src.classification.classifier import MedicalClassifier
+    _clf = MedicalClassifier.load(str(settings.classifier_path))
+    category = _clf.predict(question_text)
+"""</span>
+<span class="kw">from</span> __future__ <span class="kw">import</span> annotations
+<span class="kw">from</span> config.settings <span class="kw">import</span> settings
+
+
+<span class="kw">class</span> <span class="tp">MedicalClassifier</span>:
+    CATEGORIES = settings.categories  <span class="cm"># ["Symptoms","Diagnosis","Treatment","Medication","Prevention","General"]</span>
+
+    <span class="kw">def</span> <span class="fn2">__init__</span>(self, model, tokenizer):
+        self.model = model
+        self.tokenizer = tokenizer
+
+    <span class="fn2">@classmethod</span>
+    <span class="kw">def</span> <span class="fn2">load</span>(cls, model_path: str) -> <span class="st2">"MedicalClassifier"</span>:
+        <span class="st2">"""Load fine-tuned DistilBERT from models/classifier/ directory."""</span>
+        <span class="kw">from</span> transformers <span class="kw">import</span> AutoTokenizer, AutoModelForSequenceClassification
+        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        model = AutoModelForSequenceClassification.from_pretrained(model_path)
+        model.eval()
+        <span class="kw">return</span> cls(model=model, tokenizer=tokenizer)
+
+    <span class="kw">def</span> <span class="fn2">predict</span>(self, text: str) -> str:
+        <span class="st2">"""Classify text into one of 6 medical categories. Returns category string."""</span>
+        <span class="kw">import</span> torch
+        inputs = self.tokenizer(text, return_tensors=<span class="st2">"pt"</span>, truncation=<span class="kw">True</span>, max_length=<span class="nm">512</span>)
+        <span class="kw">with</span> torch.no_grad():
+            idx = self.model(**inputs).logits.argmax(dim=-<span class="nm">1</span>).item()
+        <span class="kw">return</span> self.CATEGORIES[idx] <span class="kw">if</span> <span class="nm">0</span> <= idx < <span class="fn2">len</span>(self.CATEGORIES) <span class="kw">else</span> <span class="st2">"General"</span></pre></div></div>
+
+  <div class="h3">src/rag/vectorstore.py — Required interface</div>
+  <div class="fb"><div class="fl"><span class="fn">src/rag/vectorstore.py — interface (M2 T1, Owner: Ziad)</span><span class="lg">python</span></div><div class="cw"><pre><span class="cm">"""
+FAISS vector store for PubMedQA embeddings.
+Written in M2 Task 1 by Ziad. This shows the interface src/pipeline.py expects.
+
+src/pipeline.py calls:
+    from src.rag.vectorstore import FAISSVectorStore
+    _vs = FAISSVectorStore.load(str(settings.faiss_index_path))
+    results = _vs.search(question, k=5)
+    # results: List[Tuple[chunk_id_str, chunk_text_str]]
+"""</span>
+<span class="kw">from</span> __future__ <span class="kw">import</span> annotations
+<span class="kw">from</span> typing <span class="kw">import</span> List, Tuple
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+<span class="kw">import</span> pickle
+
+
+<span class="kw">class</span> <span class="tp">FAISSVectorStore</span>:
+    <span class="kw">def</span> <span class="fn2">__init__</span>(self, index, chunk_mapping: dict, embedding_model):
+        self.index = index
+        self.chunk_mapping = chunk_mapping
+        self.embedding_model = embedding_model
+
+    <span class="fn2">@classmethod</span>
+    <span class="kw">def</span> <span class="fn2">load</span>(cls, index_dir: str) -> <span class="st2">"FAISSVectorStore"</span>:
+        <span class="st2">"""
+        Load FAISS index from data/embeddings/faiss_index/ directory.
+        Directory must contain:
+          - pubmedqa_index_flatl2.faiss
+          - chunk_mapping.pkl   (dict: {int_id -> (chunk_id_str, chunk_text_str)})
+        """</span>
+        <span class="kw">import</span> faiss
+        <span class="kw">from</span> sentence_transformers <span class="kw">import</span> SentenceTransformer
+        <span class="kw">from</span> config.settings <span class="kw">import</span> settings
+
+        p = Path(index_dir)
+        index = faiss.read_index(str(p / <span class="st2">"pubmedqa_index_flatl2.faiss"</span>))
+        <span class="kw">with</span> <span class="fn2">open</span>(p / <span class="st2">"chunk_mapping.pkl"</span>, <span class="st2">"rb"</span>) <span class="kw">as</span> f:
+            chunk_mapping = pickle.load(f)
+        embedding_model = SentenceTransformer(settings.embedding_model)
+        <span class="kw">return</span> cls(index=index, chunk_mapping=chunk_mapping, embedding_model=embedding_model)
+
+    <span class="kw">def</span> <span class="fn2">search</span>(self, query: str, k: int = <span class="nm">5</span>) -> List[Tuple[str, str]]:
+        <span class="st2">"""
+        Search for top-k relevant chunks.
+        Returns: List of (chunk_id: str, chunk_text: str) tuples, ordered by relevance.
+        """</span>
+        q_emb = self.embedding_model.encode([query], convert_to_numpy=<span class="kw">True</span>, normalize_embeddings=<span class="kw">True</span>)
+        _, indices = self.index.search(q_emb, k)
+        results = []
+        <span class="kw">for</span> idx <span class="kw">in</span> indices[<span class="nm">0</span>]:
+            <span class="kw">if</span> idx == -<span class="nm">1</span> <span class="kw">or</span> idx <span class="kw">not in</span> self.chunk_mapping:
+                <span class="kw">continue</span>
+            item = self.chunk_mapping[idx]
+            <span class="kw">if isinstance</span>(item, tuple):
+                results.append(item)
+            <span class="kw">else</span>:
+                results.append((f<span class="st2">f"chunk_{idx:04d}"</span>, str(item)))
+        <span class="kw">return</span> results</pre></div></div>
+
+  <div class="h3">src/rag/pipeline.py — Required interface</div>
+  <div class="fb"><div class="fl"><span class="fn">src/rag/pipeline.py — interface (M2 T2, Owner: Youssef)</span><span class="lg">python</span></div><div class="cw"><pre><span class="cm">"""
+LangChain RAG generation pipeline.
+Written in M2 Task 2 by Youssef. This shows the interface src/pipeline.py expects.
+
+src/pipeline.py calls:
+    from src.rag.pipeline import build_rag_chain
+    _chain = build_rag_chain(vectorstore, top_k, llm_model, max_new_tokens)
+    answer = _chain.generate(question, context_list, category)
+
+NOTE: The disclaimer is NOT added here — it is added by api/routes/query.py.
+"""</span>
+<span class="kw">from</span> __future__ <span class="kw">import</span> annotations
+<span class="kw">from</span> typing <span class="kw">import</span> List, Any
+<span class="kw">import</span> types
+
+
+<span class="kw">class</span> <span class="tp">RAGChain</span>:
+    <span class="kw">def</span> <span class="fn2">__init__</span>(self, llm, top_k: int, max_new_tokens: int):
+        self.llm = llm
+        self.top_k = top_k
+        self.max_new_tokens = max_new_tokens
+
+    <span class="kw">def</span> <span class="fn2">generate</span>(self, question: str, context: List[str], category: str) -> str:
+        <span class="st2">"""
+        Generate answer from question + retrieved context chunks.
+        Args:
+            question: original medical question string
+            context:  list of retrieved chunk text strings (from FAISS)
+            category: predicted category string (from classifier)
+        Returns:
+            str — generated answer text. No disclaimer added here.
+        """</span>
+        context_text = <span class="st2">"\n\n"</span>.join(context[:<span class="nm">5</span>])
+        prompt = (
+            f<span class="st2">f"You are a medical information assistant. Answer this {category} question "</span>
+            f<span class="st2">f"based only on the provided context.\n\nContext:\n{context_text}\n\n"</span>
+            f<span class="st2">f"Question: {question}\n\nAnswer:"</span>
+        )
+        inputs = self.llm.tokenizer(prompt, return_tensors=<span class="st2">"pt"</span>, max_length=<span class="nm">512</span>, truncation=<span class="kw">True</span>)
+        outputs = self.llm.model.generate(**inputs, max_new_tokens=self.max_new_tokens, do_sample=<span class="kw">False</span>)
+        <span class="kw">return</span> self.llm.tokenizer.decode(outputs[<span class="nm">0</span>], skip_special_tokens=<span class="kw">True</span>).strip()
+
+
+<span class="kw">def</span> <span class="fn2">build_rag_chain</span>(vectorstore: Any, top_k: int = <span class="nm">5</span>,
+                    llm_model: str = <span class="st2">"google/flan-t5-base"</span>,
+                    max_new_tokens: int = <span class="nm">256</span>) -> RAGChain:
+    <span class="st2">"""Build and return a RAGChain. Called once at API startup."""</span>
+    <span class="kw">from</span> transformers <span class="kw">import</span> AutoTokenizer, AutoModelForSeq2SeqLM
+    tokenizer = AutoTokenizer.from_pretrained(llm_model)
+    model = AutoModelForSeq2SeqLM.from_pretrained(llm_model)
+    model.eval()
+    llm = types.SimpleNamespace(tokenizer=tokenizer, model=model)
+    <span class="kw">return</span> RAGChain(llm=llm, top_k=top_k, max_new_tokens=max_new_tokens)</pre></div></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION 2 — PIPELINE + DOWNLOAD SCRIPT
+═══════════════════════════════════════════════ -->
+<section class="sec" id="pipeline">
+  <div class="sh"><span class="sn">02</span><h2>src/pipeline.py &amp; Model Download Script</h2></div>
+
+  <div class="h3">src/pipeline.py — Integrated M2 pipeline (M2 T5, Owner: Abdelrahman)</div>
+  <div class="fb"><div class="fl"><span class="fn">src/pipeline.py</span><span class="lg">python</span></div><div class="cw"><pre><span class="cm">"""
+Integrated M2 pipeline — the single function the API calls.
+Built in M2 Task 5 by Abdelrahman.
+
+Returns exactly: {"answer": str, "category": str, "sources": List[str]}
+The disclaimer is NOT here — it is injected by api/routes/query.py.
+
+Models are loaded lazily (once, on first request) to avoid slow startup.
+"""</span>
+<span class="kw">from</span> __future__ <span class="kw">import</span> annotations
+<span class="kw">from</span> typing <span class="kw">import</span> Dict, Any
+<span class="kw">import</span> logging
+<span class="kw">from</span> config.settings <span class="kw">import</span> settings
+
+logger = logging.getLogger(<span class="st2">"pipeline"</span>)
+
+<span class="cm"># Module-level cache — loaded once, reused on every request</span>
+_classifier  = <span class="kw">None</span>
+_rag_chain   = <span class="kw">None</span>
+_vectorstore = <span class="kw">None</span>
+
+
+<span class="kw">def</span> <span class="fn2">_load_models</span>():
+    <span class="st2">"""Load all ML models on first call. Thread-safe via Python's GIL."""</span>
+    <span class="kw">global</span> _classifier, _rag_chain, _vectorstore
+    <span class="kw">if</span> _classifier <span class="kw">is not None</span>:
+        <span class="kw">return</span>
+
+    logger.info(<span class="st2">"Loading models — this takes 10-30s on first request..."</span>)
+
+    <span class="kw">from</span> src.classification.classifier <span class="kw">import</span> MedicalClassifier
+    _classifier = MedicalClassifier.load(str(settings.classifier_path))
+    logger.info(<span class="st2">"✓ Classifier loaded"</span>)
+
+    <span class="kw">from</span> src.rag.vectorstore <span class="kw">import</span> FAISSVectorStore
+    _vectorstore = FAISSVectorStore.load(str(settings.faiss_index_path))
+    logger.info(<span class="st2">"✓ FAISS index loaded"</span>)
+
+    <span class="kw">from</span> src.rag.pipeline <span class="kw">import</span> build_rag_chain
+    _rag_chain = build_rag_chain(
+        vectorstore=_vectorstore,
+        top_k=settings.retrieval_top_k,
+        llm_model=settings.llm_model,
+        max_new_tokens=settings.max_new_tokens
+    )
+    logger.info(<span class="st2">"✓ RAG chain ready"</span>)
+
+
+<span class="kw">def</span> <span class="fn2">run_pipeline</span>(question: str) -> Dict[str, Any]:
+    <span class="st2">"""
+    Run the full integrated pipeline on a medical question.
+
+    Args:
+        question: plain text medical question from the API request
+
+    Returns:
+        {"answer": str, "category": str, "sources": List[str]}
+        — the API layer adds the disclaimer on top of this
+
+    Called on every POST /query request.
+    """</span>
+    _load_models()
+
+    category = _classifier.predict(question)
+    <span class="kw">if</span> category <span class="kw">not in</span> settings.categories:
+        category = <span class="st2">"General"</span>
+
+    retrieved = _vectorstore.search(question, k=settings.retrieval_top_k)
+    source_ids    = [r[<span class="nm">0</span>] <span class="kw">for</span> r <span class="kw">in</span> retrieved]
+    context_texts = [r[<span class="nm">1</span>] <span class="kw">for</span> r <span class="kw">in</span> retrieved]
+
+    answer = _rag_chain.generate(question=question, context=context_texts, category=category)
+
+    <span class="kw">return</span> {
+        <span class="st2">"answer"</span>:   answer,
+        <span class="st2">"category"</span>: category,
+        <span class="st2">"sources"</span>:  source_ids,
+    }</pre></div></div>
+
+  <div class="h3">scripts/download_models.py — For teams using Azure Blob storage for weights</div>
+  <div class="fb"><div class="fl"><span class="fn">scripts/download_models.py</span><span class="lg">python</span></div><div class="cw"><pre><span class="cm">"""
+Download model weights from Azure Blob Storage.
+Only needed if weights exceed GitHub's 100MB limit.
+
+Usage:
+    python scripts/download_models.py        # downloads if needed
+    # OR add to Dockerfile: RUN python scripts/download_models.py
+
+If AZURE_STORAGE_CONNECTION is not set, prints a message and exits cleanly.
+"""</span>
+<span class="kw">import</span> os, logging, sys
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+
+logging.basicConfig(level=logging.INFO, format=<span class="st2">"%(asctime)s | %(message)s"</span>)
+logger = logging.getLogger(<span class="st2">"download_models"</span>)
+
+FILES = {
+    <span class="st2">"classifier/config.json"</span>:             <span class="st2">"models/classifier/config.json"</span>,
+    <span class="st2">"classifier/pytorch_model.bin"</span>:        <span class="st2">"models/classifier/pytorch_model.bin"</span>,
+    <span class="st2">"classifier/tokenizer_config.json"</span>:    <span class="st2">"models/classifier/tokenizer_config.json"</span>,
+    <span class="st2">"classifier/vocab.txt"</span>:                <span class="st2">"models/classifier/vocab.txt"</span>,
+    <span class="st2">"faiss_index/pubmedqa_index_flatl2.faiss"</span>: <span class="st2">"data/embeddings/faiss_index/pubmedqa_index_flatl2.faiss"</span>,
+    <span class="st2">"faiss_index/chunk_mapping.pkl"</span>:       <span class="st2">"data/embeddings/faiss_index/chunk_mapping.pkl"</span>,
+}
+
+<span class="kw">def</span> <span class="fn2">main</span>():
+    conn = os.getenv(<span class="st2">"AZURE_STORAGE_CONNECTION"</span>)
+    <span class="kw">if not</span> conn:
+        logger.info(<span class="st2">"AZURE_STORAGE_CONNECTION not set — using Git LFS or local files"</span>)
+        <span class="kw">return</span>
+    <span class="kw">try</span>:
+        <span class="kw">from</span> azure.storage.blob <span class="kw">import</span> BlobServiceClient
+    <span class="kw">except</span> ImportError:
+        logger.error(<span class="st2">"pip install azure-storage-blob"</span>); sys.exit(<span class="nm">1</span>)
+
+    container = os.getenv(<span class="st2">"AZURE_STORAGE_CONTAINER"</span>, <span class="st2">"model-weights"</span>)
+    cc = BlobServiceClient.from_connection_string(conn).get_container_client(container)
+
+    <span class="kw">for</span> blob_name, local_path <span class="kw">in</span> FILES.items():
+        lp = Path(local_path)
+        <span class="kw">if</span> lp.exists():
+            logger.info(f<span class="st2">f"Already exists: {local_path}"</span>); <span class="kw">continue</span>
+        lp.parent.mkdir(parents=<span class="kw">True</span>, exist_ok=<span class="kw">True</span>)
+        logger.info(f<span class="st2">f"Downloading: {blob_name}"</span>)
+        <span class="kw">with</span> <span class="fn2">open</span>(lp, <span class="st2">"wb"</span>) <span class="kw">as</span> f:
+            f.write(cc.get_blob_client(blob_name).download_blob().readall())
+        logger.info(f<span class="st2">f"✓ {local_path} ({lp.stat().st_size/1024/1024:.1f}MB)"</span>)
+    logger.info(<span class="st2">"✓ All model files ready"</span>)
+
+<span class="kw">if</span> __name__ == <span class="st2">"__main__"</span>:
+    main()</pre></div></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     TASK 1 — FastAPI
+═══════════════════════════════════════════════ -->
+<section class="sec" id="task1">
+  <div class="sh"><span class="sn">03</span><h2>Task 1 — FastAPI Application Development</h2></div>
+  <div class="tb">
+    <div class="th">
+      <div class="tc" style="color:var(--acc)"><span class="tn">T1</span><span class="tl">Task</span></div>
+      <div class="ti"><h3>FastAPI Application Development</h3><div><span class="pi po">Owner: Youssef George Youssef</span> <span class="pi pd">Days 1–5</span></div></div>
+    </div>
+    <div class="tbody">
+      <p class="tg">Build 6 files that wrap src/pipeline.py into a REST API. Every /query response MUST include the disclaimer field — this is a project requirement. Latency middleware logs every request.</p>
+
+      <div class="steps"><div class="sth">Steps</div>
+        <div class="sr"><span class="snum">1</span><p>Create all 6 files in this order: schemas → routes → main. Schemas define the data shape everything else depends on.</p></div>
+        <div class="sr"><span class="snum">2</span><p>Test: <ic>uvicorn api.main:app --reload --port 8000</ic> → open <ic>http://localhost:8000/docs</ic> → send 10 test queries via Swagger UI.</p></div>
+        <div class="sr"><span class="snum">3</span><p>Run: <ic>pytest tests/test_api.py -v</ic> → all 9 tests must pass before Docker work begins.</p></div>
+      </div>
+
+      <div class="h3">api/__init__.py</div>
+      <div class="fb"><div class="fl"><span class="fn">api/__init__.py</span><span class="lg">python</span></div><div class="cw"><pre><span class="cm"># api package</span></pre></div></div>
+
+      <div class="h3">api/schemas/__init__.py</div>
+      <div class="fb"><div class="fl"><span class="fn">api/schemas/__init__.py</span><span class="lg">python</span></div><div class="cw"><pre><span class="cm"># api.schemas package</span></pre></div></div>
+
+      <div class="h3">api/schemas/request.py</div>
+      <div class="fb"><div class="fl"><span class="fn">api/schemas/request.py</span><span class="lg">python</span></div><div class="cw"><pre><span class="kw">from</span> pydantic <span class="kw">import</span> BaseModel, Field
+<span class="kw">from</span> typing <span class="kw">import</span> List, Optional
+
+
+<span class="kw">class</span> <span class="tp">QueryRequest</span>(BaseModel):
+    question: str = Field(..., min_length=<span class="nm">5</span>, max_length=<span class="nm">1000</span>,
+                         example=<span class="st2">"What are the symptoms of type 2 diabetes?"</span>)
+
+
+<span class="kw">class</span> <span class="tp">QueryResponse</span>(BaseModel):
+    answer:            str
+    category:          str
+    retrieved_sources: List[str]
+    disclaimer:        str   <span class="cm"># ALWAYS present — injected from config.settings.disclaimer</span>
+
+
+<span class="kw">class</span> <span class="tp">HealthResponse</span>(BaseModel):
+    status:       str           = <span class="st2">"ok"</span>
+    model_loaded: Optional[bool] = <span class="kw">None</span></pre></div></div>
+
+      <div class="h3">api/routes/__init__.py — RELATIVE import (NOT absolute — avoids circular import)</div>
+      <div class="bx danger"><span class="bx-i">🔴</span><div class="bx-b"><strong>Must use relative import</strong>Use <ic>from . import query</ic> NOT <ic>from api.routes import query</ic>. The absolute import causes a circular ImportError. This is the most common M3 bug.</div></div>
+      <div class="fb"><div class="fl"><span class="fn">api/routes/__init__.py</span><span class="lg">python</span></div><div class="cw"><pre><span class="cm"># api.routes package — uses RELATIVE import to avoid circular import</span>
+<span class="kw">from</span> . <span class="kw">import</span> query   <span class="cm"># correct: relative import</span>
+__all__ = [<span class="st2">"query"</span>]</pre></div></div>
+
+      <div class="h3">api/routes/query.py</div>
+      <div class="fb"><div class="fl"><span class="fn">api/routes/query.py</span><span class="lg">python</span></div><div class="cw"><pre><span class="kw">import</span> logging
+<span class="kw">from</span> fastapi <span class="kw">import</span> APIRouter, HTTPException
+<span class="kw">from</span> api.schemas.request <span class="kw">import</span> QueryRequest, QueryResponse, HealthResponse
+<span class="kw">from</span> config.settings <span class="kw">import</span> settings
+<span class="kw">from</span> src.pipeline <span class="kw">import</span> run_pipeline
+
+logger = logging.getLogger(<span class="st2">"healthcare_rag.routes"</span>)
+router = APIRouter()
+
+
+<span class="fn2">@router.post</span>(<span class="st2">"/query"</span>, response_model=QueryResponse)
+<span class="kw">async def</span> <span class="fn2">handle_query</span>(request: QueryRequest) -> QueryResponse:
+    <span class="st2">"""Accept a medical question, run the RAG pipeline, return grounded answer + disclaimer."""</span>
+    logger.info(f<span class="st2">f"Query: {request.question[:80]}"</span>)
+    <span class="kw">try</span>:
+        result = run_pipeline(request.question)
+        <span class="kw">return</span> QueryResponse(
+            answer=result.get(<span class="st2">"answer"</span>, <span class="st2">"Unable to generate a response."</span>),
+            category=result.get(<span class="st2">"category"</span>, <span class="st2">"General"</span>),
+            retrieved_sources=result.get(<span class="st2">"sources"</span>, []),
+            disclaimer=settings.disclaimer  <span class="cm"># always from config — never hardcoded</span>
+        )
+    <span class="kw">except</span> Exception <span class="kw">as</span> e:
+        logger.error(f<span class="st2">f"Pipeline error: {e}"</span>, exc_info=<span class="kw">True</span>)
+        <span class="kw">raise</span> HTTPException(status_code=<span class="nm">500</span>, detail=f<span class="st2">f"Pipeline error: {str(e)}"</span>)
+
+
+<span class="fn2">@router.get</span>(<span class="st2">"/health"</span>, response_model=HealthResponse)
+<span class="kw">async def</span> <span class="fn2">health_check</span>() -> HealthResponse:
+    <span class="st2">"""Azure App Service health probe — must return 200 quickly. Never runs the pipeline."""</span>
+    <span class="kw">return</span> HealthResponse(status=<span class="st2">"ok"</span>, model_loaded=<span class="kw">True</span>)</pre></div></div>
+
+      <div class="h3">api/main.py</div>
+      <div class="fb"><div class="fl"><span class="fn">api/main.py</span><span class="lg">python</span></div><div class="cw"><pre><span class="kw">import</span> time, logging, sys
+<span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI, Request
+<span class="kw">from</span> fastapi.responses <span class="kw">import</span> JSONResponse
+<span class="kw">from</span> api.routes <span class="kw">import</span> query
+
+logging.basicConfig(
+    level=logging.INFO,
+    format=<span class="st2">"%(asctime)s | %(levelname)s | %(name)s | %(message)s"</span>,
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
+logger = logging.getLogger(<span class="st2">"healthcare_rag"</span>)
+
+app = FastAPI(
+    title=<span class="st2">"Healthcare RAG Medical Q&A API"</span>,
+    version=<span class="st2">"1.0.0"</span>,
+    description=<span class="st2">"RAG-powered medical Q&A — every response includes a mandatory disclaimer."</span>
+)
+
+<span class="fn2">@app.middleware</span>(<span class="st2">"http"</span>)
+<span class="kw">async def</span> <span class="fn2">latency_middleware</span>(request: Request, call_next):
+    <span class="st2">"""Logs latency of every request. Injects X-Response-Time-Ms header."""</span>
+    start = time.perf_counter()
+    response = <span class="kw">await</span> call_next(request)
+    ms = round((time.perf_counter() - start) * <span class="nm">1000</span>, <span class="nm">2</span>)
+    response.headers[<span class="st2">"X-Response-Time-Ms"</span>] = str(ms)
+    logger.info(f<span class="st2">f"{request.method} {request.url.path} → {response.status_code} | {ms}ms"</span>)
+    <span class="kw">return</span> response
+
+<span class="fn2">@app.exception_handler</span>(Exception)
+<span class="kw">async def</span> <span class="fn2">global_exception_handler</span>(request: Request, exc: Exception):
+    logger.error(f<span class="st2">f"Unhandled: {exc}"</span>, exc_info=<span class="kw">True</span>)
+    <span class="kw">return</span> JSONResponse(status_code=<span class="nm">500</span>, content={<span class="st2">"error"</span>: str(exc)})
+
+app.include_router(query.router)
+
+<span class="fn2">@app.get</span>(<span class="st2">"/"</span>, include_in_schema=<span class="kw">False</span>)
+<span class="kw">async def</span> <span class="fn2">root</span>():
+    <span class="kw">return</span> {<span class="st2">"project"</span>: <span class="st2">"Healthcare RAG"</span>, <span class="st2">"docs"</span>: <span class="st2">"/docs"</span>, <span class="st2">"health"</span>: <span class="st2">"/health"</span>}
+
+<span class="fn2">@app.on_event</span>(<span class="st2">"startup"</span>)
+<span class="kw">async def</span> <span class="fn2">startup</span>():
+    logger.info(<span class="st2">"Healthcare RAG API starting. Docs: /docs | Health: /health"</span>)</pre></div></div>
+
+      <div class="h3">tests/conftest.py — Shared fixtures</div>
+      <div class="fb"><div class="fl"><span class="fn">tests/conftest.py</span><span class="lg">python</span></div><div class="cw"><pre><span class="cm">"""Shared pytest fixtures. Auto-loaded by pytest before any test file."""</span>
+<span class="kw">import</span> pytest
+<span class="kw">from</span> unittest.mock <span class="kw">import</span> patch
+<span class="kw">from</span> fastapi.testclient <span class="kw">import</span> TestClient
+<span class="kw">from</span> api.main <span class="kw">import</span> app
+
+MOCK_RESULT = {<span class="st2">"answer"</span>: <span class="st2">"Mock answer."</span>, <span class="st2">"category"</span>: <span class="st2">"Symptoms"</span>, <span class="st2">"sources"</span>: [<span class="st2">"chunk_001"</span>]}
+
+<span class="fn2">@pytest.fixture</span>
+<span class="kw">def</span> <span class="fn2">api_client</span>():
+    <span class="st2">"""FastAPI test client — no server needed."""</span>
+    <span class="kw">return</span> TestClient(app)
+
+<span class="fn2">@pytest.fixture</span>
+<span class="kw">def</span> <span class="fn2">mock_pipeline</span>():
+    <span class="st2">"""Patches run_pipeline with standard mock result. No ML models loaded."""</span>
+    <span class="kw">with</span> patch(<span class="st2">"api.routes.query.run_pipeline"</span>) <span class="kw">as</span> mock:
+        mock.return_value = MOCK_RESULT
+        <span class="kw">yield</span> mock
+
+<span class="fn2">@pytest.fixture</span>
+<span class="kw">def</span> <span class="fn2">mock_pipeline_error</span>():
+    <span class="st2">"""Patches run_pipeline to raise RuntimeError — tests HTTP 500 handling."""</span>
+    <span class="kw">with</span> patch(<span class="st2">"api.routes.query.run_pipeline"</span>) <span class="kw">as</span> mock:
+        mock.side_effect = RuntimeError(<span class="st2">"Simulated failure"</span>)
+        <span class="kw">yield</span> mock
+
+<span class="fn2">@pytest.fixture</span>
+<span class="kw">def</span> <span class="fn2">sample_question</span>():
+    <span class="kw">return</span> <span class="st2">"What are the main symptoms of type 2 diabetes?"</span></pre></div></div>
+
+      <div class="h3">tests/test_api.py — Full pytest suite (9 tests)</div>
+      <div class="fb"><div class="fl"><span class="fn">tests/test_api.py</span><span class="lg">python</span></div><div class="cw"><pre><span class="cm">"""API tests — M3 Task 1. Run: pytest tests/test_api.py -v"""</span>
+<span class="kw">from</span> unittest.mock <span class="kw">import</span> patch
+<span class="kw">from</span> fastapi.testclient <span class="kw">import</span> TestClient
+<span class="kw">from</span> api.main <span class="kw">import</span> app
+
+client = TestClient(app)
+MOCK = {<span class="st2">"answer"</span>:<span class="st2">"Mock answer."</span>, <span class="st2">"category"</span>:<span class="st2">"Symptoms"</span>, <span class="st2">"sources"</span>:[<span class="st2">"chunk_001"</span>]}
+
+
+<span class="kw">class</span> <span class="tp">TestHealth</span>:
+    <span class="kw">def</span> <span class="fn2">test_returns_200</span>(self):
+        <span class="kw">assert</span> client.get(<span class="st2">"/health"</span>).status_code == <span class="nm">200</span>
+
+    <span class="kw">def</span> <span class="fn2">test_status_ok</span>(self):
+        <span class="kw">assert</span> client.get(<span class="st2">"/health"</span>).json()[<span class="st2">"status"</span>] == <span class="st2">"ok"</span>
+
+    <span class="kw">def</span> <span class="fn2">test_latency_header</span>(self):
+        <span class="kw">assert</span> <span class="st2">"X-Response-Time-Ms"</span> <span class="kw">in</span> client.get(<span class="st2">"/health"</span>).headers
+
+
+<span class="kw">class</span> <span class="tp">TestQuery</span>:
+    <span class="fn2">@patch</span>(<span class="st2">"api.routes.query.run_pipeline"</span>)
+    <span class="kw">def</span> <span class="fn2">test_returns_200</span>(self, m):
+        m.return_value = MOCK
+        <span class="kw">assert</span> client.post(<span class="st2">"/query"</span>, json={<span class="st2">"question"</span>:<span class="st2">"What causes diabetes?"</span>}).status_code == <span class="nm">200</span>
+
+    <span class="fn2">@patch</span>(<span class="st2">"api.routes.query.run_pipeline"</span>)
+    <span class="kw">def</span> <span class="fn2">test_all_fields_present</span>(self, m):
+        m.return_value = MOCK
+        data = client.post(<span class="st2">"/query"</span>, json={<span class="st2">"question"</span>:<span class="st2">"How is hypertension treated?"</span>}).json()
+        <span class="kw">for</span> field <span class="kw">in</span> (<span class="st2">"answer"</span>,<span class="st2">"category"</span>,<span class="st2">"retrieved_sources"</span>,<span class="st2">"disclaimer"</span>):
+            <span class="kw">assert</span> field <span class="kw">in</span> data, f<span class="st2">f"Missing field: {field}"</span>
+
+    <span class="fn2">@patch</span>(<span class="st2">"api.routes.query.run_pipeline"</span>)
+    <span class="kw">def</span> <span class="fn2">test_disclaimer_non_empty</span>(self, m):
+        m.return_value = MOCK
+        data = client.post(<span class="st2">"/query"</span>, json={<span class="st2">"question"</span>:<span class="st2">"What is metformin used for?"</span>}).json()
+        <span class="kw">assert isinstance</span>(data[<span class="st2">"disclaimer"</span>], str) <span class="kw">and</span> <span class="fn2">len</span>(data[<span class="st2">"disclaimer"</span>]) > <span class="nm">20</span>
+
+    <span class="fn2">@patch</span>(<span class="st2">"api.routes.query.run_pipeline"</span>)
+    <span class="kw">def</span> <span class="fn2">test_category_valid</span>(self, m):
+        m.return_value = MOCK
+        data = client.post(<span class="st2">"/query"</span>, json={<span class="st2">"question"</span>:<span class="st2">"How to prevent stroke?"</span>}).json()
+        <span class="kw">assert</span> data[<span class="st2">"category"</span>] <span class="kw">in</span> {<span class="st2">"Symptoms"</span>,<span class="st2">"Diagnosis"</span>,<span class="st2">"Treatment"</span>,<span class="st2">"Medication"</span>,<span class="st2">"Prevention"</span>,<span class="st2">"General"</span>}
+
+    <span class="fn2">@patch</span>(<span class="st2">"api.routes.query.run_pipeline"</span>)
+    <span class="kw">def</span> <span class="fn2">test_latency_header</span>(self, m):
+        m.return_value = MOCK
+        <span class="kw">assert</span> <span class="st2">"X-Response-Time-Ms"</span> <span class="kw">in</span> client.post(<span class="st2">"/query"</span>, json={<span class="st2">"question"</span>:<span class="st2">"What are flu symptoms?"</span>}).headers
+
+    <span class="kw">def</span> <span class="fn2">test_missing_question_422</span>(self):
+        <span class="kw">assert</span> client.post(<span class="st2">"/query"</span>, json={}).status_code == <span class="nm">422</span>
+
+    <span class="fn2">@patch</span>(<span class="st2">"api.routes.query.run_pipeline"</span>)
+    <span class="kw">def</span> <span class="fn2">test_pipeline_error_500</span>(self, m):
+        m.side_effect = RuntimeError(<span class="st2">"FAISS not found"</span>)
+        <span class="kw">assert</span> client.post(<span class="st2">"/query"</span>, json={<span class="st2">"question"</span>:<span class="st2">"What causes anaemia?"</span>}).status_code == <span class="nm">500</span></pre></div></div>
+
+      <div class="h3">tests/test_rag_pipeline.py — M2 T5 pipeline tests (stub)</div>
+      <div class="fb"><div class="fl"><span class="fn">tests/test_rag_pipeline.py</span><span class="lg">python</span></div><div class="cw"><pre><span class="cm">"""
+M2 Task 5 — tests for FAISS retrieval and integrated RAG pipeline.
+Owner: Abdelrahman Mostafa Sayed.
+
+These tests are stubs — they skip when model files are not present
+(e.g. on CI or fresh clones without weights). They run fully when
+the FAISS index and classifier weights are available locally.
+"""</span>
+<span class="kw">import</span> pytest
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+<span class="kw">from</span> config.settings <span class="kw">import</span> settings
+
+FAISS_AVAILABLE = (settings.faiss_index_path / <span class="st2">"pubmedqa_index_flatl2.faiss"</span>).exists()
+CLF_AVAILABLE   = (settings.classifier_path / <span class="st2">"config.json"</span>).exists()
+
+<span class="fn2">@pytest.mark.skipif</span>(<span class="kw">not</span> FAISS_AVAILABLE, reason=<span class="st2">"FAISS index not present"</span>)
+<span class="kw">def</span> <span class="fn2">test_faiss_returns_results</span>():
+    <span class="kw">from</span> src.rag.vectorstore <span class="kw">import</span> FAISSVectorStore
+    vs = FAISSVectorStore.load(str(settings.faiss_index_path))
+    results = vs.search(<span class="st2">"What are symptoms of diabetes?"</span>, k=<span class="nm">3</span>)
+    <span class="kw">assert isinstance</span>(results, list)
+    <span class="kw">assert</span> <span class="fn2">len</span>(results) > <span class="nm">0</span>
+    <span class="kw">assert isinstance</span>(results[<span class="nm">0</span>], tuple)
+    <span class="kw">assert</span> <span class="fn2">len</span>(results[<span class="nm">0</span>]) == <span class="nm">2</span>   <span class="cm"># (chunk_id, chunk_text)</span>
+
+<span class="fn2">@pytest.mark.skipif</span>(<span class="kw">not</span> CLF_AVAILABLE, reason=<span class="st2">"Classifier weights not present"</span>)
+<span class="kw">def</span> <span class="fn2">test_classifier_returns_valid_category</span>():
+    <span class="kw">from</span> src.classification.classifier <span class="kw">import</span> MedicalClassifier
+    clf = MedicalClassifier.load(str(settings.classifier_path))
+    cat = clf.predict(<span class="st2">"What are the symptoms of type 2 diabetes?"</span>)
+    <span class="kw">assert</span> cat <span class="kw">in</span> settings.categories
+
+<span class="fn2">@pytest.mark.skipif</span>(<span class="kw">not</span> (FAISS_AVAILABLE <span class="kw">and</span> CLF_AVAILABLE), reason=<span class="st2">"Models not present"</span>)
+<span class="kw">def</span> <span class="fn2">test_full_pipeline_returns_correct_shape</span>():
+    <span class="kw">from</span> src.pipeline <span class="kw">import</span> run_pipeline
+    result = run_pipeline(<span class="st2">"What are the symptoms of type 2 diabetes?"</span>)
+    <span class="kw">assert</span> <span class="st2">"answer"</span> <span class="kw">in</span> result
+    <span class="kw">assert</span> <span class="st2">"category"</span> <span class="kw">in</span> result
+    <span class="kw">assert</span> <span class="st2">"sources"</span> <span class="kw">in</span> result
+    <span class="kw">assert isinstance</span>(result[<span class="st2">"answer"</span>], str) <span class="kw">and</span> <span class="fn2">len</span>(result[<span class="st2">"answer"</span>]) > <span class="nm">0</span>
+    <span class="kw">assert</span> result[<span class="st2">"category"</span>] <span class="kw">in</span> settings.categories</pre></div></div>
+
+      <div class="h3">tests/test_preprocessing.py — M1 T5 preprocessing tests (stub)</div>
+      <div class="fb"><div class="fl"><span class="fn">tests/test_preprocessing.py</span><span class="lg">python</span></div><div class="cw"><pre><span class="cm">"""
+M1 Task 5 — tests for preprocessor and labeller.
+Owner: Eman Khalid Ismail.
+"""</span>
+<span class="kw">import</span> pytest
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+<span class="kw">from</span> config.settings <span class="kw">import</span> settings
+
+CLEANED_AVAILABLE  = settings.cleaned_data_path.exists()
+LABELLED_AVAILABLE = settings.labelled_data_path.exists()
+
+<span class="fn2">@pytest.mark.skipif</span>(<span class="kw">not</span> CLEANED_AVAILABLE, reason=<span class="st2">"pubmedqa_cleaned.csv not present"</span>)
+<span class="kw">def</span> <span class="fn2">test_cleaned_csv_has_required_columns</span>():
+    df = pd.read_csv(settings.cleaned_data_path)
+    <span class="kw">for</span> col <span class="kw">in</span> (<span class="st2">"instruction"</span>, <span class="st2">"input"</span>, <span class="st2">"output"</span>):
+        <span class="kw">assert</span> col <span class="kw">in</span> df.columns, f<span class="st2">f"Missing column: {col}"</span>
+
+<span class="fn2">@pytest.mark.skipif</span>(<span class="kw">not</span> CLEANED_AVAILABLE, reason=<span class="st2">"pubmedqa_cleaned.csv not present"</span>)
+<span class="kw">def</span> <span class="fn2">test_cleaned_csv_no_nulls</span>():
+    df = pd.read_csv(settings.cleaned_data_path)
+    null_pct = df.isnull().mean().max()
+    <span class="kw">assert</span> null_pct < <span class="nm">0.10</span>, f<span class="st2">f"Null rate too high: {null_pct:.2%} (KPI: &lt;10%)"</span>
+
+<span class="fn2">@pytest.mark.skipif</span>(<span class="kw">not</span> LABELLED_AVAILABLE, reason=<span class="st2">"pubmedqa_labelled.csv not present"</span>)
+<span class="kw">def</span> <span class="fn2">test_labelled_csv_has_category_column</span>():
+    df = pd.read_csv(settings.labelled_data_path)
+    <span class="kw">assert</span> <span class="st2">"category"</span> <span class="kw">in</span> df.columns
+
+<span class="fn2">@pytest.mark.skipif</span>(<span class="kw">not</span> LABELLED_AVAILABLE, reason=<span class="st2">"pubmedqa_labelled.csv not present"</span>)
+<span class="kw">def</span> <span class="fn2">test_labelled_csv_has_all_6_categories</span>():
+    df = pd.read_csv(settings.labelled_data_path)
+    found = set(df[<span class="st2">"category"</span>].unique())
+    expected = set(settings.categories)
+    missing = expected - found
+    <span class="kw">assert not</span> missing, f<span class="st2">f"Missing categories: {missing}"</span></pre></div></div>
+
+      <div class="dl"><span class="dl-i">✅</span><div><div class="dl-l">Deliverable — Task 1</div><div class="dl-t">All 6 api/ files + tests/conftest.py + tests/test_api.py + test stubs committed. <ic>pytest tests/test_api.py -v</ic> → 9 tests pass. <ic>uvicorn api.main:app --reload</ic> → <ic>localhost:8000/docs</ic> shows Swagger UI with disclaimer in every response.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     TASK 2 — DOCKER
+═══════════════════════════════════════════════ -->
+<section class="sec" id="task2">
+  <div class="sh"><span class="sn">04</span><h2>Task 2 — Docker Containerisation</h2></div>
+  <div class="tb">
+    <div class="th">
+      <div class="tc" style="color:var(--acc2)"><span class="tn">T2</span><span class="tl">Task</span></div>
+      <div class="ti"><h3>Docker Containerisation</h3><div><span class="pi po">Owner: Doha Khaled Mahmoud</span> <span class="pi pd">Days 4–9</span></div></div>
+    </div>
+    <div class="tbody">
+      <p class="tg">Package the full application into a Docker image. Anyone running <ic>docker run</ic> gets an identical, working API.</p>
+
+      <div class="h3">docker/Dockerfile</div>
+      <div class="fb"><div class="fl"><span class="fn">docker/Dockerfile</span><span class="lg">dockerfile</span></div><div class="cw"><pre><span class="cm"># Build: docker build -f docker/Dockerfile -t healthcare-rag:latest .
+# Run:   docker run -p 8000:8000 --env-file .env --rm healthcare-rag:latest</span>
+
+FROM python:3.10-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+WORKDIR /app
+
+<span class="cm"># System deps needed by some ML packages</span>
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential curl git \
+    && rm -rf /var/lib/apt/lists/*
+
+<span class="cm"># Install Python deps first — cached layer if only source code changes</span>
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+<span class="cm"># Copy source code</span>
+COPY src/ ./src/
+COPY api/ ./api/
+COPY config/ ./config/
+COPY scripts/download_models.py ./scripts/download_models.py
+COPY scripts/__init__.py ./scripts/__init__.py
+COPY setup.py .
+
+<span class="cm"># Model weights strategy — choose ONE:
+# Option A: Download from Azure Blob at build time (large weights):
+#   Uncomment the line below. Requires AZURE_STORAGE_CONNECTION build arg.
+# RUN python scripts/download_models.py
+
+# Option B: Copy from local git checkout (Git LFS or small weights):</span>
+COPY data/embeddings/ ./data/embeddings/
+COPY models/ ./models/
+
+<span class="cm"># Install project so 'from src.rag.pipeline import ...' works everywhere</span>
+RUN pip install --no-cache-dir -e .
+
+EXPOSE 8000
+
+<span class="cm"># Single worker — Azure Free Tier has 1GB RAM limit</span>
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]</pre></div></div>
+
+      <div class="h3">docker/docker-compose.yml</div>
+      <div class="fb"><div class="fl"><span class="fn">docker/docker-compose.yml</span><span class="lg">yaml</span></div><div class="cw"><pre>version: "3.9"
+services:
+  healthcare-rag:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: healthcare-rag-api
+    ports:
+      - "8000:8000"
+    env_file:
+      - ../.env
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s</pre></div></div>
+
+      <div class="h3">.dockerignore</div>
+      <div class="fb"><div class="fl"><span class="fn">.dockerignore</span><span class="lg">text</span></div><div class="cw"><pre>.git/
+.gitignore
+.github/
+.env
+.env.*
+notebooks/
+reports/
+docs/
+data/raw/
+data/processed/
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+.idea/
+.vscode/
+tests/
+.pytest_cache/
+*.md
+Makefile
+Structure.md
+mlruns/</pre></div></div>
+
+      <div class="bb">
+        <div class="bl">▶ Build and verify locally</div>
+        <div class="bw"><pre><span class="p">$</span> <span class="d">make docker-build</span>
+<span class="p">$</span> <span class="d">docker run -p 8000:8000 --env-file .env --rm healthcare-rag:latest</span>
+<span class="c"># In second terminal:</span>
+<span class="p">$</span> <span class="d">curl</span> <span class="v">http://localhost:8000/health</span>
+<span class="c"># Expected: {"status":"ok","model_loaded":true}</span>
+<span class="p">$</span> <span class="d">curl -X POST http://localhost:8000/query</span> \
+  <span class="f">-H</span> <span class="v">"Content-Type: application/json"</span> \
+  <span class="f">-d</span> <span class="v">'{"question":"What are symptoms of diabetes?"}'</span>
+<span class="c"># Expected: JSON with answer, category, retrieved_sources, disclaimer</span></pre></div>
+      </div>
+      <div class="dl"><span class="dl-i">✅</span><div><div class="dl-l">Deliverable — Task 2</div><div class="dl-t">Dockerfile + docker-compose.yml + .dockerignore committed. Image builds without errors. Both /health and /query respond correctly inside the container.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     TASK 3 — AZURE
+═══════════════════════════════════════════════ -->
+<section class="sec" id="task3">
+  <div class="sh"><span class="sn">05</span><h2>Task 3 — Azure App Service Deployment</h2></div>
+  <div class="tb">
+    <div class="th">
+      <div class="tc" style="color:#a855f7"><span class="tn">T3</span><span class="tl">Task</span></div>
+      <div class="ti"><h3>Azure App Service Deployment</h3><div><span class="pi po">Owner: Eman Khalid Ismail</span> <span class="pi pd">Days 7–14</span></div></div>
+    </div>
+    <div class="tbody">
+      <p class="tg">Deploy the Docker image to Azure. Result: a live public URL. Share it with Abdelrahman (Task 4) and Ziad (Task 5) immediately when confirmed.</p>
+
+      <div class="bb">
+        <div class="bl">☁️ Complete Azure deployment — all 10 steps</div>
+        <div class="bw"><pre><span class="c"># Step 1: Authenticate</span>
+<span class="p">$</span> <span class="d">az login</span>
+<span class="p">$</span> <span class="d">az account show</span>
+
+<span class="c"># Step 2: Resource Group</span>
+<span class="p">$</span> <span class="d">az group create</span> <span class="f">--name</span> <span class="v">healthcare-rag-rg</span> <span class="f">--location</span> <span class="v">eastus</span>
+
+<span class="c"># Step 3: Container Registry (name must be globally unique)</span>
+<span class="p">$</span> <span class="d">az acr create</span> \
+    <span class="f">--name</span>           <span class="v">healthcareragacr</span> \
+    <span class="f">--resource-group</span> <span class="v">healthcare-rag-rg</span> \
+    <span class="f">--sku</span>            <span class="v">Basic</span> \
+    <span class="f">--admin-enabled</span>  <span class="v">true</span>
+
+<span class="c"># Step 4: Build and push image</span>
+<span class="p">$</span> <span class="d">az acr login</span> <span class="f">--name</span> <span class="v">healthcareragacr</span>
+<span class="p">$</span> <span class="d">docker tag healthcare-rag:latest</span> <span class="v">healthcareragacr.azurecr.io/healthcare-rag:v1</span>
+<span class="p">$</span> <span class="d">docker push</span> <span class="v">healthcareragacr.azurecr.io/healthcare-rag:v1</span>
+
+<span class="c"># Verify image is in ACR</span>
+<span class="p">$</span> <span class="d">az acr repository list</span> <span class="f">--name</span> <span class="v">healthcareragacr</span> <span class="f">--output</span> <span class="v">table</span>
+
+<span class="c"># Step 5: App Service Plan (Free Tier)</span>
+<span class="p">$</span> <span class="d">az appservice plan create</span> \
+    <span class="f">--name</span>           <span class="v">healthcare-rag-plan</span> \
+    <span class="f">--resource-group</span> <span class="v">healthcare-rag-rg</span> \
+    <span class="f">--is-linux --sku</span> <span class="v">F1</span>
+
+<span class="c"># Step 6: Create Web App</span>
+<span class="p">$</span> <span class="d">az webapp create</span> \
+    <span class="f">--name</span>                           <span class="v">healthcare-rag-app</span> \
+    <span class="f">--resource-group</span>                 <span class="v">healthcare-rag-rg</span> \
+    <span class="f">--plan</span>                           <span class="v">healthcare-rag-plan</span> \
+    <span class="f">--deployment-container-image-name</span> <span class="v">healthcareragacr.azurecr.io/healthcare-rag:v1</span>
+
+<span class="c"># Step 7: Configure ACR credentials</span>
+<span class="p">$</span> <span class="d">ACR_PASSWORD=$(az acr credential show</span> \
+    <span class="f">--name</span> <span class="v">healthcareragacr --query passwords[0].value -o tsv)</span>
+<span class="p">$</span> <span class="d">az webapp config container set</span> \
+    <span class="f">--name</span>                            <span class="v">healthcare-rag-app</span> \
+    <span class="f">--resource-group</span>                  <span class="v">healthcare-rag-rg</span> \
+    <span class="f">--docker-registry-server-url</span>      <span class="v">https://healthcareragacr.azurecr.io</span> \
+    <span class="f">--docker-registry-server-user</span>     <span class="v">healthcareragacr</span> \
+    <span class="f">--docker-registry-server-password</span>  <span class="v">$ACR_PASSWORD</span>
+
+<span class="c"># Step 8: Set environment variables</span>
+<span class="p">$</span> <span class="d">az webapp config appsettings set</span> \
+    <span class="f">--name</span>           <span class="v">healthcare-rag-app</span> \
+    <span class="f">--resource-group</span> <span class="v">healthcare-rag-rg</span> \
+    <span class="f">--settings</span> \
+      <span class="v">WEBSITE_PORT="8000"</span> \
+      <span class="v">PYTHONUNBUFFERED="1"</span> \
+      <span class="v">HF_TOKEN="your-hf-token-here"</span>
+
+<span class="c"># Step 9: Wait 2-3 min then verify</span>
+<span class="p">$</span> <span class="d">curl</span> <span class="v">https://healthcare-rag-app.azurewebsites.net/health</span>
+<span class="c"># Expected: {"status":"ok","model_loaded":true}
+
+# View live logs (essential for debugging)</span>
+<span class="p">$</span> <span class="d">az webapp log tail</span> \
+    <span class="f">--name</span> <span class="v">healthcare-rag-app</span> <span class="f">--resource-group</span> <span class="v">healthcare-rag-rg</span>
+
+<span class="c"># Step 10: Share URL with team
+# https://healthcare-rag-app.azurewebsites.net
+# Abdelrahman (Task 4) needs it for latency testing
+# Ziad (Task 5) needs it for the proposal update
+
+# REDEPLOYMENT (when code changes):
+</span>
+<span class="p">$</span> <span class="d">docker build -f docker/Dockerfile -t</span> <span class="v">healthcareragacr.azurecr.io/healthcare-rag:v2 .</span>
+<span class="p">$</span> <span class="d">docker push</span> <span class="v">healthcareragacr.azurecr.io/healthcare-rag:v2</span>
+<span class="p">$</span> <span class="d">az webapp config container set</span> \
+    <span class="f">--name</span> <span class="v">healthcare-rag-app</span> <span class="f">--resource-group</span> <span class="v">healthcare-rag-rg</span> \
+    <span class="f">--docker-custom-image-name</span> <span class="v">healthcareragacr.azurecr.io/healthcare-rag:v2</span>
+<span class="p">$</span> <span class="d">az webapp restart</span> <span class="f">--name</span> <span class="v">healthcare-rag-app</span> <span class="f">--resource-group</span> <span class="v">healthcare-rag-rg</span></pre></div>
+      </div>
+      <div class="bx warn"><span class="bx-i">⚠️</span><div class="bx-b"><strong>Cold-start — normal, not a failure</strong>Azure Free Tier (F1) shuts down after 20 min idle. First request after idle takes 60–120s. This is normal and excluded from KPI latency measurement. Warm-instance (≤5,000ms) is what counts.</div></div>
+      <div class="dl"><span class="dl-i">✅</span><div><div class="dl-l">Deliverable — Task 3</div><div class="dl-t">Live URL responding with 200. URL shared immediately with Abdelrahman and Ziad. Azure portal screenshot committed to reports/.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     TASK 4 — TESTING
+═══════════════════════════════════════════════ -->
+<section class="sec" id="task4">
+  <div class="sh"><span class="sn">06</span><h2>Task 4 — Integration Testing &amp; Latency Measurement</h2></div>
+  <div class="tb">
+    <div class="th">
+      <div class="tc" style="color:var(--grn)"><span class="tn">T4</span><span class="tl">Task</span></div>
+      <div class="ti"><h3>API Integration Testing &amp; Latency Measurement</h3><div><span class="pi po">Owner: Abdelrahman Mostafa Sayed</span> <span class="pi pd">Days 12–19</span></div></div>
+    </div>
+    <div class="tbody">
+      <p class="tg">20 warm-instance queries against the live Azure URL. All 6 categories covered. Record latency, verify disclaimer, check category. All ≤5,000ms. Write deployment_test_report.md.</p>
+
+      <div class="h3">scripts/latency_test.py — Full test script</div>
+      <div class="fb"><div class="fl"><span class="fn">scripts/latency_test.py</span><span class="lg">python</span></div><div class="cw"><pre><span class="cm">"""
+M3 Task 4 — 20-query latency test against live Azure API.
+Run: python scripts/latency_test.py
+     OR: make latency-test
+"""</span>
+<span class="kw">import</span> requests, time, csv, os
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+
+BASE_URL   = os.getenv(<span class="st2">"API_BASE_URL"</span>, <span class="st2">"https://healthcare-rag-app.azurewebsites.net"</span>)
+VALID_CATS = {<span class="st2">"Symptoms"</span>,<span class="st2">"Diagnosis"</span>,<span class="st2">"Treatment"</span>,<span class="st2">"Medication"</span>,<span class="st2">"Prevention"</span>,<span class="st2">"General"</span>}
+LIMIT_MS   = <span class="nm">5000</span>
+
+TEST_QUERIES = [
+    (<span class="st2">"What are the early symptoms of type 2 diabetes?"</span>,           <span class="st2">"Symptoms"</span>),
+    (<span class="st2">"What symptoms indicate a possible heart attack?"</span>,            <span class="st2">"Symptoms"</span>),
+    (<span class="st2">"What are warning signs of kidney disease?"</span>,                  <span class="st2">"Symptoms"</span>),
+    (<span class="st2">"What symptoms are linked to iron deficiency anaemia?"</span>,        <span class="st2">"Symptoms"</span>),
+    (<span class="st2">"How is hypertension diagnosed?"</span>,                             <span class="st2">"Diagnosis"</span>),
+    (<span class="st2">"What tests diagnose thyroid disorders?"</span>,                     <span class="st2">"Diagnosis"</span>),
+    (<span class="st2">"How do doctors diagnose celiac disease?"</span>,                    <span class="st2">"Diagnosis"</span>),
+    (<span class="st2">"What treatments are available for moderate asthma?"</span>,          <span class="st2">"Treatment"</span>),
+    (<span class="st2">"How is Crohn's disease treated in adults?"</span>,                  <span class="st2">"Treatment"</span>),
+    (<span class="st2">"What is the treatment for mild depression?"</span>,                 <span class="st2">"Treatment"</span>),
+    (<span class="st2">"What are the common side effects of metformin?"</span>,              <span class="st2">"Medication"</span>),
+    (<span class="st2">"Is it safe to take ibuprofen and paracetamol together?"</span>,      <span class="st2">"Medication"</span>),
+    (<span class="st2">"What are the main uses of corticosteroids?"</span>,                 <span class="st2">"Medication"</span>),
+    (<span class="st2">"How can I reduce the risk of cardiovascular disease?"</span>,        <span class="st2">"Prevention"</span>),
+    (<span class="st2">"What lifestyle changes help prevent type 2 diabetes?"</span>,        <span class="st2">"Prevention"</span>),
+    (<span class="st2">"How effective are vaccines in preventing influenza?"</span>,          <span class="st2">"Prevention"</span>),
+    (<span class="st2">"What is the difference between a virus and a bacterium?"</span>,     <span class="st2">"General"</span>),
+    (<span class="st2">"How does the immune system respond to infection?"</span>,            <span class="st2">"General"</span>),
+    (<span class="st2">"What is BMI and how is it calculated?"</span>,                      <span class="st2">"General"</span>),
+    (<span class="st2">"What does peer-reviewed medical research mean?"</span>,              <span class="st2">"General"</span>),
+]
+
+
+<span class="kw">def</span> <span class="fn2">warm_up</span>():
+    <span class="fn2">print</span>(<span class="st2">f"API: {BASE_URL}"</span>)
+    <span class="fn2">print</span>(<span class="st2">"Warm-up request (not recorded)..."</span>)
+    <span class="kw">try</span>:
+        r = requests.get(f<span class="st2">f"{BASE_URL}/health"</span>, timeout=<span class="nm">120</span>)
+        <span class="fn2">print</span>(f<span class="st2">f"  Warm-up: HTTP {r.status_code} ({r.elapsed.total_seconds():.1f}s)"</span>)
+    <span class="kw">except</span> Exception <span class="kw">as</span> e:
+        <span class="fn2">print</span>(f<span class="st2">f"  Warm-up failed: {e}. Wait 90s and retry."</span>)
+
+
+<span class="kw">def</span> <span class="fn2">run_query</span>(q: str, n: int) -> dict:
+    <span class="kw">try</span>:
+        start = time.perf_counter()
+        r = requests.post(f<span class="st2">f"{BASE_URL}/query"</span>, json={<span class="st2">"question"</span>: q}, timeout=<span class="nm">30</span>)
+        ms = round((time.perf_counter() - start) * <span class="nm">1000</span>, <span class="nm">1</span>)
+        <span class="kw">if</span> r.status_code == <span class="nm">200</span>:
+            d = r.json()
+            <span class="kw">return</span> {<span class="st2">"n"</span>:n,<span class="st2">"q"</span>:q,<span class="st2">"ms"</span>:ms,<span class="st2">"cat"</span>:d.get(<span class="st2">"category"</span>,<span class="st2">"MISS"</span>),
+                    <span class="st2">"disc_ok"</span>:bool(d.get(<span class="st2">"disclaimer"</span>)),
+                    <span class="st2">"lat_pass"</span>:ms<=LIMIT_MS,
+                    <span class="st2">"cat_valid"</span>:d.get(<span class="st2">"category"</span>) <span class="kw">in</span> VALID_CATS,<span class="st2">"err"</span>:<span class="kw">None</span>}
+        <span class="kw">return</span> {<span class="st2">"n"</span>:n,<span class="st2">"q"</span>:q,<span class="st2">"ms"</span>:ms,<span class="st2">"cat"</span>:<span class="st2">"ERR"</span>,<span class="st2">"disc_ok"</span>:<span class="kw">False</span>,
+                <span class="st2">"lat_pass"</span>:<span class="kw">False</span>,<span class="st2">"cat_valid"</span>:<span class="kw">False</span>,<span class="st2">"err"</span>:f<span class="st2">f"HTTP {r.status_code}"</span>}
+    <span class="kw">except</span> requests.exceptions.Timeout:
+        <span class="kw">return</span> {<span class="st2">"n"</span>:n,<span class="st2">"q"</span>:q,<span class="st2">"ms"</span>:<span class="nm">30000</span>,<span class="st2">"cat"</span>:<span class="st2">"TIMEOUT"</span>,<span class="st2">"disc_ok"</span>:<span class="kw">False</span>,
+                <span class="st2">"lat_pass"</span>:<span class="kw">False</span>,<span class="st2">"cat_valid"</span>:<span class="kw">False</span>,<span class="st2">"err"</span>:<span class="st2">"Timeout 30s"</span>}
+
+
+<span class="kw">if</span> __name__ == <span class="st2">"__main__"</span>:
+    warm_up()
+    <span class="fn2">print</span>(<span class="st2">"Waiting 5s for warm instance..."</span>); time.sleep(<span class="nm">5</span>)
+    results = []
+    <span class="kw">for</span> i, (q, exp) <span class="kw">in</span> enumerate(TEST_QUERIES, <span class="nm">1</span>):
+        r = run_query(q, i); r[<span class="st2">"expected"</span>] = exp; results.append(r)
+        ok = <span class="st2">"✅"</span> <span class="kw">if</span> r[<span class="st2">"lat_pass"</span>] <span class="kw">and</span> r[<span class="st2">"disc_ok"</span>] <span class="kw">else</span> <span class="st2">"❌"</span>
+        <span class="fn2">print</span>(f<span class="st2">f"  [{i:02d}/20] {ok} {r['ms']:>7.1f}ms | {r['cat']:<12} | {q[:48]}"</span>)
+        time.sleep(<span class="nm">0.5</span>)
+
+    lat_pass  = <span class="fn2">sum</span>(<span class="nm">1</span> <span class="kw">for</span> r <span class="kw">in</span> results <span class="kw">if</span> r[<span class="st2">"lat_pass"</span>])
+    disc_pass = <span class="fn2">sum</span>(<span class="nm">1</span> <span class="kw">for</span> r <span class="kw">in</span> results <span class="kw">if</span> r[<span class="st2">"disc_ok"</span>])
+    avg_ms    = <span class="fn2">sum</span>(r[<span class="st2">"ms"</span>] <span class="kw">for</span> r <span class="kw">in</span> results) / <span class="fn2">len</span>(results)
+    <span class="fn2">print</span>(f<span class="st2">f"""
+{'='*52}
+Latency ≤5000ms:  {lat_pass}/{len(results)}  {'✅' if lat_pass==len(results) else '❌'}
+Disclaimer OK:    {disc_pass}/{len(results)}  {'✅' if disc_pass==len(results) else '❌'}
+Avg latency:      {avg_ms:.0f}ms
+Max latency:      {max(r['ms'] for r in results):.0f}ms
+Test date:        {datetime.now().strftime('%Y-%m-%d %H:%M')}
+{'='*52}"""</span>)
+
+    os.makedirs(<span class="st2">"reports"</span>, exist_ok=<span class="kw">True</span>)
+    <span class="kw">with</span> <span class="fn2">open</span>(<span class="st2">"reports/latency_results.csv"</span>, <span class="st2">"w"</span>, newline=<span class="st2">""</span>) <span class="kw">as</span> f:
+        writer = csv.DictWriter(f, fieldnames=[<span class="st2">"n"</span>,<span class="st2">"q"</span>,<span class="st2">"expected"</span>,<span class="st2">"cat"</span>,<span class="st2">"ms"</span>,<span class="st2">"disc_ok"</span>,<span class="st2">"lat_pass"</span>,<span class="st2">"cat_valid"</span>,<span class="st2">"err"</span>])
+        writer.writeheader(); writer.writerows(results)
+    <span class="fn2">print</span>(<span class="st2">"Exported: reports/latency_results.csv"</span>)</pre></div></div>
+
+      <div class="h3">reports/deployment_test_report.md — Fill from actual run</div>
+      <div class="fb"><div class="fl"><span class="fn">reports/deployment_test_report.md</span><span class="lg">markdown</span></div><div class="cw"><pre><span class="cm"># M3 Deployment Test Report
+# Owner: Abdelrahman Mostafa Sayed | Date: YYYY-MM-DD</span>
+
+## Overview
+| Field | Value |
+|---|---|
+| API URL | https://healthcare-rag-app.azurewebsites.net |
+| Cold-start | ___ s (excluded from KPI) |
+| Warm queries | 20 |
+| KPI threshold | ≤ 5,000ms warm |
+
+## Results (fill from scripts/latency_test.py output)
+| # | Expected | Actual Cat | Latency (ms) | Disc ✓ | Pass |
+|---|---|---|---|---|---|
+| 01 | Symptoms  | ___ | ___ | ✓ | ✅ |
+| 02 | Symptoms  | ___ | ___ | ✓ | ✅ |
+| 03 | Symptoms  | ___ | ___ | ✓ | ✅ |
+| 04 | Symptoms  | ___ | ___ | ✓ | ✅ |
+| 05 | Diagnosis | ___ | ___ | ✓ | ✅ |
+| 06 | Diagnosis | ___ | ___ | ✓ | ✅ |
+| 07 | Diagnosis | ___ | ___ | ✓ | ✅ |
+| 08 | Treatment | ___ | ___ | ✓ | ✅ |
+| 09 | Treatment | ___ | ___ | ✓ | ✅ |
+| 10 | Treatment | ___ | ___ | ✓ | ✅ |
+| 11 | Medication | ___ | ___ | ✓ | ✅ |
+| 12 | Medication | ___ | ___ | ✓ | ✅ |
+| 13 | Medication | ___ | ___ | ✓ | ✅ |
+| 14 | Prevention | ___ | ___ | ✓ | ✅ |
+| 15 | Prevention | ___ | ___ | ✓ | ✅ |
+| 16 | Prevention | ___ | ___ | ✓ | ✅ |
+| 17 | General   | ___ | ___ | ✓ | ✅ |
+| 18 | General   | ___ | ___ | ✓ | ✅ |
+| 19 | General   | ___ | ___ | ✓ | ✅ |
+| 20 | General   | ___ | ___ | ✓ | ✅ |
+
+## KPI Summary
+| KPI | Target | Result | Status |
+|---|---|---|---|
+| Latency ≤5000ms | 20/20 | ___/20 | ✅/❌ |
+| Disclaimer present | 20/20 | ___/20 | ✅/❌ |
+| Avg warm latency | — | ___ ms | — |
+| Max warm latency | ≤5000ms | ___ ms | ✅/❌ |</pre></div></div>
+
+      <div class="dl"><span class="dl-i">✅</span><div><div class="dl-l">Deliverable — Task 4</div><div class="dl-t">scripts/latency_test.py + reports/deployment_test_report.md (all values filled from real run) + reports/latency_results.csv committed.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════
+     TASK 5 — DOCS
+═══════════════════════════════════════════════ -->
+<section class="sec" id="task5">
+  <div class="sh"><span class="sn">07</span><h2>Task 5 — Integration Documentation &amp; Proposal URL Update</h2></div>
+  <div class="tb">
+    <div class="th">
+      <div class="tc" style="color:var(--ylw)"><span class="tn">T5</span><span class="tl">Task</span></div>
+      <div class="ti"><h3>Integration Documentation &amp; Proposal URL Update</h3><div><span class="pi po">Owner: Ziad Ahmed El-Nady</span> <span class="pi pd">Days 17–21</span></div></div>
+    </div>
+    <div class="tbody">
+      <p class="tg">Write integration_doc.md. Update proposal DOCX Section 12 with the live URL from Eman (Task 3). Push all M3 files. Submit to mentor before May 25.</p>
+      <div class="bx danger"><span class="bx-i">🔗</span><div class="bx-b"><strong>Sequencing dependency</strong>Cannot update proposal URL until Eman (Task 3) confirms the live URL. Write integration_doc.md first. Add the URL the moment it arrives. Do not hold the full submission waiting for one line.</div></div>
+
+      <div class="h3">reports/integration_doc.md</div>
+      <div class="fb"><div class="fl"><span class="fn">reports/integration_doc.md</span><span class="lg">markdown</span></div><div class="cw"><pre><span class="cm"># M3 Integration Documentation
+# Owner: Ziad Ahmed El-Nady | eyouth × DEPI 2025</span>
+
+## 1. Live URL
+https://healthcare-rag-app.azurewebsites.net
+
+## 2. Architecture
+```
+Client (HTTP)
+  → FastAPI POST /query (api/main.py + api/routes/query.py)
+  → Latency middleware (logs X-Response-Time-Ms header)
+  → src/pipeline.run_pipeline()
+      → DistilBERT classify (src/classification/classifier.py)
+      → FAISS retrieve top-5 (src/rag/vectorstore.py)
+      → flan-t5-base generate (src/rag/pipeline.py)
+      → disclaimer injected from config.settings.disclaimer
+  → JSON response: {answer, category, retrieved_sources, disclaimer}
+  → Docker image (docker/Dockerfile)
+  → Azure Container Registry (healthcareragacr.azurecr.io)
+  → Azure App Service F1 (healthcare-rag-app.azurewebsites.net)
+```
+
+## 3. Endpoints
+| Endpoint | Method | Returns |
+|---|---|---|
+| /query | POST | {answer, category, retrieved_sources, disclaimer} |
+| /health | GET | {status: "ok", model_loaded: true} |
+| /docs | GET | Swagger UI |
+
+## 4. Environment Variables (set in Azure App Service Configuration)
+| Variable | Value | Purpose |
+|---|---|---|
+| WEBSITE_PORT | 8000 | Port the app listens on |
+| PYTHONUNBUFFERED | 1 | Real-time log output |
+| HF_TOKEN | your-token | HuggingFace model downloads |
+
+## 5. Redeployment Steps
+```bash
+docker build -f docker/Dockerfile -t healthcareragacr.azurecr.io/healthcare-rag:v2 .
+docker push healthcareragacr.azurecr.io/healthcare-rag:v2
+az webapp config container set --name healthcare-rag-app \
+  --resource-group healthcare-rag-rg \
+  --docker-custom-image-name healthcareragacr.azurecr.io/healthcare-rag:v2
+az webapp restart --name healthcare-rag-app --resource-group healthcare-rag-rg
+```
+
+## 6. Azure Free Tier Limitations
+- 60 CPU min/day, 1GB RAM, cold-start after 20min idle
+- Cold-start latency (60-120s) excluded from KPI measurement
+- No custom domain on F1 tier; HTTPS included on azurewebsites.net
+
+## 7. M4/M5 Sequencing Note
+- This URL is needed for M4 Task 5 end-to-end test
+- This URL is needed for M5 Task 4 demo video
+- Must remain live through July 2026 (final presentation)</pre></div></div>
+
+      <div class="bb">
+        <div class="bl">📤 Final M3 GitHub push</div>
+        <div class="bw"><pre><span class="p">$</span> <span class="d">make freeze</span>   <span class="c"># pin requirements.txt</span>
+<span class="p">$</span> <span class="d">git add</span> <span class="v">.</span>
+<span class="p">$</span> <span class="d">git commit -m</span> <span class="v">"M3: FastAPI, Docker, Azure, latency test, integration docs — complete"</span>
+<span class="p">$</span> <span class="d">git push origin main</span>
+<span class="c"># Verify on GitHub before sending to mentor</span></pre></div>
+      </div>
+      <div class="dl"><span class="dl-i">✅</span><div><div class="dl-l">Deliverable — Task 5</div><div class="dl-t">reports/integration_doc.md + updated proposal DOCX Section 12 with live URL + all M3 files pushed + mentor submission before May 25, 2026.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- VERIFY -->
+<section class="sec" id="verify">
+  <div class="sh"><span class="sn">08</span><h2>Complete Verification Sequence</h2></div>
+  <p class="intro">Run every command below before submitting. Every one must succeed.</p>
+  <div class="bb">
+    <div class="bl">✅ Run these in order — all must pass</div>
+    <div class="bw"><pre><span class="c"># 1. Package imports</span>
+<span class="p">$</span> <span class="d">python -c</span> <span class="v">"import config,src,src.data,src.rag,src.classification,src.evaluation; print('Imports OK')"</span>
+
+<span class="c"># 2. Settings</span>
+<span class="p">$</span> <span class="d">python -c</span> <span class="v">"from config.settings import settings; print('Settings OK, port:', settings.api_port)"</span>
+
+<span class="c"># 3. FastAPI app loads (no circular import)</span>
+<span class="p">$</span> <span class="d">python -c</span> <span class="v">"from api.main import app; print('FastAPI OK')"</span>
+<span class="p">$</span> <span class="d">python -c</span> <span class="v">"from api.routes import query; print('Routes OK — no circular import')"</span>
+
+<span class="c"># 4. All tests pass</span>
+<span class="p">$</span> <span class="d">make test</span>   <span class="c"># Expected: 9 passed (test_api), skipped (model-dependent tests)</span>
+
+<span class="c"># 5. Linting passes</span>
+<span class="p">$</span> <span class="d">make lint</span>   <span class="c"># Expected: no errors</span>
+
+<span class="c"># 6. Docker builds</span>
+<span class="p">$</span> <span class="d">make docker-build</span>   <span class="c"># Expected: exit code 0</span>
+
+<span class="c"># 7. Container responds</span>
+<span class="p">$</span> <span class="d">docker run -p 8000:8000 --env-file .env --rm healthcare-rag:latest &</span>
+<span class="p">$</span> <span class="d">sleep 30 && curl http://localhost:8000/health</span>
+<span class="c"># Expected: {"status":"ok","model_loaded":true}</span>
+<span class="p">$</span> <span class="d">docker stop $(docker ps -q)</span>
+
+<span class="c"># 8. Azure URL responds</span>
+<span class="p">$</span> <span class="d">curl</span> <span class="v">https://healthcare-rag-app.azurewebsites.net/health</span>
+<span class="c"># Expected: {"status":"ok"}</span>
+
+<span class="c"># 9. Latency test passes</span>
+<span class="p">$</span> <span class="d">make latency-test</span>
+<span class="c"># Expected: 20/20 ≤5000ms, 20/20 disclaimer present</span>
+
+<span class="c"># 10. No large files staged</span>
+<span class="p">$</span> <span class="d">git status</span>
+<span class="c"># Should NOT show *.bin, *.pt, *.faiss, *.pkl, .env</span>
+
+<span class="c"># 11. Final push</span>
+<span class="p">$</span> <span class="d">make freeze && git add requirements.txt && git commit -m</span> <span class="v">"M3: final requirements pin"</span>
+<span class="p">$</span> <span class="d">git push origin main</span></pre></div>
+  </div>
+</section>
+
+<!-- KPIs -->
+<section class="sec" id="kpis">
+  <div class="sh"><span class="sn">09</span><h2>M3 KPI Checkpoints</h2></div>
+  <div class="kgrid">
+    <div class="kc"><div class="kn">KPI 1</div><div class="kt">Live Azure URL → 200</div><div class="kh">GET /health returns HTTP 200 with body {"status":"ok"}. Verified by Eman then Abdelrahman.</div></div>
+    <div class="kc"><div class="kn">KPI 2</div><div class="kt">All 20 queries have disclaimer</div><div class="kh">Every /query response has non-empty disclaimer field. Zero exceptions. Measured by latency_test.py.</div></div>
+    <div class="kc"><div class="kn">KPI 3</div><div class="kt">Warm latency ≤ 5,000ms</div><div class="kh">All 20 warm-instance queries under 5,000ms. Cold-start excluded per proposal KPI definition.</div></div>
+    <div class="kc"><div class="kn">KPI 4</div><div class="kt">≥ 1 stable Docker deployment</div><div class="kh">Azure App Service logs show clean container start. Screenshot committed to reports/.</div></div>
+    <div class="kc"><div class="kn">KPI 5</div><div class="kt">API uptime ≥ 90% / 48h</div><div class="kh">Azure App Service built-in health monitor. Cold-start restarts recovering within 2min don't count as downtime.</div></div>
+  </div>
+</section>
+
+<!-- TIMELINE -->
+<section class="sec" id="timeline">
+  <div class="sh"><span class="sn">10</span><h2>Day-by-Day Timeline</h2></div>
+  <div class="tl-w">
+    <div class="tli"><div class="tld"><div class="tldot"></div></div><div class="tlc"><div class="tld-t">Days 1–5 · May 5–9</div><div class="tl-ti">Task 1 — FastAPI (Youssef)</div><ul class="tl-li"><li>Create all __init__.py files + setup.py + Makefile (Day 1)</li><li>Write schemas, routes, main in order</li><li>make test — 9 tests pass</li><li>Push api/ to GitHub</li></ul></div></div>
+    <div class="tli"><div class="tld"><div class="tldot" style="background:var(--acc2)"></div></div><div class="tlc"><div class="tld-t">Days 4–9 · May 8–13</div><div class="tl-ti">Task 2 — Docker (Doha)</div><ul class="tl-li"><li>Decide Option A (Azure Blob) or B (Git LFS) for weights</li><li>Write Dockerfile, docker-compose.yml, .dockerignore</li><li>make docker-build — success</li><li>docker run — both endpoints respond inside container</li></ul></div></div>
+    <div class="tli"><div class="tld"><div class="tldot" style="background:#a855f7"></div></div><div class="tlc"><div class="tld-t">Days 7–14 · May 11–18</div><div class="tl-ti">Task 3 — Azure (Eman)</div><ul class="tl-li"><li>All 10 Azure CLI steps in order</li><li>Confirm live URL returns 200</li><li>Share URL with Abdelrahman + Ziad immediately</li></ul></div></div>
+    <div class="tli"><div class="tld"><div class="tldot" style="background:var(--grn)"></div></div><div class="tlc"><div class="tld-t">Days 12–19 · May 16–23</div><div class="tl-ti">Task 4 — Latency Test (Abdelrahman)</div><ul class="tl-li"><li>make latency-test — all 20 queries ≤5,000ms</li><li>Fill deployment_test_report.md with real values</li><li>Commit latency_results.csv + report</li></ul></div></div>
+    <div class="tli"><div class="tld"><div class="tldot" style="background:var(--ylw)"></div></div><div class="tlc"><div class="tld-t">Days 17–21 · May 21–25 — DEADLINE May 25</div><div class="tl-ti">Task 5 — Docs + Submission (Ziad)</div><ul class="tl-li"><li>Write integration_doc.md</li><li>Update proposal DOCX Section 12 with live URL</li><li>make freeze → git push → mentor submission</li></ul></div></div>
+  </div>
+</section>
+
+<!-- FILES -->
+<section class="sec" id="files">
+  <div class="sh"><span class="sn">11</span><h2>Complete File Manifest — M3 (38 files)</h2></div>
+  <table class="ftbl">
+    <thead><tr><th>File</th><th>Task/Role</th><th>Owner</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td><span class="fp">config/__init__.py</span></td><td>Infra</td><td>All</td><td>Written §00</td></tr>
+      <tr><td><span class="fp">config/settings.py</span></td><td>Infra</td><td>All</td><td>Written §00</td></tr>
+      <tr><td><span class="fp">src/__init__.py</span></td><td>Infra</td><td>All</td><td>Written §00</td></tr>
+      <tr><td><span class="fp">src/data/__init__.py</span></td><td>Infra</td><td>All</td><td>Written §00</td></tr>
+      <tr><td><span class="fp">src/rag/__init__.py</span></td><td>Infra</td><td>All</td><td>Written §00</td></tr>
+      <tr><td><span class="fp">src/classification/__init__.py</span></td><td>Infra</td><td>All</td><td>Written §00</td></tr>
+      <tr><td><span class="fp">src/evaluation/__init__.py</span></td><td>Infra</td><td>All</td><td>Written §00</td></tr>
+      <tr><td><span class="fp">mlops/__init__.py</span></td><td>Infra (M4)</td><td>All</td><td>Written §00</td></tr>
+      <tr><td><span class="fp">dashboard/__init__.py</span></td><td>Infra (M4)</td><td>All</td><td>Written §00</td></tr>
+      <tr><td><span class="fp">tests/__init__.py</span></td><td>Infra</td><td>All</td><td>Written §00</td></tr>
+      <tr><td><span class="fp">scripts/__init__.py</span></td><td>Infra</td><td>All</td><td>Written §00</td></tr>
+      <tr><td><span class="fp">setup.py</span></td><td>Infra</td><td>All</td><td>Written §00</td></tr>
+      <tr><td><span class="fp">Makefile</span></td><td>Infra</td><td>All</td><td>Written §00</td></tr>
+      <tr><td><span class="fp">.env.example</span></td><td>Infra</td><td>All</td><td>Written §00</td></tr>
+      <tr><td><span class="fp">.gitignore</span></td><td>Infra</td><td>All</td><td>Written §00</td></tr>
+      <tr><td><span class="fp">requirements.txt</span></td><td>Infra</td><td>All</td><td>Written §00</td></tr>
+      <tr><td><span class="fp">README.md</span></td><td>Infra</td><td>All</td><td>Written §00</td></tr>
+      <tr><td><span class="fp">data/embeddings/faiss_index/.gitkeep</span></td><td>Infra</td><td>All</td><td>Written §00</td></tr>
+      <tr><td><span class="fp">models/classifier/.gitkeep</span></td><td>Infra</td><td>All</td><td>Written §00</td></tr>
+      <tr><td><span class="fp">src/classification/classifier.py</span></td><td>M2 T3 interface</td><td>Doha</td><td>Interface §01</td></tr>
+      <tr><td><span class="fp">src/rag/vectorstore.py</span></td><td>M2 T1 interface</td><td>Ziad</td><td>Interface §01</td></tr>
+      <tr><td><span class="fp">src/rag/pipeline.py</span></td><td>M2 T2 interface</td><td>Youssef</td><td>Interface §01</td></tr>
+      <tr><td><span class="fp">src/pipeline.py</span></td><td>M2 T5</td><td>Abdelrahman</td><td>Written §02</td></tr>
+      <tr><td><span class="fp">scripts/download_models.py</span></td><td>M3 Infra</td><td>Doha</td><td>Written §02</td></tr>
+      <tr><td><span class="fp">api/__init__.py</span></td><td>M3 T1</td><td>Youssef</td><td>Written §03</td></tr>
+      <tr><td><span class="fp">api/schemas/__init__.py</span></td><td>M3 T1</td><td>Youssef</td><td>Written §03</td></tr>
+      <tr><td><span class="fp">api/schemas/request.py</span></td><td>M3 T1</td><td>Youssef</td><td>Written §03</td></tr>
+      <tr><td><span class="fp">api/routes/__init__.py</span></td><td>M3 T1 (relative import)</td><td>Youssef</td><td>Written §03</td></tr>
+      <tr><td><span class="fp">api/routes/query.py</span></td><td>M3 T1</td><td>Youssef</td><td>Written §03</td></tr>
+      <tr><td><span class="fp">api/main.py</span></td><td>M3 T1</td><td>Youssef</td><td>Written §03</td></tr>
+      <tr><td><span class="fp">tests/conftest.py</span></td><td>Infra</td><td>All</td><td>Written §03</td></tr>
+      <tr><td><span class="fp">tests/test_api.py</span></td><td>M3 T1</td><td>Youssef</td><td>Written §03</td></tr>
+      <tr><td><span class="fp">tests/test_rag_pipeline.py</span></td><td>M2 T5</td><td>Abdelrahman</td><td>Written §03</td></tr>
+      <tr><td><span class="fp">tests/test_preprocessing.py</span></td><td>M1 T5</td><td>Eman</td><td>Written §03</td></tr>
+      <tr><td><span class="fp">docker/Dockerfile</span></td><td>M3 T2</td><td>Doha</td><td>Written §04</td></tr>
+      <tr><td><span class="fp">docker/docker-compose.yml</span></td><td>M3 T2</td><td>Doha</td><td>Written §04</td></tr>
+      <tr><td><span class="fp">.dockerignore</span></td><td>M3 T2</td><td>Doha</td><td>Written §04</td></tr>
+      <tr><td><span class="fp">scripts/latency_test.py</span></td><td>M3 T4</td><td>Abdelrahman</td><td>Written §06</td></tr>
+      <tr><td><span class="fp">reports/deployment_test_report.md</span></td><td>M3 T4</td><td>Abdelrahman</td><td>Template §06</td></tr>
+      <tr><td><span class="fp">reports/integration_doc.md</span></td><td>M3 T5</td><td>Ziad</td><td>Written §07</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<footer>
+  <div><div class="fb2">Healthcare RAG — Milestone 3 Complete v3 (Final)</div><div class="fi">eyouth × DEPI 2025 · Microsoft ML Track · Deadline: May 25, 2026<br>Self-contained · 38 files · Every __init__.py · Every interface · No references to other documents</div></div>
+  <div class="ftgs"><span class="tg2">FastAPI</span> <span class="tg2">Docker</span> <span class="tg2">Azure ACR</span> <span class="tg2">App Service F1</span></div>
+</footer>
+</body>
+</html>
