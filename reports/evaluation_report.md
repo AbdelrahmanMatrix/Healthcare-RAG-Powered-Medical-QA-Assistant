@@ -1,7 +1,7 @@
 # RAG Evaluation Report
 **Healthcare RAG-Powered Medical Q&A Assistant**
 **Owner:** Eman Khalid Ismail
-**Generated:** 2026-04-30 17:45:06
+**Generated:** 2026-05-06 02:31:34
 
 ---
 
@@ -35,8 +35,8 @@
 - Hallucination rate: 10.0%
 
 ## RAG Latency
-- Mean: 595ms
-- Min: 268ms
-- Max: 1421ms
+- Mean: 422ms
+- Min: 260ms
+- Max: 961ms
 
 **Status: M2 Task 4 — Completed**

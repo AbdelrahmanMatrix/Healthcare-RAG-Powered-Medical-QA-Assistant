@@ -6,7 +6,7 @@
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 1,
-    "latency_ms": 781.77,
+    "latency_ms": 693.3,
     "sources": [
       {
         "chunk_id": 9676,
@@ -47,7 +47,7 @@
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 2,
-    "latency_ms": 431.84,
+    "latency_ms": 405.3,
     "sources": [
       {
         "chunk_id": 7908,
@@ -88,7 +88,7 @@
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 3,
-    "latency_ms": 417.45,
+    "latency_ms": 381.68,
     "sources": [
       {
         "chunk_id": 5821,
@@ -129,7 +129,7 @@
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 4,
-    "latency_ms": 433.23,
+    "latency_ms": 394.98,
     "sources": [
       {
         "chunk_id": 27,
@@ -170,7 +170,7 @@
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 5,
-    "latency_ms": 439.32,
+    "latency_ms": 352.6,
     "sources": [
       {
         "chunk_id": 3105,
@@ -211,7 +211,7 @@
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 5,
-    "latency_ms": 497.16,
+    "latency_ms": 352.16,
     "sources": [
       {
         "chunk_id": 3995,
@@ -252,7 +252,7 @@
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 5,
-    "latency_ms": 821.66,
+    "latency_ms": 350.74,
     "sources": [
       {
         "chunk_id": 4298,
@@ -293,7 +293,7 @@
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 5,
-    "latency_ms": 1146.06,
+    "latency_ms": 362.67,
     "sources": [
       {
         "chunk_id": 333,
@@ -334,7 +334,7 @@
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 3,
-    "latency_ms": 1179.63,
+    "latency_ms": 413.54,
     "sources": [
       {
         "chunk_id": 4799,
@@ -375,7 +375,7 @@
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 5,
-    "latency_ms": 907.34,
+    "latency_ms": 338.18,
     "sources": [
       {
         "chunk_id": 6252,
