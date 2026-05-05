@@ -5,7 +5,7 @@ After this, the Docker container can download them in Azure.
 from pathlib import Path
 from huggingface_hub import HfApi, create_repo
 
-HF_REPO_ID = "AbdooMatrix/distilbert-medical-classifier"
+HF_REPO_ID = "AbdoMatrix/distilbert-medical-classifier"
 LOCAL_PATH  = Path("models/classifier/distilbert_classifier")
 
 def main():

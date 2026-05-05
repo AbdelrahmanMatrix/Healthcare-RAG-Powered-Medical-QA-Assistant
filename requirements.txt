@@ -1,55 +1,75 @@
-# ─── Core ───────────────────────────────────────────────────────────────────
+# =========================================================
+# 🧠 Healthcare RAG Assistant — Requirements
+# =========================================================
+
+# ─── Core Configuration ───────────────────────────────────
 python-dotenv==1.0.0
 
-# ─── Data ───────────────────────────────────────────────────────────────────
+# ─── Data Processing & Utilities ──────────────────────────
 pandas==2.2.2
 numpy==1.26.4
-datasets==2.19.1
-huggingface-hub==0.23.2
+scipy==1.13.1
 tabulate==0.9.0
+tqdm==4.66.4
 langdetect==1.0.9
 
-# ─── NLP & Embeddings ───────────────────────────────────────────────────────
+# ─── Hugging Face Ecosystem ───────────────────────────────
+datasets==2.19.1
+huggingface-hub==0.23.2
+
+# ─── NLP & Embeddings ─────────────────────────────────────
 transformers==4.41.2
 accelerate==0.31.0
 sentence-transformers==3.0.0
 tokenizers==0.19.1
-# NOTE: Install torch with CUDA separately:
-#   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+sentencepiece==0.2.0
 
-# ─── RAG Pipeline ───────────────────────────────────────────────────────────
+# ⚠️ Install PyTorch separately depending on your system:
+# GPU (recommended):
+# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+#
+# CPU:
+# pip install torch
+
+# ─── RAG & Vector Store ───────────────────────────────────
 faiss-cpu==1.8.0
 
-# ─── Classification ─────────────────────────────────────────────────────────
+# ─── Machine Learning ─────────────────────────────────────
 scikit-learn==1.4.2
 
-# ─── Evaluation Metrics ─────────────────────────────────────────────────────
+# ─── Evaluation Metrics ───────────────────────────────────
 nltk==3.8.1
 rouge-score==0.1.2
 evaluate==0.4.2
 
-# ─── API ────────────────────────────────────────────────────────────────────
+# ─── API & Backend ────────────────────────────────────────
 fastapi==0.111.0
 uvicorn==0.30.1
 pydantic==2.7.3
 pydantic-settings==2.2.1
+httpx==0.27.0
+requests==2.31.0
 
-# ─── MLOps ──────────────────────────────────────────────────────────────────
+# ─── MLOps & Cloud ────────────────────────────────────────
 mlflow==2.13.2
+azure-storage-blob==12.19.0
 
-# ─── Dashboard ──────────────────────────────────────────────────────────────
+# ─── Dashboard & Visualization ────────────────────────────
 streamlit==1.35.0
 plotly==5.22.0
 
-# ─── EDA & Visualization ────────────────────────────────────────────────────
+# ─── Data Visualization (EDA) ─────────────────────────────
 matplotlib==3.9.0
 seaborn==0.13.2
 wordcloud==1.9.3
 
-# ─── Notebook ───────────────────────────────────────────────────────────────
+# ─── Notebook Environment ─────────────────────────────────
 jupyter==1.0.0
 ipykernel==6.29.4
-tqdm==4.66.4
 
-# ─── Stability ──────────────────────────────────────────────────────────────
+# ─── Dev & Testing ────────────────────────────────────────
+flake8==7.0.0
+pytest-asyncio==0.23.6
+
+# ─── Stability & Performance ──────────────────────────────
 threadpoolctl==3.6.0

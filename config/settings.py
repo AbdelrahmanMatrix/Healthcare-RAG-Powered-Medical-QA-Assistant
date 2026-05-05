@@ -27,6 +27,18 @@ class Settings(BaseSettings):
     # API keys (from .env, never hardcoded)
     GROQ_API_KEY: str = ""
 
+    disclaimer: str = (
+        "This is an informational assistant only. "
+        "Always consult a qualified healthcare professional for medical decisions. "
+        "Do not use this information as a substitute for professional medical advice, "
+        "diagnosis, or treatment."
+    )
+
+    categories: list = [
+        "Symptoms", "Diagnosis", "Treatment",
+        "Medication", "Prevention", "General"
+    ]
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
