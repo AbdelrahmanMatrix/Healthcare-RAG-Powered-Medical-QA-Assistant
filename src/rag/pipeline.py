@@ -152,6 +152,10 @@ class RAGPipeline:
             "text2text-generation",
             model=llm_model,
             max_new_tokens=max_new_tokens,
+            min_new_tokens=60,
+            num_beams=4,
+            early_stopping=True,
+            no_repeat_ngram_size=3,
             do_sample=False,
         )
         print("✅ RAG Pipeline ready")
@@ -239,12 +243,14 @@ class RAGPipeline:
         evidence = "\n---\n".join(evidence_blocks)
 
         return (
-            "You are a medical assistant. Use the medical evidence below to "
-            "answer the question concisely. If the evidence does not contain "
-            "enough information, reply: \"insufficient evidence\".\n\n"
-            f"Evidence:\n{evidence}\n\n"
+            "You are a medical information assistant. "
+            "Using the medical evidence below, write a detailed and complete answer "
+            "to the question. Your answer must be at least 3 sentences long and "
+            "must explain the reasoning using the provided evidence. "
+            "Do not answer with only yes or no.\n\n"
+            f"Medical Evidence:\n{evidence}\n\n"
             f"Question: {query}\n\n"
-            "Answer:"
+            "Detailed Answer:"
         )
 
     def generate(self, query: str, retrieved_chunks: list[dict]) -> str:
