@@ -2,11 +2,11 @@
   {
     "question": "What are the early symptoms of type 2 diabetes?",
     "category": "Symptoms",
-    "answer_raw": "impaired glucose metabolism and type 2 diabetes. ---",
+    "answer_raw": "Incident impaired fasting glucose, impaired glucose tolerance, and newly diagnosed type 2 diabetes are associated with increased bodily pain at baseline compared with those with normal glucose tolerance.",
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 1,
-    "latency_ms": 693.3,
+    "latency_ms": 3588.63,
     "sources": [
       {
         "chunk_id": 9676,
@@ -43,11 +43,11 @@
   {
     "question": "What are the symptoms of diaphragmatic herniation?",
     "category": "Symptoms",
-    "answer_raw": "The retrieved medical literature does not contain enough information to answer this question confidently. Please consult the listed sources directly or rephrase your question.",
+    "answer_raw": "PODH is a common complication following esophagectomy or total gastrectomy.",
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 2,
-    "latency_ms": 405.3,
+    "latency_ms": 3357.1,
     "sources": [
       {
         "chunk_id": 7908,
@@ -84,11 +84,11 @@
   {
     "question": "How is pneumonia diagnosed in elderly patients?",
     "category": "Diagnosis",
-    "answer_raw": "The retrieved medical literature does not contain enough information to answer this question confidently. Please consult the listed sources directly or rephrase your question.",
+    "answer_raw": "A chest physician diagnoses chronic obstructive pulmonary disease (COPD) in elderly patients.",
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 3,
-    "latency_ms": 381.68,
+    "latency_ms": 2973.65,
     "sources": [
       {
         "chunk_id": 5821,
@@ -125,11 +125,11 @@
   {
     "question": "How accurate is diagnosis of acute otitis media in primary care?",
     "category": "Diagnosis",
-    "answer_raw": "The retrieved medical literature does not contain enough information to answer this question confidently. Please consult the listed sources directly or rephrase your question.",
+    "answer_raw": "The inter-rater agreement in diagnosis of acute otitis media in primary care is moderate to substantial.",
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 4,
-    "latency_ms": 394.98,
+    "latency_ms": 2721.18,
     "sources": [
       {
         "chunk_id": 27,
@@ -166,11 +166,11 @@
   {
     "question": "What are the current treatment options for hypertension?",
     "category": "Treatment",
-    "answer_raw": "The retrieved medical literature does not contain enough information to answer this question confidently. Please consult the listed sources directly or rephrase your question.",
+    "answer_raw": "Arterial hypertension is the most frequently observed vascular risk factor. Physical and rehabilitative interventions may affect arterial blood pressure. The frequency of hypertensive patients in an outpatient clinic of physical medicine is unknown.",
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 5,
-    "latency_ms": 352.6,
+    "latency_ms": 3968.1,
     "sources": [
       {
         "chunk_id": 3105,
@@ -207,11 +207,11 @@
   {
     "question": "Is laparoscopic surgery better than open surgery for prostatectomy?",
     "category": "Treatment",
-    "answer_raw": "The retrieved medical literature does not contain enough information to answer this question confidently. Please consult the listed sources directly or rephrase your question.",
+    "answer_raw": "Robot-assisted laparoscopic radical prostatectomy is a safe procedure even in the hands of surgeons with no prior experience. Robotic surgery is not associated with increased operating time, robotic-assist time, surgical margin positivity, or rate of complications in patients undergoing RALP.",
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 5,
-    "latency_ms": 352.16,
+    "latency_ms": 5220.61,
     "sources": [
       {
         "chunk_id": 3995,
@@ -248,11 +248,11 @@
   {
     "question": "What are the side effects of metformin?",
     "category": "Medication",
-    "answer_raw": "The retrieved medical literature does not contain enough information to answer this question confidently. Please consult the listed sources directly or rephrase your question.",
+    "answer_raw": "GI AE, frequency of vomiting and frequency of discomfort. In women with PCOS, continuous use of metformin during pregnancy significantly reduced the rate of miscarriage, gestational diabetes requiring insulin treatment and fetal growth restriction.",
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 5,
-    "latency_ms": 350.74,
+    "latency_ms": 4431.45,
     "sources": [
       {
         "chunk_id": 4298,
@@ -289,11 +289,11 @@
   {
     "question": "How can cardiovascular disease be prevented through lifestyle changes?",
     "category": "Prevention",
-    "answer_raw": "The retrieved medical literature does not contain enough information to answer this question confidently. Please consult the listed sources directly or rephrase your question.",
+    "answer_raw": "Cardiovascular disease can be prevented through lifestyle changes. Lifestyle changes can reduce the risk of cardiovascular disease.",
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 5,
-    "latency_ms": 362.67,
+    "latency_ms": 2550.81,
     "sources": [
       {
         "chunk_id": 333,
@@ -329,30 +329,18 @@
   },
   {
     "question": "What is the role of the immune system in fighting infections?",
-    "category": "Prevention",
-    "answer_raw": "The retrieved medical literature does not contain enough information to answer this question confidently. Please consult the listed sources directly or rephrase your question.",
+    "category": "General",
+    "answer_raw": "Infection is common following stroke and is independently associated with worse outcome. Stroke severity is the most important predictor of infection risk. Increased plasma cortisol, IL-10, and IL-1ra, as well as decreased lymphocyte numbers, at 72 h after stroke onset were associated with risk of subsequent infection.",
     "disclaimer_present": true,
     "top_k": 5,
-    "category_matched_sources": 3,
-    "latency_ms": 413.54,
+    "category_matched_sources": 1,
+    "latency_ms": 6804.35,
     "sources": [
       {
-        "chunk_id": 4799,
-        "question": "Staphylococcal enterotoxin induced IL-5 stimulation as a cofactor in the pathogenesis of atopic disease: the hygiene hypothesis in reverse?",
-        "category": "Prevention",
-        "distance": 1.126909852027893
-      },
-      {
-        "chunk_id": 7098,
-        "question": "Does prolonged cycling of moderate intensity affect immune cell function?",
-        "category": "Prevention",
-        "distance": 1.2008086442947388
-      },
-      {
-        "chunk_id": 528,
-        "question": "Does progesterone inhibit bacteria-stimulated interleukin-8 production by lower genital tract epithelial cells?",
-        "category": "Prevention",
-        "distance": 1.2377080917358398
+        "chunk_id": 7204,
+        "question": "Expansion of hepatitis C-specific CD4+CD25+ regulatory T cells after viral clearance: a mechanism to limit collateral damage?",
+        "category": "General",
+        "distance": 1.1258407831192017
       },
       {
         "chunk_id": 4873,
@@ -365,17 +353,29 @@
         "question": "Post-stroke infection: a role for IL-1ra?",
         "category": "Symptoms",
         "distance": 1.0936121940612793
+      },
+      {
+        "chunk_id": 2025,
+        "question": "Neonatal immune responses to microbial stimuli: is there an influence of maternal allergy?",
+        "category": "Medication",
+        "distance": 1.1246814727783203
+      },
+      {
+        "chunk_id": 2985,
+        "question": "Increase in T-cell subsets of oral mucosa: a late immune response in patients with treated coeliac disease?",
+        "category": "Treatment",
+        "distance": 1.125030279159546
       }
     ]
   },
   {
     "question": "Are there advantages of induction therapy in renal transplantation?",
     "category": "Treatment",
-    "answer_raw": "The retrieved medical literature does not contain enough information to answer this question confidently. Please consult the listed sources directly or rephrase your question.",
+    "answer_raw": "Induction therapy with the IL-2R antagonist basiliximab is associated with a reduced incidence of acute rejection episodes but not improved graft survival.",
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 5,
-    "latency_ms": 338.18,
+    "latency_ms": 5543.42,
     "sources": [
       {
         "chunk_id": 6252,

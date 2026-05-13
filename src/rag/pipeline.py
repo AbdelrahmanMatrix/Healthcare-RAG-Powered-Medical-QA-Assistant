@@ -2,8 +2,8 @@
 RAG Pipeline for Healthcare Medical Q&A.
 
 Chain: embed query → retrieve top-K FAISS chunks → inject top-N truncated
-       contexts into prompt → generate answer via flan-t5-base
-       → clean output → empty-answer guard → append disclaimer.
+       contexts into prompt → generate answer via Groq (llama-3.1-8b-instant)
+       or flan-t5-base fallback → clean output → empty-answer guard → append disclaimer.
 
 Public API (stable — used by notebooks 06, 08, 09, 10 and by the M3 FastAPI):
     build_rag_pipeline(**kwargs) -> RAGPipeline
@@ -25,8 +25,8 @@ from pathlib import Path
 
 import faiss
 import numpy as np
+from openai import OpenAI
 from sentence_transformers import SentenceTransformer
-from transformers import pipeline as hf_pipeline
 
 
 # ── Constants ────────────────────────────────────────────────────────────────
@@ -48,11 +48,11 @@ DEFAULT_EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 DEFAULT_LLM_MODEL = "google/flan-t5-base"
 
 # Retrieval / generation knobs (tunable from M3 config/settings.py later)
-DEFAULT_TOP_K = 5            # chunks returned to the API caller
-DEFAULT_INJECT_K = 3         # chunks actually fed to the LLM
-DEFAULT_MAX_CONTEXT_WORDS = 80   # per-chunk context truncation
+DEFAULT_TOP_K = 5             # chunks returned to the API caller
+DEFAULT_INJECT_K = 3          # chunks actually fed to the LLM
+DEFAULT_MAX_CONTEXT_WORDS = 200   # per-chunk context truncation (was 80 — increased for ROUGE-L)
 DEFAULT_MAX_NEW_TOKENS = 256
-DEFAULT_MIN_ANSWER_WORDS = 3     # under this → use insufficient-context fallback
+DEFAULT_MIN_ANSWER_WORDS = 3      # under this → use insufficient-context fallback
 
 # Resolve paths relative to project root
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -109,8 +109,9 @@ class RAGPipeline:
     Components:
       1. SentenceTransformer encoder (query embedding)
       2. FAISS index (vector retrieval)
-      3. Chunk mapping (id → text)
-      4. HuggingFace LLM (answer generation)
+      3. BM25 keyword index (hybrid retrieval — optional, degrades gracefully)
+      4. Chunk mapping (id → text)
+      5. Groq LLM via OpenAI-compatible API (falls back to local flan-t5-base)
     """
 
     def __init__(
@@ -146,18 +147,40 @@ class RAGPipeline:
         with open(map_path, "rb") as f:
             self.mapping_df = pickle.load(f)
 
+        # ── BM25 keyword index (outside with-block — FIX #2) ────────
+        try:
+            from src.rag.bm25_retriever import BM25Retriever
+            self.bm25 = BM25Retriever(self.mapping_df)
+            self._use_bm25 = True
+        except ImportError:
+            self._use_bm25 = False
+
         # ── Load LLM ────────────────────────────────────────────────
-        print(f"Loading LLM: {llm_model}")
-        self.generator = hf_pipeline(
-            "text2text-generation",
-            model=llm_model,
-            max_new_tokens=max_new_tokens,
-            min_new_tokens=60,
-            num_beams=4,
-            early_stopping=True,
-            no_repeat_ngram_size=3,
-            do_sample=False,
-        )
+        groq_key = os.getenv("GROQ_API_KEY", "")
+        if groq_key:
+            print(f"Loading LLM via Groq API: {llm_model}")
+            self._groq_client = OpenAI(
+                api_key=groq_key,
+                base_url="https://api.groq.com/openai/v1",
+            )
+            self._groq_model = llm_model
+            self._use_groq = True
+            print("✅ Groq client ready")
+        else:
+            print("GROQ_API_KEY not set — falling back to local flan-t5-base")
+            from transformers import pipeline as hf_pipeline
+            self.generator = hf_pipeline(
+                "text2text-generation",
+                model="google/flan-t5-base",
+                max_new_tokens=max_new_tokens,
+                min_new_tokens=15,       # was 60 — reduced so short answers aren't padded
+                num_beams=4,
+                early_stopping=True,
+                no_repeat_ngram_size=3,
+                do_sample=False,
+            )
+            self._use_groq = False
+
         print("✅ RAG Pipeline ready")
 
     # ── Retrieval ────────────────────────────────────────────────────
@@ -176,20 +199,41 @@ class RAGPipeline:
 
     def retrieve(self, query: str, top_k: int = None) -> list[dict]:
         """
-        Embed query and retrieve top-k chunks from FAISS.
+        Hybrid retrieval: BM25 keyword search + FAISS semantic search.
 
-        Returns list of dicts with keys: chunk_id, question, context,
-        answer, category, text_chunk, distance.
+        BM25 high-confidence hits (score > 5.0) come first — they likely
+        matched the exact paper by keyword. FAISS results fill remaining slots.
+        Falls back to FAISS-only if rank-bm25 is not installed.
         """
         k = top_k or self.top_k
 
+        # FAISS semantic retrieval
         query_vector = self.encoder.encode(
             [query], convert_to_numpy=True
         ).astype(np.float32)
-
         D, I = self.index.search(query_vector, k)
+        faiss_results = [
+            self._row_to_dict(int(I[0, r]), float(D[0, r])) for r in range(k)
+        ]
 
-        return [self._row_to_dict(int(I[0, r]), float(D[0, r])) for r in range(k)]
+        if not self._use_bm25:
+            return faiss_results
+
+        # BM25 keyword retrieval
+        bm25_results = self.bm25.retrieve(query, top_k=k)
+
+        # Merge: high-confidence BM25 hits first, then FAISS to fill slots
+        seen, merged = set(), []
+        for r in bm25_results:
+            if r["bm25_score"] > 5.0 and r["chunk_id"] not in seen:
+                merged.append(r)
+                seen.add(r["chunk_id"])
+        for r in faiss_results:
+            if r["chunk_id"] not in seen:
+                merged.append(r)
+                seen.add(r["chunk_id"])
+
+        return merged[:k]
 
     def retrieve_by_category(
         self, query: str, category: str, top_k: int = None
@@ -226,52 +270,71 @@ class RAGPipeline:
         """
         Build the LLM prompt from the top `inject_k` chunks.
 
-        Design notes:
-          - We deliberately do NOT label chunks "[Source 1]", "[Source 2]",
-            because flan-t5-base learned to copy those markers into its
-            output. Plain '---' separators avoid that failure mode.
-          - Each chunk's context is truncated to max_context_words words
-            so the full prompt stays under the 512-token encoder limit.
+        Key design change: the retrieved chunk's `answer` field (the actual
+        research conclusion) is placed first and labelled "Research Conclusion".
+        This causes the LLM to stay lexically close to the source text,
+        dramatically improving ROUGE-L overlap vs. the original verbose prompt.
         """
         evidence_blocks = []
-        for chunk in chunks[: self.inject_k]:
+        for i, chunk in enumerate(chunks[: self.inject_k]):
+            answer_text = chunk.get("answer", "").strip()
             ctx = _truncate_words(chunk["context"], self.max_context_words)
             evidence_blocks.append(
-                f"Context: {ctx}\n"
-                f"Conclusion: {chunk['answer']}"
+                f"Research Conclusion {i + 1}: {answer_text}\n"
+                f"Supporting Context: {ctx}"
             )
         evidence = "\n---\n".join(evidence_blocks)
 
         return (
-            "You are a medical information assistant. "
-            "Using the medical evidence below, write a detailed and complete answer "
-            "to the question. Your answer must be at least 3 sentences long and "
-            "must explain the reasoning using the provided evidence. "
-            "Do not answer with only yes or no.\n\n"
+            "You are a medical research assistant. "
+            "Using the research conclusions below, write a concise, accurate answer "
+            "to the medical question. "
+            "Stay as close as possible to the language of the research conclusions. "
+            "Do not add information not found in the evidence.\n\n"
             f"Medical Evidence:\n{evidence}\n\n"
             f"Question: {query}\n\n"
-            "Detailed Answer:"
+            "Concise Answer (based on the research conclusions above):"
         )
 
     def generate(self, query: str, retrieved_chunks: list[dict]) -> str:
         """
         Build prompt from retrieved context and generate a cleaned answer.
 
+        Uses Groq (llama-3.1-8b-instant) if GROQ_API_KEY is set,
+        otherwise falls back to local flan-t5-base.
         Returns the cleaned answer string (no disclaimer).
-        Empty/nonsense outputs are replaced with INSUFFICIENT_CONTEXT_MESSAGE.
         """
         if not retrieved_chunks:
             return INSUFFICIENT_CONTEXT_MESSAGE
 
         prompt = self._build_prompt(query, retrieved_chunks)
-        raw = self.generator(prompt)[0]["generated_text"]
+
+        if self._use_groq:
+            response = self._groq_client.chat.completions.create(
+                model=self._groq_model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": (
+                            "You are a medical research assistant. Answer medical questions "
+                            "by closely following the provided research conclusions. "
+                            "Be concise and accurate."
+                        ),
+                    },
+                    {"role": "user", "content": prompt},
+                ],
+                max_tokens=self.max_new_tokens,
+                temperature=0.1,  # low temperature → stays close to source → better ROUGE-L
+            )
+            raw = response.choices[0].message.content.strip()
+        else:
+            raw = self.generator(prompt)[0]["generated_text"]
+
         cleaned = _clean_answer(raw)
 
-        # Detect explicit insufficient-evidence reply
         if cleaned.lower().startswith("insufficient evidence"):
             return INSUFFICIENT_CONTEXT_MESSAGE
 
-        # Detect empty / single-token / nonsense outputs
         if _is_insufficient(cleaned, self.min_answer_words):
             return INSUFFICIENT_CONTEXT_MESSAGE
 
@@ -353,7 +416,24 @@ _pipeline_instance: RAGPipeline | None = None
 
 
 def build_rag_pipeline(**kwargs) -> RAGPipeline:
-    """Build and cache a RAG pipeline instance."""
+    """
+    Build and cache a RAG pipeline instance.
+    Reads LLM model, top_k, and max_tokens from config/settings.py if available,
+    so that settings.LLM_MODEL = 'llama-3.1-8b-instant' is picked up automatically.
+    Any kwargs passed in override the settings defaults.
+    """
+    try:
+        from config.settings import settings
+        defaults = {
+            "llm_model": settings.LLM_MODEL,
+            "top_k": settings.TOP_K,
+            "max_new_tokens": settings.MAX_TOKENS,
+        }
+        defaults.update(kwargs)
+        kwargs = defaults
+    except Exception:
+        pass  # fall back to hardcoded defaults if settings unavailable
+
     global _pipeline_instance
     _pipeline_instance = RAGPipeline(**kwargs)
     return _pipeline_instance

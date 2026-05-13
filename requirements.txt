@@ -29,7 +29,7 @@ sentencepiece==0.2.0
 # pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 #
 # CPU:
-# pip install torch
+torch==2.2.2
 
 # ─── RAG & Vector Store ───────────────────────────────────
 faiss-cpu==1.8.0
@@ -73,3 +73,6 @@ pytest-asyncio==0.23.6
 
 # ─── Stability & Performance ──────────────────────────────
 threadpoolctl==3.6.0
+
+openai==1.35.3
+rank-bm25==0.2.2
