@@ -21,6 +21,7 @@ Public API (stable — used by notebooks 06, 08, 09, 10 and by the M3 FastAPI):
 import os
 import pickle
 import re
+import threading
 from pathlib import Path
 
 import faiss
@@ -165,6 +166,13 @@ class RAGPipeline:
         except ImportError:
             self._use_bm25 = False
 
+        # Cache BM25 threshold at init time to avoid repeated imports on the hot path
+        try:
+            from config.settings import settings
+            self._bm25_threshold = settings.BM25_THRESHOLD
+        except Exception:
+            self._bm25_threshold = 5.0
+
         # ── Load LLM ────────────────────────────────────────────────
         groq_key = os.getenv("GROQ_API_KEY", "")
         if groq_key:
@@ -233,16 +241,9 @@ class RAGPipeline:
         bm25_results = self.bm25.retrieve(query, top_k=k)
 
         # Merge: high-confidence BM25 hits first, then FAISS to fill slots.
-        # Threshold is configurable via config/settings.py → BM25_THRESHOLD.
-        try:
-            from config.settings import settings
-            bm25_threshold = settings.BM25_THRESHOLD
-        except Exception:
-            bm25_threshold = 5.0
-
         seen, merged = set(), []
         for r in bm25_results:
-            if r["bm25_score"] > bm25_threshold and r["chunk_id"] not in seen:
+            if r["bm25_score"] > self._bm25_threshold and r["chunk_id"] not in seen:
                 merged.append(r)
                 seen.add(r["chunk_id"])
         for r in faiss_results:
@@ -379,15 +380,25 @@ class RAGPipeline:
     # ── Public answer methods ────────────────────────────────────────
 
     def _format_sources(self, retrieved: list[dict]) -> list[dict]:
-        return [
-            {
-                "chunk_id": r["chunk_id"],
-                "question": r["question"],
-                "category": r["category"],
-                "distance": r["distance"],
-            }
-            for r in retrieved
-        ]
+        results = []
+        for r in retrieved:
+            raw_dist = r["distance"]
+            # Normalise to a 0-1 relevance score (1.0 = most relevant).
+            # FAISS IndexFlatL2: positive L2 distances, lower = better (typical range 0-200).
+            # BM25: stores -bm25_score, so raw_dist is negative (typical range -50 to 0).
+            if raw_dist <= 0:
+                relevance = min(1.0, -raw_dist / 30.0)   # BM25
+            else:
+                relevance = max(0.0, 1.0 - raw_dist / 200.0)  # FAISS L2
+            results.append({
+                "chunk_id":        r["chunk_id"],
+                "question":        r["question"],
+                "category":        r["category"],
+                "distance":        round(raw_dist, 4),
+                "relevance_score": round(relevance, 4),   # 0-1, higher = better
+                "excerpt":         r.get("context", "")[:150].strip(),
+            })
+        return results
 
     def answer(self, query: str, top_k: int = None) -> dict:
         """
@@ -449,29 +460,33 @@ class RAGPipeline:
 # ── Module-level convenience functions (cached singleton) ───────────────────
 
 _pipeline_instance: RAGPipeline | None = None
+_pipeline_lock = threading.Lock()
 
 
 def build_rag_pipeline(**kwargs) -> RAGPipeline:
     """
-    Build and cache a RAG pipeline instance.
-    Reads LLM model, top_k, and max_tokens from config/settings.py if available,
-    so that settings.LLM_MODEL = 'llama-3.1-8b-instant' is picked up automatically.
-    Any kwargs passed in override the settings defaults.
-    """
-    try:
-        from config.settings import settings
-        defaults = {
-            "llm_model": settings.LLM_MODEL,
-            "top_k": settings.TOP_K,
-            "max_new_tokens": settings.MAX_TOKENS,
-        }
-        defaults.update(kwargs)
-        kwargs = defaults
-    except Exception:
-        pass  # fall back to hardcoded defaults if settings unavailable
+    Build and cache a RAG pipeline instance (thread-safe singleton).
 
+    Uses double-checked locking: safe when called from multiple threads
+    simultaneously (e.g. during lifespan warmup + first real request race).
+    Any kwargs passed in override settings defaults.
+    """
     global _pipeline_instance
-    _pipeline_instance = RAGPipeline(**kwargs)
+    if _pipeline_instance is None:
+        with _pipeline_lock:
+            if _pipeline_instance is None:   # re-check inside the lock
+                try:
+                    from config.settings import settings
+                    defaults = {
+                        "llm_model":      settings.LLM_MODEL,
+                        "top_k":          settings.TOP_K,
+                        "max_new_tokens": settings.MAX_TOKENS,
+                    }
+                    defaults.update(kwargs)
+                    kwargs = defaults
+                except Exception:
+                    pass  # fall back to hardcoded defaults if settings unavailable
+                _pipeline_instance = RAGPipeline(**kwargs)
     return _pipeline_instance
 
 

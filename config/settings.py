@@ -29,7 +29,12 @@ class Settings(BaseSettings):
     CORS_ORIGINS: list = ["*"]    # Tighten to specific origins before public launch; e.g. ["https://myapp.com"]
 
     # API keys (from .env, never hardcoded)
+    API_KEY: str = ""          # if empty, auth is disabled (dev mode)
     GROQ_API_KEY: str = ""
+
+    # Deployment info (reflected in Streamlit dashboard)
+    DEPLOY_ENV: str  = "local"     # e.g. "Azure App Service F1"
+    DEPLOY_DATE: str = ""          # e.g. "May 2026"
 
     disclaimer: str = (
         "This is an informational assistant only. "

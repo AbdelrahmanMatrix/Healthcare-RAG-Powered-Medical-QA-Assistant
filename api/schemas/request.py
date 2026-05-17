@@ -22,10 +22,12 @@ class QueryRequest(BaseModel):
 
 
 class SourceCitation(BaseModel):
-    chunk_id:  str
-    question:  str
-    category:  str
-    distance:  float
+    chunk_id:        str
+    question:        str
+    category:        str
+    distance:        float
+    relevance_score: float = 0.0   # 0-1, higher = more relevant (normalised)
+    excerpt:         str   = ""    # first 150 chars of retrieved context
 
 
 class QueryResponse(BaseModel):

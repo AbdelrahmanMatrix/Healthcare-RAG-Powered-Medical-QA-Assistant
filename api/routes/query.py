@@ -34,6 +34,8 @@ async def handle_query(request: QueryRequest) -> QueryResponse:
                 question=s.get("question", ""),
                 category=s.get("category", "Unknown"),
                 distance=round(float(s.get("distance", 0.0)), 4),
+                relevance_score=round(float(s.get("relevance_score", 0.0)), 4),
+                excerpt=s.get("excerpt", ""),
             )
             for s in raw_details
         ]

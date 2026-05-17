@@ -31,6 +31,10 @@ st.set_page_config(
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
+# Load deployment config from environment (set in .env)
+DEPLOY_ENV  = os.getenv("DEPLOY_ENV", "local")
+DEPLOY_DATE = os.getenv("DEPLOY_DATE", "—")
+
 # ── Helpers to load real data ─────────────────────────────────────────────────
 
 @st.cache_data(ttl=60)
@@ -108,8 +112,8 @@ corpus_size = len(labelled) if labelled is not None else 0
 col1, col2, col3, col4 = st.columns(4)
 col1.metric("Corpus Size", f"{corpus_size:,} pairs", help="Rows in pubmedqa_labelled.csv")
 col2.metric("Test Queries Run", query_count, help="From rag_pipeline_test_log.json")
-col3.metric("Deployment", "Azure App Service F1", help="Free Tier Linux Docker")
-col4.metric("Last M3 Deploy", "May 2026", help="Azure deployment date")
+col3.metric("Deployment", DEPLOY_ENV, help="Set DEPLOY_ENV in .env")
+col4.metric("Last Deploy", DEPLOY_DATE if DEPLOY_DATE else "—", help="Set DEPLOY_DATE in .env")
 
 azure_url = os.getenv("AZURE_APP_URL", "")
 if azure_url:

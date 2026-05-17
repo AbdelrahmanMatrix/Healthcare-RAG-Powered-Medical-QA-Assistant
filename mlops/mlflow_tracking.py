@@ -48,10 +48,12 @@ def _load_eval_metrics() -> dict:
     from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
     from rouge_score import rouge_scorer as rs_mod
     import nltk
-    try:
-        nltk.data.find("tokenizers/punkt")
-    except LookupError:
-        nltk.download("punkt", quiet=True)
+    # NLTK 3.8.1+ requires punkt_tab; download both for backward compat.
+    for _pkg in ("punkt", "punkt_tab"):
+        try:
+            nltk.data.find(f"tokenizers/{_pkg}")
+        except LookupError:
+            nltk.download(_pkg, quiet=True)
 
     df = pd.read_csv(EVAL_REPORT_PATH).dropna(subset=["rag_answer", "llm_answer", "reference"])
 
@@ -89,9 +91,12 @@ def _load_classifier_metrics() -> dict:
     # Parse macro avg F1 from the markdown report
     text = report_path.read_text()
     import re
-    m = re.search(r"macro avg.*?([\d.]+)\s*$", text, re.MULTILINE)
+    # Line format: "   macro avg    0.87    0.86    0.87    1000"
+    # Fields:       <label>         prec    recall  f1      support
+    # We want f1 (3rd numeric column), NOT support (last column).
+    m = re.search(r"macro avg\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+\d+", text)
     if m:
-        return {"macro_f1": float(m.group(1))}
+        return {"macro_f1": float(m.group(3))}   # group(3) = f1-score column
     return {}
 
 
@@ -153,13 +158,16 @@ def register_best_model(run_ids: list[str], experiment_name: str) -> None:
     """Register the first run as 'production' in the MLflow model registry."""
     client = mlflow.tracking.MlflowClient()
 
-    # Find run with lowest avg_latency_ms as a simple 'best' heuristic
+    # Prefer highest bleu_rag → rouge_rag → lowest latency as tie-break
     best_run_id = None
+    best_bleu = -1.0
     best_latency = float("inf")
     for rid in run_ids:
         run = client.get_run(rid)
-        lat = run.data.metrics.get("avg_latency_ms", float("inf"))
-        if lat < best_latency:
+        bleu = run.data.metrics.get("bleu_rag", -1.0)
+        lat  = run.data.metrics.get("avg_latency_ms", float("inf"))
+        if bleu > best_bleu or (bleu == best_bleu and lat < best_latency):
+            best_bleu = bleu
             best_latency = lat
             best_run_id = rid
 
@@ -195,14 +203,15 @@ def register_best_model(run_ids: list[str], experiment_name: str) -> None:
     selection_path.write_text(
         f"# MLflow Model Selection\n\n"
         f"**Selected run:** `{best_run_id[:8]}`\n\n"
-        f"**Reason:** Lowest simulated avg latency ({best_latency:.0f}ms) among {len(run_ids)} runs.\n\n"
+        f"**Reason:** Highest bleu_rag ({best_bleu:.4f}) among {len(run_ids)} runs "
+        f"(latency: {best_latency:.0f}ms).\n\n"
         f"**Parameters:**\n"
         + "\n".join(f"- `{k}`: `{v}`" for k, v in run_obj.data.params.items())
         + f"\n\n**Metrics:**\n"
         + "\n".join(f"- `{k}`: `{v:.4f}`" for k, v in run_obj.data.metrics.items())
     )
     print(f"  📝 model_selection.md written → {selection_path}")
-    print(f"  🏆 Best run: {best_run_id[:8]} (latency {best_latency:.0f}ms)")
+    print(f"  🏆 Best run: {best_run_id[:8]} (bleu_rag={best_bleu:.4f}, latency={best_latency:.0f}ms)")
 
 
 def main():

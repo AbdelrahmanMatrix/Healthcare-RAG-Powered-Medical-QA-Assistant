@@ -10,6 +10,7 @@ import os
 from datetime import datetime
 
 BASE_URL = os.getenv("AZURE_APP_URL", "https://healthcare-rag-app.azurewebsites.net")
+API_KEY = os.getenv("API_KEY", "")   # set in .env when auth is enabled
 VALID_CATS = {"Symptoms", "Diagnosis", "Treatment", "Medication", "Prevention", "General"}
 LIMIT_MS = 5000
 
@@ -51,7 +52,13 @@ def warm_up():
 def query_once(question: str, n: int) -> dict:
     try:
         t0 = time.perf_counter()
-        r = requests.post(f"{BASE_URL}/query", json={"question": question}, timeout=30)
+        headers = {"X-API-Key": API_KEY} if API_KEY else {}
+        r = requests.post(
+            f"{BASE_URL}/query",
+            json={"question": question},
+            headers=headers,
+            timeout=30,
+        )
         ms = round((time.perf_counter() - t0) * 1000, 1)
         if r.status_code == 200:
             d = r.json()
