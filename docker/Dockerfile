@@ -6,6 +6,11 @@ FROM python:3.10-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+
+# Accept HF_TOKEN at build time (used by entrypoint to download models/data)
+ARG HF_TOKEN=""
+ENV HF_TOKEN=${HF_TOKEN}
+
 WORKDIR /app
 
 # System deps

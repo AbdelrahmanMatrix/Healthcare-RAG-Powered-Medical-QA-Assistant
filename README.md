@@ -18,7 +18,7 @@ cd Healthcare-RAG-Powered-Medical-QA-Assistant
 pip install -r requirements.txt
 
 # 3. Download data + models (30 seconds)
-python download_data.py
+python download.py
 ```
 
 That's it. Run any notebook now.
@@ -66,7 +66,7 @@ That's it. Run any notebook now.
 ├── config/                              # Settings
 ├── tests/                               # Unit tests
 │
-├── download_data.py                     # ← Run this after cloning
+├── download.py                     # ← Run this after cloning
 ├── requirements.txt
 ├── setup.py
 └── README.md
@@ -127,9 +127,10 @@ User Query
 | Item | Value |
 |------|-------|
 | Embeddings | `sentence-transformers/all-MiniLM-L6-v2` (384d) |
-| Vector Store | FAISS IndexFlatL2 |
-| Generator | `google/flan-t5-base` |
+| Vector Store | FAISS IndexFlatL2 + BM25 hybrid retrieval |
+| Generator | `llama-3.1-8b-instant` via Groq API (falls back to `google/flan-t5-base` locally) |
 | Retrieval | Top-5 with category routing |
+| HTTP Client | `openai` Python SDK pointed at `api.groq.com/openai/v1` |
 
 ---
 
@@ -267,7 +268,7 @@ MIT License
 git clone https://github.com/AbdooMatrix/Healthcare-RAG-Powered-Medical-QA-Assistant.git
 cd Healthcare-RAG-Powered-Medical-QA-Assistant
 pip install -r requirements.txt
-python download_data.py
+python download.py
 ```
 
 Output:
@@ -282,7 +283,6 @@ Output:
    ❌ data/processed/pubmedqa_labelled.csv
    ❌ data/embeddings/faiss_index/pubmedqa_index_flatl2.faiss
    ❌ data/embeddings/faiss_index/chunk_mapping.pkl
-   ❌ data/embeddings/faiss_index/chunk_mapping.csv
 
 📥 Downloading 6 missing files...
 
@@ -291,7 +291,6 @@ Output:
   ✅ Downloaded: data/processed/pubmedqa_labelled.csv (12.3 MB)
   ✅ Downloaded: data/embeddings/faiss_index/pubmedqa_index_flatl2.faiss (14.7 MB)
   ✅ Downloaded: data/embeddings/faiss_index/chunk_mapping.pkl (11.8 MB)
-  ✅ Downloaded: data/embeddings/faiss_index/chunk_mapping.csv (12.0 MB)
 
 🎉 Setup complete! You can now run any notebook.
 ```

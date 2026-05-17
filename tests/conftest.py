@@ -15,12 +15,14 @@ MOCK_RESULT = {
     "answer": "Mock answer.",
     "category": "Symptoms",
     "sources": ["42"],
-    "source_details": [          # required by api/routes/query.py → SourceCitation schema
+    "source_details": [
         {
             "chunk_id": 42,
             "question": "What are the symptoms of diabetes?",
             "category": "Symptoms",
             "distance": 0.1234,
+            "relevance_score": 0.87,
+            "excerpt": "Diabetes mellitus type 2 is characterised by elevated blood glucose...",
         }
     ],
 }

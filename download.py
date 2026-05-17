@@ -2,7 +2,7 @@
 Healthcare RAG — One-Command Data Setup
 
 Run after cloning:
-    python download_data.py
+    python download.py
 
 Downloads all data files, FAISS index, and chunk mappings
 from HuggingFace so you can run any notebook immediately.

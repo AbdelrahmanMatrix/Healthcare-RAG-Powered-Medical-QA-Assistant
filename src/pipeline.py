@@ -22,9 +22,12 @@ def _get_rag():
 
 
 def run_query(query: str) -> dict:
-    """Original pipeline — returns full dict with disclaimer baked into 'answer'."""
-    category = predict(query)
-    return _get_rag().answer_with_routing(query, category=category)
+    """
+    Notebook / legacy entry point — wraps run_pipeline() so disclaimer
+    behaviour is identical to the API path (disclaimer as a separate field,
+    NOT baked into the answer string).
+    """
+    return run_pipeline(query)
 
 
 def run_pipeline(question: str, top_k: int = None, category: str = None) -> dict:
