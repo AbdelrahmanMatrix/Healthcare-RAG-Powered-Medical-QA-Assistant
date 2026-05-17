@@ -24,6 +24,7 @@ COPY api/      ./api/
 COPY config/   ./config/
 COPY scripts/  ./scripts/
 COPY mlops/    ./mlops/
+COPY dashboard/ ./dashboard/
 COPY setup.py  .
 COPY download.py .
 

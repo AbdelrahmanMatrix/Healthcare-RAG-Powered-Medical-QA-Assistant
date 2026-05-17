@@ -1,0 +1,22 @@
+# MLflow Model Selection
+
+**Selected run:** `7d1a2bc1`
+
+**Reason:** Lowest simulated avg latency (1040ms) among 5 runs.
+
+**Parameters:**
+- `embedding_model`: `sentence-transformers/all-MiniLM-L6-v2`
+- `inject_k`: `3`
+- `llm_model`: `google/flan-t5-base (or Groq llama-3.1-8b-instant)`
+- `max_context_words`: `200`
+- `top_k`: `3`
+
+**Metrics:**
+- `avg_latency_ms`: `1040.0000`
+- `bleu_baseline`: `0.0008`
+- `bleu_improvement_pct`: `1759.2596`
+- `bleu_rag`: `0.0157`
+- `faiss_index_size`: `9800.0000`
+- `macro_f1`: `1000.0000`
+- `rouge_baseline`: `0.0265`
+- `rouge_rag`: `0.1662`

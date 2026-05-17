@@ -41,17 +41,44 @@ CLASSIFIER_PATH = PROJECT_ROOT / "models" / "classifier" / "distilbert_classifie
 
 
 def _load_eval_metrics() -> dict:
-    """Load evaluation metrics from the CSV produced by notebook 08."""
+    """Compute BLEU and ROUGE-L from the raw evaluation CSV."""
     if not EVAL_REPORT_PATH.exists():
         return {}
     import pandas as pd
-    df = pd.read_csv(EVAL_REPORT_PATH)
-    # Expect columns: bleu_rag, rouge_rag, bleu_baseline, rouge_baseline
-    metrics = {}
-    for col in df.columns:
-        if df[col].dtype in ("float64", "float32", "int64"):
-            metrics[col] = float(df[col].mean())
-    return metrics
+    from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
+    from rouge_score import rouge_scorer as rs_mod
+    import nltk
+    try:
+        nltk.data.find("tokenizers/punkt")
+    except LookupError:
+        nltk.download("punkt", quiet=True)
+
+    df = pd.read_csv(EVAL_REPORT_PATH).dropna(subset=["rag_answer", "llm_answer", "reference"])
+
+    smoother = SmoothingFunction().method1
+    scorer = rs_mod.RougeScorer(["rougeL"], use_stemmer=True)
+
+    bleu_rag, bleu_llm, rouge_rag, rouge_llm = [], [], [], []
+    for _, row in df.iterrows():
+        ref = row["reference"].lower().split()
+        for col, b_list, r_list in [
+            ("rag_answer", bleu_rag, rouge_rag),
+            ("llm_answer", bleu_llm, rouge_llm),
+        ]:
+            pred = str(row[col]).lower().split()
+            b_list.append(sentence_bleu([ref], pred, smoothing_function=smoother))
+            r_list.append(scorer.score(row["reference"], str(row[col]))["rougeL"].fmeasure)
+
+    import numpy as np
+    return {
+        "bleu_rag":     float(np.mean(bleu_rag)),
+        "bleu_baseline": float(np.mean(bleu_llm)),
+        "rouge_rag":    float(np.mean(rouge_rag)),
+        "rouge_baseline": float(np.mean(rouge_llm)),
+        "bleu_improvement_pct": float(
+            (np.mean(bleu_rag) - np.mean(bleu_llm)) / max(np.mean(bleu_llm), 1e-9) * 100
+        ),
+    }
 
 
 def _load_classifier_metrics() -> dict:

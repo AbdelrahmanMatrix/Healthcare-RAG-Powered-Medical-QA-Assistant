@@ -1,9 +1,14 @@
+import os
+from dotenv import load_dotenv
+load_dotenv()                     # loads .env into os.environ BEFORE pipeline reads os.getenv()
+
 import time
 import logging
 import sys
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from api.routes import query  # noqa: F401
+from fastapi.middleware.cors import CORSMiddleware   # add this import
+from api.routes import query
 
 logging.basicConfig(
     level=logging.INFO,
@@ -21,6 +26,12 @@ app = FastAPI(
     ),
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],          # tighten to specific origins before public launch
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
+)
 
 @app.middleware("http")
 async def latency_middleware(request: Request, call_next):
