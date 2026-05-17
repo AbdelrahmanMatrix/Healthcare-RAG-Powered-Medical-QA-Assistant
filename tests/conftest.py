@@ -14,7 +14,15 @@ from api.main import app
 MOCK_RESULT = {
     "answer": "Mock answer.",
     "category": "Symptoms",
-    "sources": ["42"]
+    "sources": ["42"],
+    "source_details": [          # required by api/routes/query.py → SourceCitation schema
+        {
+            "chunk_id": 42,
+            "question": "What are the symptoms of diabetes?",
+            "category": "Symptoms",
+            "distance": 0.1234,
+        }
+    ],
 }
 
 

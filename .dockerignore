@@ -1,0 +1,36 @@
+# Healthcare RAG — Docker build exclusions
+# Without this, `docker build` copies 34MB CSVs, notebooks, reports, and .git
+# into the build context, making builds 10–30s slower.
+
+# Git
+.git/
+.gitignore
+
+# Data files — mounted as a Docker volume at runtime
+data/raw/
+data/processed/
+data/embeddings/
+
+# Notebooks and reports — not needed at runtime
+notebooks/
+reports/
+docs/
+
+# Dev artifacts
+*.pyc
+__pycache__/
+.pytest_cache/
+*.egg-info/
+.eggs/
+
+# Local env files — passed via --env-file at runtime, never baked in
+.env
+.env.*
+
+# MLflow local tracking directory
+mlruns/
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp

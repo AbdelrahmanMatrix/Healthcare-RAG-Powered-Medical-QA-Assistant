@@ -159,14 +159,17 @@ with col_left:
 with col_right:
     st.subheader("MLflow Experiment Runs")
     if mlflow_runs is not None:
-        metric_cols = [c for c in mlflow_runs.columns if c in ("bleu", "rouge_l", "f1", "accuracy", "latency_ms")]
+        # Column names must match what mlflow_tracking.py actually logs:
+        #   bleu_rag, rouge_rag, avg_latency_ms, bleu_improvement_pct, macro_f1
+        METRIC_COLS = ["bleu_rag", "rouge_rag", "avg_latency_ms", "bleu_improvement_pct", "macro_f1"]
+        metric_cols = [c for c in METRIC_COLS if c in mlflow_runs.columns]
         if metric_cols:
             fig2 = px.bar(
                 mlflow_runs,
                 x="run_id",
                 y=metric_cols,
                 barmode="group",
-                title="Metrics per Run",
+                title="Metrics per MLflow Run",
                 height=300,
             )
             st.plotly_chart(fig2, use_container_width=True)

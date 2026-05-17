@@ -121,9 +121,28 @@ def run_experiment(config: dict, base_metrics: dict, clf_metrics: dict) -> str:
             mlflow.log_metric(k, v)
 
         # Simulate small latency measurement per config
-        # (in a real run this would query the live API)
         simulated_latency = 800 + (config["top_k"] * 50) + (config["inject_k"] * 30)
         mlflow.log_metric("avg_latency_ms", simulated_latency)
+
+        # FIX: Log a pyfunc model artifact so register_best_model() can find it.
+        # We log the classifier directory if it has weights; otherwise log a
+        # placeholder text artifact so the run URI resolves.
+        classifier_has_weights = CLASSIFIER_PATH.exists() and any(
+            f.endswith((".bin", ".safetensors")) for f in CLASSIFIER_PATH.iterdir()
+            if CLASSIFIER_PATH.is_dir()
+        )
+        if classifier_has_weights:
+            mlflow.log_artifacts(str(CLASSIFIER_PATH), artifact_path="model")
+        else:
+            # Log a minimal artifact so the run URI is not empty
+            import tempfile, os
+            with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as tmp:
+                tmp.write(f"RAG experiment: {config['name']}\n")
+                tmp.write("Classifier weights not available locally.\n")
+                tmp.write("Download from HuggingFace: AbdoMatrix/distilbert-medical-classifier\n")
+                tmp_path = tmp.name
+            mlflow.log_artifact(tmp_path, artifact_path="model")
+            os.unlink(tmp_path)
 
         run_id = run.info.run_id
         print(f"  ✅ Run logged: {config['name']} — {run_id[:8]}")
@@ -157,13 +176,14 @@ def register_best_model(run_ids: list[str], experiment_name: str) -> None:
 
     registered_name = "healthcare-rag-classifier"
     try:
+        # Use the artifact we actually logged in run_experiment ("model" subdir)
         mlflow.register_model(
             model_uri=f"runs:/{best_run_id}/model",
             name=registered_name,
         )
-    except Exception:
-        # The model artifact may not be logged — register a pyfunc wrapper instead
-        pass
+        print(f"  📦 Model registered as '{registered_name}'")
+    except Exception as e:
+        print(f"  ⚠️  Model registry step skipped: {e}")
 
     # Tag the best run as production
     client.set_tag(best_run_id, "stage", "production")

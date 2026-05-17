@@ -36,8 +36,12 @@ def run_pipeline(question: str, top_k: int = None, category: str = None) -> dict
     Returns source IDs as plain strings + richer source_details list.
     """
     rag = _get_rag()
-    clf_category = predict(question)
-    effective_category = category or clf_category   # explicit > inferred
+
+    # FIX: Skip the classifier (~50–200ms) when caller already provides category.
+    if category:
+        effective_category = category
+    else:
+        effective_category = predict(question)
 
     if effective_category:
         retrieved = rag.retrieve_by_category(question, effective_category, top_k)
@@ -51,5 +55,5 @@ def run_pipeline(question: str, top_k: int = None, category: str = None) -> dict
         "answer":         raw_answer,
         "category":       effective_category or "General",
         "sources":        [str(s["chunk_id"]) for s in sources],
-        "source_details": sources,          # richer data consumed by API schema
+        "source_details": sources,
     }

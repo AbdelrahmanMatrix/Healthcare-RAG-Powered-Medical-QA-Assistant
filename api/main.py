@@ -1,4 +1,5 @@
 import os
+from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 load_dotenv()                     # loads .env into os.environ BEFORE pipeline reads os.getenv()
 
@@ -7,7 +8,7 @@ import logging
 import sys
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware   # add this import
+from fastapi.middleware.cors import CORSMiddleware
 from api.routes import query
 
 logging.basicConfig(
@@ -17,18 +18,43 @@ logging.basicConfig(
 )
 logger = logging.getLogger("healthcare_rag")
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Pre-load the RAG pipeline + classifier on startup so the first real
+    request isn't penalised by cold-start model loading (10–30s).
+    Runs in a threadpool to avoid blocking the event loop during startup.
+    """
+    logger.info("Healthcare RAG API starting — pre-loading models...")
+    try:
+        from starlette.concurrency import run_in_threadpool
+        from src.pipeline import _get_rag
+        await run_in_threadpool(_get_rag)
+        logger.info("✅ Models pre-loaded. Swagger UI at /docs")
+    except Exception as e:
+        logger.error(
+            f"⚠️  Model pre-load failed: {e!r} — "
+            "first request will trigger load. Check FAISS index and model paths."
+        )
+    yield  # application runs here
+    # (add shutdown cleanup here if needed)
+
 app = FastAPI(
     title="Healthcare RAG Medical Q&A API",
-    version="1.1.0",
+    version="1.2.0",
     description=(
         "RAG-powered medical Q&A grounded in PubMedQA peer-reviewed research. "
         "Every /query response includes a mandatory medical disclaimer."
     ),
+    lifespan=lifespan,
 )
+
+from config.settings import settings
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],          # tighten to specific origins before public launch
+    allow_origins=settings.CORS_ORIGINS,   # configure via CORS_ORIGINS in .env
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
@@ -59,25 +85,5 @@ async def root():
         "project": "Healthcare RAG Medical Q&A Assistant",
         "docs": "/docs",
         "health": "/health",
-        "version": "1.1.0",
+        "version": "1.2.0",
     }
-
-
-@app.on_event("startup")
-async def startup():
-    """
-    Pre-load the RAG pipeline + classifier on startup so the first real
-    request isn't penalised by cold-start model loading (10–30s).
-    Runs in a threadpool to avoid blocking the event loop during startup.
-    """
-    logger.info("Healthcare RAG API starting — pre-loading models...")
-    try:
-        from starlette.concurrency import run_in_threadpool
-        from src.pipeline import _get_rag
-        await run_in_threadpool(_get_rag)
-        logger.info("✅ Models pre-loaded. Swagger UI at /docs")
-    except Exception as e:
-        logger.error(
-            f"⚠️  Model pre-load failed: {e!r} — "
-            "first request will trigger load. Check FAISS index and model paths."
-        )

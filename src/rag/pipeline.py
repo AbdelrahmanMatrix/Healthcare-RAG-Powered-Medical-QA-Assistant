@@ -69,7 +69,9 @@ CHUNK_MAPPING_PATH = PROJECT_ROOT / "data" / "embeddings" / "faiss_index" / "chu
 
 # ── Helper functions ────────────────────────────────────────────────────────
 
-_SOURCE_MARKER_RE = re.compile(r'\s*$$\s*sources?\s*\d+\s*$$\s*', re.IGNORECASE)
+# Strips LLM-generated citation markers like [Source 1], [Sources 2], etc.
+# BUG FIX: original used '$$' (regex end-of-string anchor) instead of '\[' / '\]'.
+_SOURCE_MARKER_RE = re.compile(r'\s*\[\s*sources?\s*\d+\s*\]\s*', re.IGNORECASE)
 _MULTISPACE_RE = re.compile(r'\s+')
 _LEADING_PUNCT_RE = re.compile(r'^[\W_]+')
 
@@ -230,10 +232,17 @@ class RAGPipeline:
         # BM25 keyword retrieval
         bm25_results = self.bm25.retrieve(query, top_k=k)
 
-        # Merge: high-confidence BM25 hits first, then FAISS to fill slots
+        # Merge: high-confidence BM25 hits first, then FAISS to fill slots.
+        # Threshold is configurable via config/settings.py → BM25_THRESHOLD.
+        try:
+            from config.settings import settings
+            bm25_threshold = settings.BM25_THRESHOLD
+        except Exception:
+            bm25_threshold = 5.0
+
         seen, merged = set(), []
         for r in bm25_results:
-            if r["bm25_score"] > 5.0 and r["chunk_id"] not in seen:
+            if r["bm25_score"] > bm25_threshold and r["chunk_id"] not in seen:
                 merged.append(r)
                 seen.add(r["chunk_id"])
         for r in faiss_results:

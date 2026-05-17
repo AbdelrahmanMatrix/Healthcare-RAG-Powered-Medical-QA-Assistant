@@ -67,6 +67,17 @@ class TestQuery:
         r = client.post("/query", json={"question": "What causes anaemia?"})
         assert r.status_code == 500
 
+    @patch("api.routes.query.run_pipeline")
+    def test_source_citations_schema(self, m):
+        """source_citations must be a list of objects with the SourceCitation fields."""
+        m.return_value = MOCK
+        data = client.post("/query", json={"question": "What causes anaemia?"}).json()
+        assert isinstance(data["source_citations"], list)
+        if data["source_citations"]:
+            citation = data["source_citations"][0]
+            for field in ("chunk_id", "question", "category", "distance"):
+                assert field in citation, f"SourceCitation missing field: {field}"
+
     def test_question_too_short_returns_422(self):
         # min_length=5 on the question field
         assert client.post("/query", json={"question": "hi"}).status_code == 422

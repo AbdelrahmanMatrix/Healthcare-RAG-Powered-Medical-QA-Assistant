@@ -10,7 +10,6 @@ services:
       - "8000:8000"
     env_file:
       - ../.env
-    # Mount a named volume so the FAISS index is only downloaded once
     volumes:
       - rag-embeddings:/app/data/embeddings
     restart: on-failure
@@ -19,8 +18,39 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 120s  # allow time for cold-start + potential index download
+      start_period: 120s
+
+  mlflow:
+    image: python:3.10-slim
+    container_name: healthcare-rag-mlflow
+    working_dir: /app
+    command: >
+      bash -c "pip install mlflow --quiet &&
+               mlflow ui --host 0.0.0.0 --port 5000 --backend-store-uri /mlruns"
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow-data:/mlruns
+    restart: on-failure
+
+  dashboard:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: healthcare-rag-dashboard
+    command: streamlit run dashboard/app.py --server.port 8501 --server.address 0.0.0.0
+    ports:
+      - "8501:8501"
+    env_file:
+      - ../.env
+    volumes:
+      - rag-embeddings:/app/data/embeddings
+    depends_on:
+      - healthcare-rag
+    restart: on-failure
 
 volumes:
   rag-embeddings:
+    driver: local
+  mlflow-data:
     driver: local

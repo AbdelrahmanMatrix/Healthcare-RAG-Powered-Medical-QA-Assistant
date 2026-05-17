@@ -3,10 +3,13 @@ API_PORT  := 8000
 ACR_NAME  := healthcareragacr
 .DEFAULT_GOAL := help
 
-.PHONY: install test test-api run lint docker-build docker-run docker-push latency-test mlflow dashboard clean help
+.PHONY: install test test-api run lint docker-build docker-run docker-push latency-test mlflow dashboard download-classifier clean help
 
 install:       ## Install all dependencies
 	pip install --upgrade pip && pip install -r requirements.txt && pip install -e .
+
+download-classifier: ## Download DistilBERT classifier weights from HuggingFace
+	python scripts/download_classifier.py
 
 test:          ## Run all pytest tests
 	pytest tests/ -v --tb=short
