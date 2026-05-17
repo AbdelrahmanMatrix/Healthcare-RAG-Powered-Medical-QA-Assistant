@@ -1,0 +1,18 @@
+version: "3.9"
+services:
+  healthcare-rag:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: healthcare-rag-api
+    ports:
+      - "8000:8000"
+    env_file:
+      - ../.env
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s

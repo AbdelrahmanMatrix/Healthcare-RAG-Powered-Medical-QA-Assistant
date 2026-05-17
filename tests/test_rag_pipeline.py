@@ -22,7 +22,7 @@ def test_classifier_returns_string():
 
 def test_retrieve_returns_list():
     """FAISS retrieval should return a non-empty list."""
-    results = retrieve("What causes high blood pressure?", k=5)
+    results = retrieve("What causes high blood pressure?", top_k=5)
     assert isinstance(results, list)
     assert len(results) == 5
 

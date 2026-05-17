@@ -1,7 +1,7 @@
 # Model Development Documentation
 **Healthcare RAG-Powered Medical Q&A Assistant**
 **Owner:** Abdelrahman Mostafa Sayed
-**Generated:** 2026-05-13 14:17:57
+**Generated:** 2026-05-17 17:57:26
 
 ---
 
@@ -91,7 +91,7 @@ The classifier doesn't just label queries — it improves retrieval:
 
 **Integrated test results:**
 - Queries tested: 10
-- Category routing match rate: 72.0%
+- Category routing match rate: 76.0%
 - All disclaimers present: True
 
 ## 5. Design Decisions

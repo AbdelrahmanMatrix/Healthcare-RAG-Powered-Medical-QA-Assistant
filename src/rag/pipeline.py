@@ -130,6 +130,7 @@ class RAGPipeline:
         self.inject_k = inject_k
         self.max_context_words = max_context_words
         self.min_answer_words = min_answer_words
+        self.max_new_tokens = max_new_tokens   # FIX: was never stored; Groq path crashed
 
         # ── Load embedding model ─────────────────────────────────────
         print(f"Loading embedding model: {embedding_model}")

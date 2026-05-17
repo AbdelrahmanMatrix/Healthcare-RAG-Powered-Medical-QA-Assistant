@@ -6,7 +6,7 @@
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 1,
-    "latency_ms": 3588.63,
+    "latency_ms": 2749.07,
     "sources": [
       {
         "chunk_id": 9676,
@@ -47,7 +47,7 @@
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 2,
-    "latency_ms": 3357.1,
+    "latency_ms": 2464.82,
     "sources": [
       {
         "chunk_id": 7908,
@@ -88,7 +88,7 @@
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 3,
-    "latency_ms": 2973.65,
+    "latency_ms": 2278.85,
     "sources": [
       {
         "chunk_id": 5821,
@@ -129,7 +129,7 @@
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 4,
-    "latency_ms": 2721.18,
+    "latency_ms": 2203.43,
     "sources": [
       {
         "chunk_id": 27,
@@ -170,7 +170,7 @@
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 5,
-    "latency_ms": 3968.1,
+    "latency_ms": 3130.7,
     "sources": [
       {
         "chunk_id": 3105,
@@ -211,7 +211,7 @@
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 5,
-    "latency_ms": 5220.61,
+    "latency_ms": 3925.36,
     "sources": [
       {
         "chunk_id": 3995,
@@ -252,7 +252,7 @@
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 5,
-    "latency_ms": 4431.45,
+    "latency_ms": 3233.22,
     "sources": [
       {
         "chunk_id": 4298,
@@ -293,7 +293,7 @@
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 5,
-    "latency_ms": 2550.81,
+    "latency_ms": 2055.74,
     "sources": [
       {
         "chunk_id": 333,
@@ -329,18 +329,30 @@
   },
   {
     "question": "What is the role of the immune system in fighting infections?",
-    "category": "General",
-    "answer_raw": "Infection is common following stroke and is independently associated with worse outcome. Stroke severity is the most important predictor of infection risk. Increased plasma cortisol, IL-10, and IL-1ra, as well as decreased lymphocyte numbers, at 72 h after stroke onset were associated with risk of subsequent infection.",
+    "category": "Prevention",
+    "answer_raw": "Progesterone inhibits interleukin-8 production by vaginal and cervical epithelial cells.",
     "disclaimer_present": true,
     "top_k": 5,
-    "category_matched_sources": 1,
-    "latency_ms": 6804.35,
+    "category_matched_sources": 3,
+    "latency_ms": 2503.54,
     "sources": [
       {
-        "chunk_id": 7204,
-        "question": "Expansion of hepatitis C-specific CD4+CD25+ regulatory T cells after viral clearance: a mechanism to limit collateral damage?",
-        "category": "General",
-        "distance": 1.1258407831192017
+        "chunk_id": 4799,
+        "question": "Staphylococcal enterotoxin induced IL-5 stimulation as a cofactor in the pathogenesis of atopic disease: the hygiene hypothesis in reverse?",
+        "category": "Prevention",
+        "distance": 1.126909852027893
+      },
+      {
+        "chunk_id": 7098,
+        "question": "Does prolonged cycling of moderate intensity affect immune cell function?",
+        "category": "Prevention",
+        "distance": 1.2008086442947388
+      },
+      {
+        "chunk_id": 528,
+        "question": "Does progesterone inhibit bacteria-stimulated interleukin-8 production by lower genital tract epithelial cells?",
+        "category": "Prevention",
+        "distance": 1.2377080917358398
       },
       {
         "chunk_id": 4873,
@@ -353,18 +365,6 @@
         "question": "Post-stroke infection: a role for IL-1ra?",
         "category": "Symptoms",
         "distance": 1.0936121940612793
-      },
-      {
-        "chunk_id": 2025,
-        "question": "Neonatal immune responses to microbial stimuli: is there an influence of maternal allergy?",
-        "category": "Medication",
-        "distance": 1.1246814727783203
-      },
-      {
-        "chunk_id": 2985,
-        "question": "Increase in T-cell subsets of oral mucosa: a late immune response in patients with treated coeliac disease?",
-        "category": "Treatment",
-        "distance": 1.125030279159546
       }
     ]
   },
@@ -375,7 +375,7 @@
     "disclaimer_present": true,
     "top_k": 5,
     "category_matched_sources": 5,
-    "latency_ms": 5543.42,
+    "latency_ms": 4065.64,
     "sources": [
       {
         "chunk_id": 6252,
