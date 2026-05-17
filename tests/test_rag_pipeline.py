@@ -1,40 +1,57 @@
 # tests/test_rag_pipeline.py
-# Basic smoke tests for the integrated RAG + classifier pipeline
+# Integration tests for the RAG + classifier pipeline.
+# Requires real FAISS index + model files.
+#
+# Run in CI:        skipped automatically (no models available)
+# Run locally:      pytest tests/test_rag_pipeline.py -v -m integration
+# Run all locally:  pytest tests/ -v
 
 import pytest
-from src.rag.pipeline import retrieve, answer
-from src.classification.classifier import predict
 
-# --- Classifier tests ---
+pytestmark = pytest.mark.integration  # skip in CI unless explicitly requested
 
-def test_classifier_returns_valid_category():
+
+@pytest.fixture(scope="module")
+def rag_pipeline():
+    """Load the real RAG pipeline once for the whole module."""
+    from src.rag.pipeline import build_rag_pipeline
+    return build_rag_pipeline()
+
+
+@pytest.fixture(scope="module")
+def classifier():
+    from src.classification.classifier import load_classifier
+    return load_classifier()
+
+
+def test_classifier_returns_valid_category(classifier):
     """Classifier should return one of the 6 valid categories."""
     valid = {"Symptoms", "Diagnosis", "Treatment", "Medication", "Prevention", "General"}
-    result = predict("What are the symptoms of diabetes?")
+    result = classifier.predict("What are the symptoms of diabetes?")
     assert result in valid
 
-def test_classifier_returns_string():
-    result = predict("How is pneumonia treated?")
-    assert isinstance(result, str)
-    assert len(result) > 0
 
-# --- RAG pipeline tests ---
+def test_classifier_returns_string(classifier):
+    result = classifier.predict("How is pneumonia treated?")
+    assert isinstance(result, str) and len(result) > 0
 
-def test_retrieve_returns_list():
-    """FAISS retrieval should return a non-empty list."""
-    results = retrieve("What causes high blood pressure?", top_k=5)
+
+def test_retrieve_returns_list(rag_pipeline):
+    """FAISS retrieval should return a non-empty list of the right length."""
+    results = rag_pipeline.retrieve("What causes high blood pressure?", top_k=5)
     assert isinstance(results, list)
     assert len(results) == 5
 
-def test_answer_contains_disclaimer():
-    """Every answer must contain the medical disclaimer."""
-    result = answer("What is the treatment for type 2 diabetes?")
+
+def test_answer_contains_disclaimer(rag_pipeline):
+    """Every answer must have disclaimer_present=True."""
+    result = rag_pipeline.answer("What is the treatment for type 2 diabetes?")
     assert result["disclaimer_present"] is True
     assert "DISCLAIMER" in result["answer"] or "educational" in result["answer"].lower()
 
-def test_answer_returns_expected_keys():
-    """Answer dict should have required keys for the API."""
-    result = answer("What are symptoms of hypertension?")
-    assert "answer" in result
-    assert "retrieved_sources" in result
-    assert "disclaimer_present" in result
+
+def test_answer_returns_expected_keys(rag_pipeline):
+    """Answer dict must have all keys required by the API layer."""
+    result = rag_pipeline.answer("What are symptoms of hypertension?")
+    for key in ("answer", "answer_raw", "retrieved_sources", "disclaimer_present", "top_k"):
+        assert key in result, f"Missing key: {key}"

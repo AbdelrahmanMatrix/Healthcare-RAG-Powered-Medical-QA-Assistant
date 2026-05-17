@@ -24,7 +24,7 @@ from transformers import DistilBertTokenizer, DistilBertForSequenceClassificatio
 # ── Config ────────────────────────────────────────────────────────────────
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 DEFAULT_LOCAL_PATH = PROJECT_ROOT / "models" / "classifier" / "distilbert_classifier"
-HF_REPO_ID = "AbdooMatrix/distilbert-medical-classifier"  # ← change username
+HF_REPO_ID = "AbdoMatrix/distilbert-medical-classifier"  # Fixed: was AbdooMatrix  # ← change username
 
 
 class MedicalClassifier:

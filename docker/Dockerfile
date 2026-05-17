@@ -1,6 +1,6 @@
 # Healthcare RAG — Production Dockerfile
 # Build:  docker build -f docker/Dockerfile -t healthcare-rag:latest .
-# Run:    docker run -p 8000:8000 --env-file .env --rm healthcare-rag:latest
+# Run:    docker run -p 8000:8000 --env-file .env -v rag-data:/app/data/embeddings --rm healthcare-rag:latest
 
 FROM python:3.10-slim
 
@@ -8,30 +8,37 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
-# System deps needed to compile some Python packages
+# System deps
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python deps first — cached layer rebuilds only when requirements.txt changes
+# Install Python deps first — cached unless requirements.txt changes
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copy source
+# Copy source code
 COPY src/      ./src/
 COPY api/      ./api/
 COPY config/   ./config/
 COPY scripts/  ./scripts/
+COPY mlops/    ./mlops/
 COPY setup.py  .
+COPY download.py .
 
-# FAISS index + chunk mapping (produced by notebook 05 or python download.py)
-COPY data/embeddings/ ./data/embeddings/
+# Classifier config only (weights downloaded at runtime from HuggingFace if missing)
+COPY models/   ./models/
 
-# Install project in editable mode so absolute imports work inside Docker
+# Ensure data directories exist (index downloaded at container start if not mounted)
+RUN mkdir -p data/embeddings/faiss_index data/processed data/raw
+
+# Install project in editable mode so absolute imports resolve inside Docker
 RUN pip install --no-cache-dir -e .
 
-EXPOSE 8000
+# Entrypoint: downloads index if missing, then starts uvicorn
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-# Single worker — Azure Free Tier has 1GB RAM limit
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+EXPOSE 8000
+CMD ["/entrypoint.sh"]

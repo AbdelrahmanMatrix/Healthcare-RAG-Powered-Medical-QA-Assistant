@@ -28,6 +28,13 @@ import numpy as np
 from openai import OpenAI
 from sentence_transformers import SentenceTransformer
 
+try:
+    from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+    import openai as _openai_mod
+    HAS_TENACITY = True
+except ImportError:
+    HAS_TENACITY = False
+
 
 # ── Constants ────────────────────────────────────────────────────────────────
 
@@ -297,6 +304,41 @@ class RAGPipeline:
             "Concise Answer (based on the research conclusions above):"
         )
 
+    def _call_groq(self, prompt: str) -> str:
+        """
+        Call Groq API with automatic retry on transient errors (rate limit / 5xx).
+        Falls back gracefully if tenacity is not installed.
+        """
+        _system = (
+            "You are a medical research assistant. Answer medical questions "
+            "by closely following the provided research conclusions. Be concise and accurate."
+        )
+
+        def _do_call():
+            response = self._groq_client.chat.completions.create(
+                model=self._groq_model,
+                messages=[
+                    {"role": "system", "content": _system},
+                    {"role": "user",   "content": prompt},
+                ],
+                max_tokens=self.max_new_tokens,
+                temperature=0.1,
+            )
+            return response.choices[0].message.content.strip()
+
+        if HAS_TENACITY:
+            @retry(
+                retry=retry_if_exception_type(Exception),
+                wait=wait_exponential(multiplier=1, min=2, max=30),
+                stop=stop_after_attempt(3),
+                reraise=True,
+            )
+            def _retried():
+                return _do_call()
+            return _retried()
+        else:
+            return _do_call()
+
     def generate(self, query: str, retrieved_chunks: list[dict]) -> str:
         """
         Build prompt from retrieved context and generate a cleaned answer.
@@ -311,23 +353,7 @@ class RAGPipeline:
         prompt = self._build_prompt(query, retrieved_chunks)
 
         if self._use_groq:
-            response = self._groq_client.chat.completions.create(
-                model=self._groq_model,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": (
-                            "You are a medical research assistant. Answer medical questions "
-                            "by closely following the provided research conclusions. "
-                            "Be concise and accurate."
-                        ),
-                    },
-                    {"role": "user", "content": prompt},
-                ],
-                max_tokens=self.max_new_tokens,
-                temperature=0.1,  # low temperature → stays close to source → better ROUGE-L
-            )
-            raw = response.choices[0].message.content.strip()
+            raw = self._call_groq(prompt)
         else:
             raw = self.generator(prompt)[0]["generated_text"]
 

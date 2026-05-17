@@ -14,7 +14,7 @@ logger = logging.getLogger("healthcare_rag")
 
 app = FastAPI(
     title="Healthcare RAG Medical Q&A API",
-    version="1.0.0",
+    version="1.1.0",
     description=(
         "RAG-powered medical Q&A grounded in PubMedQA peer-reviewed research. "
         "Every /query response includes a mandatory medical disclaimer."
@@ -48,10 +48,25 @@ async def root():
         "project": "Healthcare RAG Medical Q&A Assistant",
         "docs": "/docs",
         "health": "/health",
-        "version": "1.0.0",
+        "version": "1.1.0",
     }
 
 
 @app.on_event("startup")
 async def startup():
-    logger.info("Healthcare RAG API started. Swagger UI at /docs")
+    """
+    Pre-load the RAG pipeline + classifier on startup so the first real
+    request isn't penalised by cold-start model loading (10–30s).
+    Runs in a threadpool to avoid blocking the event loop during startup.
+    """
+    logger.info("Healthcare RAG API starting — pre-loading models...")
+    try:
+        from starlette.concurrency import run_in_threadpool
+        from src.pipeline import _get_rag
+        await run_in_threadpool(_get_rag)
+        logger.info("✅ Models pre-loaded. Swagger UI at /docs")
+    except Exception as e:
+        logger.error(
+            f"⚠️  Model pre-load failed: {e!r} — "
+            "first request will trigger load. Check FAISS index and model paths."
+        )

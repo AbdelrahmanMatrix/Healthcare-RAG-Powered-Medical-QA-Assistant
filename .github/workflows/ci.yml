@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -e .
+
+      - name: Lint (flake8)
+        run: |
+          flake8 src/ api/ config/ --max-line-length 120 \
+            --exclude __pycache__,*.pyc
+
+      - name: Unit tests — API (no models needed, fully mocked)
+        run: |
+          pytest tests/test_api.py -v --tb=short
+
+      - name: Unit tests — Preprocessing (no models needed)
+        run: |
+          pytest tests/test_preprocessing.py -v --tb=short
+
+      - name: Coverage gate (unit tests only)
+        run: |
+          pytest tests/test_api.py tests/test_preprocessing.py \
+            --cov=src --cov=api \
+            --cov-report=term-missing \
+            --cov-fail-under=50
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image (smoke test)
+        run: |
+          docker build -f docker/Dockerfile -t healthcare-rag:ci-${{ github.sha }} .

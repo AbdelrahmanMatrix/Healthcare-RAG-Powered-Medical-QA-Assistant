@@ -1,40 +1,38 @@
 # tests/test_preprocessing.py
+# Fixed: function names now match actual preprocessor API
+from src.data.preprocessor import clean_text, extract_question, extract_context
+from src.data.labeller import assign_category
 
-from src.data.preprocessor import normalize_text, get_question, get_context
-from src.data.labeller import label_question
 
-
-def test_normalize_text_lowercases():
-    result = normalize_text("Hello WORLD")
+def test_clean_text_lowercases():
+    result = clean_text("Hello WORLD")
     assert result == result.lower()
 
 
-def test_normalize_text_removes_html():
-    result = normalize_text("<p>Hello</p>")
-    assert "<" not in result
-    assert ">" not in result
+def test_clean_text_removes_html():
+    result = clean_text("<p>Hello</p>")
+    assert "<" not in result and ">" not in result
 
 
-def test_normalize_text_collapses_spaces():
-    result = normalize_text("too   many    spaces")
+def test_clean_text_collapses_spaces():
+    result = clean_text("too   many    spaces")
     assert "  " not in result
 
 
-def test_get_question_extracts_correctly():
-    text = "context: some context. question: what causes fever?"
-    result = get_question(text)
+def test_extract_question_finds_keyword():
+    text = "Question: what causes fever?"
+    result = extract_question(text)
     assert "fever" in result
 
 
-def test_get_context_extracts_correctly():
+def test_extract_context_finds_text():
     text = "context: the patient has a history of diabetes."
-    result = get_context(text)
+    result = extract_context(text)
     assert "diabetes" in result
-
 
 
 def test_labeller_returns_valid_category():
     valid = {"Symptoms", "Diagnosis", "Treatment", "Medication", "Prevention", "General"}
-    assert label_question("What are the symptoms of flu?") in valid
-    assert label_question("How is cancer diagnosed?") in valid
-    assert label_question("What is 2+2?") == "General"
+    assert assign_category("What are the symptoms of flu?") in valid
+    assert assign_category("How is cancer diagnosed?") in valid
+    assert assign_category("What is 2+2?") == "General"
