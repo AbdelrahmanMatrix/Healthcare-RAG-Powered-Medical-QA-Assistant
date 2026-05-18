@@ -18,9 +18,6 @@ Usage:
 import os
 from pathlib import Path
 
-import torch
-from transformers import DistilBertTokenizer, DistilBertForSequenceClassification
-
 # ── Config ────────────────────────────────────────────────────────────────
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 DEFAULT_LOCAL_PATH = PROJECT_ROOT / "models" / "classifier" / "distilbert_classifier"
@@ -35,6 +32,8 @@ class MedicalClassifier:
     """
 
     def __init__(self, model_path: str = None):
+        import torch
+        from transformers import DistilBertTokenizer, DistilBertForSequenceClassification
         path = model_path or str(DEFAULT_LOCAL_PATH)
 
         # Check if local model exists and has actual model files
@@ -68,6 +67,7 @@ class MedicalClassifier:
 
     def predict(self, text: str) -> str:
         """Predict category for a single text input."""
+        import torch
         inputs = self.tokenizer(
             text,
             truncation=True,
@@ -84,6 +84,7 @@ class MedicalClassifier:
 
     def predict_with_confidence(self, text: str) -> dict:
         """Predict category with confidence scores."""
+        import torch
         inputs = self.tokenizer(
             text,
             truncation=True,

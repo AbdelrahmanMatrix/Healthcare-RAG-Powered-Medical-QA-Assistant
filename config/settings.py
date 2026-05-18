@@ -26,15 +26,15 @@ class Settings(BaseSettings):
     BM25_THRESHOLD: float = 5.0   # BM25 scores above this are treated as high-confidence hits
 
     # API configuration
-    CORS_ORIGINS: list = ["*"]    # Tighten to specific origins before public launch; e.g. ["https://myapp.com"]
+    CORS_ORIGINS: list = ["*"]    # Tighten to specific origins before public launch
 
     # API keys (from .env, never hardcoded)
-    API_KEY: str = ""          # if empty, auth is disabled (dev mode)
+    API_KEY: str = ""             # if empty, auth is disabled (dev mode)
     GROQ_API_KEY: str = ""
 
     # Deployment info (reflected in Streamlit dashboard)
-    DEPLOY_ENV: str  = "local"     # e.g. "Azure App Service F1"
-    DEPLOY_DATE: str = ""          # e.g. "May 2026"
+    DEPLOY_ENV: str = "local"
+    DEPLOY_DATE: str = ""
 
     disclaimer: str = (
         "This is an informational assistant only. "
@@ -45,10 +45,14 @@ class Settings(BaseSettings):
 
     categories: list = [
         "Symptoms", "Diagnosis", "Treatment",
-        "Medication", "Prevention", "General"
+        "Medication", "Prevention", "General",
     ]
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",           # silently drop unknown env vars (e.g. HF_TOKEN, WEBSITE_PORT)
+    )
 
 
 settings = Settings()

@@ -24,14 +24,8 @@ import re
 import threading
 from pathlib import Path
 
-import faiss
-import numpy as np
-from openai import OpenAI
-from sentence_transformers import SentenceTransformer
-
 try:
     from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
-    import openai as _openai_mod
     HAS_TENACITY = True
 except ImportError:
     HAS_TENACITY = False
@@ -136,6 +130,12 @@ class RAGPipeline:
         faiss_index_path: str = None,
         chunk_mapping_path: str = None,
     ):
+        import faiss
+        import numpy as np
+        from sentence_transformers import SentenceTransformer
+        self._np = np
+        self._faiss = faiss
+
         self.top_k = top_k
         self.inject_k = inject_k
         self.max_context_words = max_context_words
@@ -174,6 +174,7 @@ class RAGPipeline:
             self._bm25_threshold = 5.0
 
         # ── Load LLM ────────────────────────────────────────────────
+        from openai import OpenAI
         groq_key = os.getenv("GROQ_API_KEY", "")
         if groq_key:
             print(f"Loading LLM via Groq API: {llm_model}")
@@ -228,10 +229,10 @@ class RAGPipeline:
         # FAISS semantic retrieval
         query_vector = self.encoder.encode(
             [query], convert_to_numpy=True
-        ).astype(np.float32)
-        D, I = self.index.search(query_vector, k)
+        ).astype(self._np.float32)
+        D, faiss_idx = self.index.search(query_vector, k)
         faiss_results = [
-            self._row_to_dict(int(I[0, r]), float(D[0, r])) for r in range(k)
+            self._row_to_dict(int(faiss_idx[0, r]), float(D[0, r])) for r in range(k)
         ]
 
         if not self._use_bm25:
@@ -269,12 +270,12 @@ class RAGPipeline:
 
         query_vector = self.encoder.encode(
             [query], convert_to_numpy=True
-        ).astype(np.float32)
+        ).astype(self._np.float32)
 
-        D, I = self.index.search(query_vector, search_k)
+        D, faiss_idx = self.index.search(query_vector, search_k)
 
         candidates = [
-            self._row_to_dict(int(I[0, r]), float(D[0, r]))
+            self._row_to_dict(int(faiss_idx[0, r]), float(D[0, r]))
             for r in range(search_k)
         ]
 

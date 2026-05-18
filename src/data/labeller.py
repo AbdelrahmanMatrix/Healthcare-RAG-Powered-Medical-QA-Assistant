@@ -265,7 +265,7 @@ def explain(question: str, context: str = '') -> str:
     if context:
         print(f"   (context: {context[:80]}...)")
     print(f"\nPredicted: {cat}")
-    print(f"Scores:")
+    print("Scores:")
     for c in sorted(scores, key=scores.get, reverse=True):
         if scores[c] > 0:
             print(f"  {c:<12} {scores[c]}")

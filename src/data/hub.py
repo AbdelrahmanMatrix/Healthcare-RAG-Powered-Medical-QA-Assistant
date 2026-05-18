@@ -14,7 +14,7 @@ from huggingface_hub import HfApi, hf_hub_download
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
-HF_DATA_REPO = "AbdoMatrix/healthcare-rag-data" 
+HF_DATA_REPO = "AbdoMatrix/healthcare-rag-data"
 
 # Files to sync between local and HuggingFace
 DATA_FILES = [

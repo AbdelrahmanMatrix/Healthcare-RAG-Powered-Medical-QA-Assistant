@@ -9,7 +9,7 @@ class QueryRequest(BaseModel):
     )
     top_k: Optional[int] = Field(
         default=None, ge=1, le=20,
-        description="Override the default number of retrieved chunks (1–20)."
+        description="Override the default number of retrieved chunks (1–20).",
     )
     category: Optional[str] = Field(
         default=None,
@@ -17,32 +17,32 @@ class QueryRequest(BaseModel):
             "Force retrieval to prioritise this medical category. "
             "Valid values: Symptoms, Diagnosis, Treatment, Medication, Prevention, General."
         ),
-        json_schema_extra={"example": "Treatment"}
+        json_schema_extra={"example": "Treatment"},
     )
 
 
 class SourceCitation(BaseModel):
-    chunk_id:        str
-    question:        str
-    category:        str
-    distance:        float
+    chunk_id: str
+    question: str
+    category: str
+    distance: float
     relevance_score: float = 0.0   # 0-1, higher = more relevant (normalised)
-    excerpt:         str   = ""    # first 150 chars of retrieved context
+    excerpt: str = ""              # first 150 chars of retrieved context
 
 
 class QueryResponse(BaseModel):
-    answer:             str
-    category:           str
-    retrieved_sources:  List[str]
-    source_citations:   List[SourceCitation] = []
-    disclaimer:         str
+    answer: str
+    category: str
+    retrieved_sources: List[str]
+    source_citations: List[SourceCitation] = []
+    disclaimer: str
 
 
 class HealthResponse(BaseModel):
     model_config = ConfigDict(protected_namespaces=())
 
-    status:           str  = "ok"
-    model_loaded:     bool = False
+    status: str = "ok"
+    model_loaded: bool = False
     classifier_ready: bool = False
-    groq_configured:  bool = False
-    index_vectors:    int  = 0
+    groq_configured: bool = False
+    index_vectors: int = 0

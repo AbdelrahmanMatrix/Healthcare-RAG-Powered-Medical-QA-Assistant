@@ -29,7 +29,7 @@ sentencepiece==0.2.0
 # pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 #
 # CPU:
-torch==2.2.2
+torch>=2.4.0,<3.0.0
 
 # ─── RAG & Vector Store ───────────────────────────────────
 faiss-cpu>=1.7.4,<2.0.0

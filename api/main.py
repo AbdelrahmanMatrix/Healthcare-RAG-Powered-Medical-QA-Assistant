@@ -1,15 +1,19 @@
-import os
-from contextlib import asynccontextmanager
-from dotenv import load_dotenv
-load_dotenv()                     # loads .env into os.environ BEFORE pipeline reads os.getenv()
-
+"""Healthcare RAG — FastAPI application entry point."""
+import sys
 import time
 import logging
-import sys
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-from api.routes import query
+from contextlib import asynccontextmanager
+
+from dotenv import load_dotenv
+
+load_dotenv()  # Must run before config.settings reads os.environ  # noqa: E402
+
+from fastapi import FastAPI, Request  # noqa: E402
+from fastapi.responses import JSONResponse  # noqa: E402
+from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
+
+from config.settings import settings  # noqa: E402
+from api.routes import query  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO,
@@ -40,6 +44,7 @@ async def lifespan(app: FastAPI):
     yield  # application runs here
     # (add shutdown cleanup here if needed)
 
+
 app = FastAPI(
     title="Healthcare RAG Medical Q&A API",
     version="1.2.0",
@@ -50,14 +55,13 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-from config.settings import settings
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,   # configure via CORS_ORIGINS in .env
+    allow_origins=settings.CORS_ORIGINS,
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
+
 
 @app.middleware("http")
 async def latency_middleware(request: Request, call_next):
