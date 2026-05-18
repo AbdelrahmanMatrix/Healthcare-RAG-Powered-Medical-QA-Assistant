@@ -132,9 +132,8 @@ def run_experiment(config: dict, base_metrics: dict, clf_metrics: dict) -> str:
         # FIX: Log a pyfunc model artifact so register_best_model() can find it.
         # We log the classifier directory if it has weights; otherwise log a
         # placeholder text artifact so the run URI resolves.
-        classifier_has_weights = CLASSIFIER_PATH.exists() and any(
-            f.endswith((".bin", ".safetensors")) for f in CLASSIFIER_PATH.iterdir()
-            if CLASSIFIER_PATH.is_dir()
+        classifier_has_weights = CLASSIFIER_PATH.exists() and CLASSIFIER_PATH.is_dir() and any(
+            f.name.endswith((".bin", ".safetensors")) for f in CLASSIFIER_PATH.iterdir()
         )
         if classifier_has_weights:
             mlflow.log_artifacts(str(CLASSIFIER_PATH), artifact_path="model")

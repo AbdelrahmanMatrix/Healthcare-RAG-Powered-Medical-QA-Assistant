@@ -2,7 +2,7 @@
 
 **Selected run:** `7d1a2bc1`
 
-**Reason:** Lowest simulated avg latency (1040ms) among 5 runs.
+**Reason:** Highest bleu_rag (0.0157) among 5 runs; latency tie-broken at 1040ms.
 
 **Parameters:**
 - `embedding_model`: `sentence-transformers/all-MiniLM-L6-v2`
@@ -17,6 +17,6 @@
 - `bleu_improvement_pct`: `1759.2596`
 - `bleu_rag`: `0.0157`
 - `faiss_index_size`: `9800.0000`
-- `macro_f1`: `1000.0000`
+- `macro_f1`: `0.8670`
 - `rouge_baseline`: `0.0265`
 - `rouge_rag`: `0.1662`

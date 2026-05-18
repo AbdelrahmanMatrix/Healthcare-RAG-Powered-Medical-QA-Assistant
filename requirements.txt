@@ -15,13 +15,13 @@ langdetect==1.0.9
 
 # ─── Hugging Face Ecosystem ───────────────────────────────
 datasets==2.19.1
-huggingface-hub==0.23.2
+huggingface-hub>=0.23.2,<2.0.0
 
 # ─── NLP & Embeddings ─────────────────────────────────────
-transformers==4.41.2
+transformers>=4.41.2,<6.0.0
 accelerate==0.31.0
-sentence-transformers==3.0.0
-tokenizers==0.19.1
+sentence-transformers>=3.0.0,<6.0.0
+tokenizers>=0.19.1,<1.0.0
 sentencepiece==0.2.0
 
 # ⚠️ Install PyTorch separately depending on your system:
@@ -32,7 +32,7 @@ sentencepiece==0.2.0
 torch==2.2.2
 
 # ─── RAG & Vector Store ───────────────────────────────────
-faiss-cpu==1.8.0
+faiss-cpu>=1.7.4,<2.0.0
 
 # ─── Machine Learning ─────────────────────────────────────
 scikit-learn==1.4.2
@@ -43,16 +43,22 @@ rouge-score==0.1.2
 evaluate==0.4.2
 
 # ─── API & Backend ────────────────────────────────────────
-fastapi==0.111.0
+fastapi>=0.111.0,<1.0.0
 uvicorn==0.30.1
-pydantic==2.7.3
-pydantic-settings==2.2.1
-httpx==0.27.0
+pydantic>=2.7.3,<3.0.0
+pydantic-settings>=2.2.1,<3.0.0
+python-multipart==0.0.9
+httpx>=0.27.0,<1.0.0
 requests==2.31.0
+
+# ─── LLM Client ───────────────────────────────────────────
+# openai v1.x and v2.x both support the chat.completions.create API we use.
+# Pin to >=1.35.3 to guarantee the OpenAI() client constructor is available.
+openai>=1.35.3,<3.0.0
 
 # ─── MLOps & Cloud ────────────────────────────────────────
 mlflow==2.13.2
-# azure-storage-blob: add back when Azure Blob storage is implemented
+azure-storage-blob==12.19.0
 
 # ─── Dashboard & Visualization ────────────────────────────
 streamlit==1.35.0
@@ -76,6 +82,4 @@ tenacity==8.3.0
 
 # ─── Stability & Performance ──────────────────────────────
 threadpoolctl==3.6.0
-
-openai==1.35.3
 rank-bm25==0.2.2

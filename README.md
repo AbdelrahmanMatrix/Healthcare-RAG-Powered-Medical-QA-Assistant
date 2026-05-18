@@ -16,6 +16,7 @@ cd Healthcare-RAG-Powered-Medical-QA-Assistant
 
 # 2. Install
 pip install -r requirements.txt
+pip install -e .   # registers src/ as a package so absolute imports resolve
 
 # 3. Download data + models (30 seconds)
 python download.py
@@ -268,6 +269,7 @@ MIT License
 git clone https://github.com/AbdooMatrix/Healthcare-RAG-Powered-Medical-QA-Assistant.git
 cd Healthcare-RAG-Powered-Medical-QA-Assistant
 pip install -r requirements.txt
+pip install -e .
 python download.py
 ```
 
