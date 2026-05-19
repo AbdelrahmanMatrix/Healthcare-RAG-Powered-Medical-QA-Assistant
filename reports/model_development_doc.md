@@ -1,7 +1,7 @@
 # Model Development Documentation
 **Healthcare RAG-Powered Medical Q&A Assistant**
 **Owner:** Abdelrahman Mostafa Sayed
-**Generated:** 2026-05-19 10:08:49
+**Generated:** 2026-05-19 12:15:19
 
 ---
 
@@ -44,7 +44,7 @@ User Query
 | Item | Value |
 |---|---|
 | Type | FAISS `IndexFlatL2` |
-| Vectors | 9,800 |
+| Vectors | 9,000 |
 | Chunk format | Question + Context + Answer |
 | Rationale | Exact search (no approximation errors). IndexFlatL2 chosen for correctness — acceptable for 10K vectors. |
 
@@ -91,7 +91,7 @@ The classifier doesn't just label queries — it improves retrieval:
 
 **Integrated test results:**
 - Queries tested: 10
-- Category routing match rate: 72.0%
+- Category routing match rate: 83.0%
 - All disclaimers present: True
 
 ## 5. Design Decisions

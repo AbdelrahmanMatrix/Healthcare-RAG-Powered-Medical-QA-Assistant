@@ -2,10 +2,10 @@
 # 🧠 Healthcare RAG Assistant — Requirements
 # =========================================================
 
-# ─── Core Configuration ───────────────────────────────────
+# ─── Core Configuration ────────────────────────────────────
 python-dotenv==1.0.0
 
-# ─── Data Processing & Utilities ──────────────────────────
+# ─── Data Processing & Utilities ───────────────────────────
 pandas==2.2.2
 numpy==1.26.4
 scipy==1.13.1
@@ -13,36 +13,41 @@ tabulate==0.9.0
 tqdm==4.66.4
 langdetect==1.0.9
 
-# ─── Hugging Face Ecosystem ───────────────────────────────
+# ─── Hugging Face Ecosystem ────────────────────────────────
 datasets==2.19.1
 huggingface-hub>=0.23.2,<2.0.0
 
-# ─── NLP & Embeddings ─────────────────────────────────────
+# ─── NLP & Embeddings ──────────────────────────────────────
 transformers>=4.41.2,<6.0.0
 accelerate==0.31.0
+# sentence-transformers includes CrossEncoder — required for reranker
 sentence-transformers>=3.0.0,<6.0.0
 tokenizers>=0.19.1,<1.0.0
 sentencepiece==0.2.0
 
-# ⚠️ Install PyTorch separately depending on your system:
+# ─── PyTorch ───────────────────────────────────────────────
 # GPU (recommended):
-# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-#
+#   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 # CPU:
 torch>=2.4.0,<3.0.0
 
-# ─── RAG & Vector Store ───────────────────────────────────
+# ─── RAG & Vector Store ────────────────────────────────────
 faiss-cpu>=1.7.4,<2.0.0
 
-# ─── Machine Learning ─────────────────────────────────────
+# ─── BM25 (hybrid retrieval) ───────────────────────────────
+rank-bm25==0.2.2
+
+# ─── Machine Learning ──────────────────────────────────────
 scikit-learn==1.4.2
 
-# ─── Evaluation Metrics ───────────────────────────────────
+# ─── Evaluation Metrics ────────────────────────────────────
 nltk==3.8.1
 rouge-score==0.1.2
 evaluate==0.4.2
+# BERTScore — PRIMARY semantic similarity metric for abstractive RAG
+bert-score==0.3.13
 
-# ─── API & Backend ────────────────────────────────────────
+# ─── API & Backend ─────────────────────────────────────────
 fastapi>=0.111.0,<1.0.0
 uvicorn==0.30.1
 pydantic>=2.7.3,<3.0.0
@@ -51,35 +56,32 @@ python-multipart==0.0.9
 httpx>=0.27.0,<1.0.0
 requests==2.31.0
 
-# ─── LLM Client ───────────────────────────────────────────
-# openai v1.x and v2.x both support the chat.completions.create API we use.
-# Pin to >=1.35.3 to guarantee the OpenAI() client constructor is available.
+# ─── LLM Client ────────────────────────────────────────────
 openai>=1.35.3,<3.0.0
 
-# ─── MLOps & Cloud ────────────────────────────────────────
+# ─── MLOps & Cloud ─────────────────────────────────────────
 mlflow==2.13.2
 azure-storage-blob==12.19.0
 
-# ─── Dashboard & Visualization ────────────────────────────
+# ─── Dashboard & Visualization ─────────────────────────────
 streamlit==1.35.0
 plotly==5.22.0
 
-# ─── Data Visualization (EDA) ─────────────────────────────
+# ─── Data Visualization (EDA) ──────────────────────────────
 matplotlib==3.9.0
 seaborn==0.13.2
 wordcloud==1.9.3
 
-# ─── Notebook Environment ─────────────────────────────────
+# ─── Notebook Environment ──────────────────────────────────
 jupyter==1.0.0
 ipykernel==6.29.4
 
-# ─── Dev & Testing ────────────────────────────────────────
+# ─── Dev & Testing ─────────────────────────────────────────
 flake8==7.0.0
 pytest==8.2.0
 pytest-asyncio==0.23.6
 pytest-cov==5.0.0
 tenacity==8.3.0
 
-# ─── Stability & Performance ──────────────────────────────
+# ─── Stability & Performance ───────────────────────────────
 threadpoolctl==3.6.0
-rank-bm25==0.2.2

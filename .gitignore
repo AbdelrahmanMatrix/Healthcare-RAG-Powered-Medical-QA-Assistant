@@ -1,8 +1,8 @@
 # ═══════════════════════════════════════════════════════════════════════════════
-# Healthcare RAG-Powered Medical Q&A Assistant — .gitignore
+# Healthcare RAG-Powered Medical Q&A Assistant — .gitignore (PRODUCTION READY)
 # ═══════════════════════════════════════════════════════════════════════════════
 
-# ─── Python ─────────────────────────────────────────────────────────────────
+# ─── Python ───────────────────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *$py.class
@@ -13,40 +13,41 @@ dist/
 build/
 healthcare_rag.egg-info/
 
-# ─── Virtual Environments ───────────────────────────────────────────────────
+# ─── Virtual Environments ─────────────────────────────────────────────────────
 .venv/
 venv/
 env/
 ENV/
 
-# ─── Environment Variables / Secrets ────────────────────────────────────────
+# ─── Environment Variables / Secrets ─────────────────────────────────────────
 .env
 .env.*
 !.env.example
 
-# ─── Model Weights (too large for GitHub — reproducible from notebooks) ────
-models/classifier/distilbert_classifier/*.bin
-models/classifier/distilbert_classifier/*.safetensors
-models/classifier/distilbert_classifier/model.safetensors
-models/classifier/distilbert_classifier/pytorch_model.bin
-models/classifier/distilbert_classifier/tokenizer.json
-models/classifier/distilbert_classifier/vocab.txt
-models/classifier/checkpoints/
+# ─── Model Weights (ALL classifiers - SAFE FOR RAG PROJECTS) ─────────────────
+models/classifier/**/
+!models/classifier/**/config.json
+!models/classifier/**/tokenizer_config.json
+!models/classifier/**/special_tokens_map.json
+!models/classifier/**/README.md
 
-# ─── Data Files (reproducible from notebooks) ──────────────────────────────
+# ─── Checkpoints ──────────────────────────────────────────────────────────────
+models/**/checkpoints/
+
+# ─── Data Files (reproducible / externalized) ─────────────────────────────────
 data/raw/*.csv
 data/processed/*.csv
 
-# ─── FAISS Index & Embeddings (reproducible from notebook 05) ──────────────
-data/embeddings/faiss_index/*.faiss
-data/embeddings/faiss_index/*.pkl
-data/embeddings/faiss_index/*.csv
+# ─── FAISS / Embeddings (rebuildable artifacts) ───────────────────────────────
+data/embeddings/faiss_index/
+*.faiss
+*.pkl
 
-# ─── Jupyter Notebook ──────────────────────────────────────────────────────
+# ─── Jupyter Notebook ─────────────────────────────────────────────────────────
 .ipynb_checkpoints/
 *.ipynb_checkpoints
 
-# ─── IDE / Editor ──────────────────────────────────────────────────────────
+# ─── IDE / Editor ─────────────────────────────────────────────────────────────
 .idea/
 .vscode/
 *.swp
@@ -55,38 +56,33 @@ data/embeddings/faiss_index/*.csv
 *.sublime-project
 *.sublime-workspace
 
-# ─── OS Files ──────────────────────────────────────────────────────────────
+# ─── OS Files ────────────────────────────────────────────────────────────────
 .DS_Store
 .DS_Store?
 Thumbs.db
 ehthumbs.db
 Desktop.ini
 
-# ─── Logs & Temp ───────────────────────────────────────────────────────────
+# ─── Logs & Temp Files ────────────────────────────────────────────────────────
 *.log
 *.tmp
 *.bak
 *.orig
 
-# ─── MLflow (local tracking — can be large) ────────────────────────────────
+# ─── MLflow (local tracking) ──────────────────────────────────────────────────
 mlruns/
 mlartifacts/
 
-# ─── Docker ────────────────────────────────────────────────────────────────
+# ─── Docker ───────────────────────────────────────────────────────────────────
 docker/.env
 
-# ─── Distribution / Packaging ──────────────────────────────────────────────
-*.manifest
-*.spec
-pip-log.txt
-pip-delete-this-directory.txt
-
-# ─── Testing ───────────────────────────────────────────────────────────────
+# ─── Testing ──────────────────────────────────────────────────────────────────
 .pytest_cache/
 .coverage
 htmlcov/
 .tox/
 
-# ─── HuggingFace Cache (large model downloads) ────────────────────────────
+# ─── HuggingFace / Transformers Cache ─────────────────────────────────────────
 .cache/
-~/.cache/huggingface/
+huggingface/
+**/.cache/

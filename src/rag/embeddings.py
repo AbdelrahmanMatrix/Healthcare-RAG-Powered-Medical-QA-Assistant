@@ -1,13 +1,13 @@
 """
 Embedding utilities for the RAG pipeline.
-
-Wraps SentenceTransformer for consistent usage across the project.
+Upgraded from all-MiniLM-L6-v2 (general-purpose) to
+pritamdeka/S-PubMedBert-MS-MARCO (biomedical domain).
 """
-
 import numpy as np
 from sentence_transformers import SentenceTransformer
 
-DEFAULT_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+# Medical-domain embedding model — trained on PubMed + MS-MARCO retrieval.
+DEFAULT_MODEL = "pritamdeka/S-PubMedBert-MS-MARCO"
 
 
 class EmbeddingModel:
@@ -16,14 +16,16 @@ class EmbeddingModel:
     def __init__(self, model_name: str = DEFAULT_MODEL):
         self.model = SentenceTransformer(model_name)
         self.dimension = self.model.get_sentence_embedding_dimension()
+        print(f"✅ Embedding model loaded: {model_name} (dim={self.dimension})")
 
-    def encode(self, texts: list[str], batch_size: int = 64) -> np.ndarray:
-        """Encode texts into float32 numpy array."""
+    def encode(self, texts: list, batch_size: int = 32) -> np.ndarray:
+        """Encode texts into float32 numpy array (L2-normalised)."""
         embeddings = self.model.encode(
             texts,
             batch_size=batch_size,
             show_progress_bar=True,
             convert_to_numpy=True,
+            normalize_embeddings=True,
         )
         return np.asarray(embeddings, dtype=np.float32)
 
@@ -32,5 +34,6 @@ class EmbeddingModel:
         embedding = self.model.encode(
             [query],
             convert_to_numpy=True,
+            normalize_embeddings=True,
         )
         return np.asarray(embedding, dtype=np.float32)

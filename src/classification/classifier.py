@@ -1,11 +1,15 @@
 """
-DistilBERT medical query classifier.
+BioBERT medical query classifier (upgraded from DistilBERT).
 
 Classifies medical questions into 6 categories:
 Symptoms, Diagnosis, Treatment, Medication, Prevention, General
 
+BioBERT (dmis-lab/biobert-v1.1) is pre-trained on PubMed abstracts and
+PMC full-text articles — significantly better domain fit than general-purpose
+DistilBERT for medical text classification.
+
 Loading priority:
-1. Local model (models/classifier/distilbert_classifier/)
+1. Local model (models/classifier/biobert_classifier/)
 2. HuggingFace Hub (auto-download if local not found)
 
 Usage:
@@ -18,25 +22,29 @@ Usage:
 import os
 from pathlib import Path
 
-# ── Config ────────────────────────────────────────────────────────────────
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
-DEFAULT_LOCAL_PATH = PROJECT_ROOT / "models" / "classifier" / "distilbert_classifier"
-HF_REPO_ID = "AbdoMatrix/distilbert-medical-classifier"  # Fixed: was AbdooMatrix  # ← change username
+# ── Config ────────────────────────────────────────────────────────────────────
+PROJECT_ROOT       = Path(__file__).resolve().parent.parent.parent
+DEFAULT_LOCAL_PATH = PROJECT_ROOT / "models" / "classifier" / "biobert_classifier"
+HF_REPO_ID         = "AbdooMatrix/biobert-medical-classifier"
+
+# Fallback to DistilBERT repo if BioBERT weights not yet uploaded
+HF_REPO_ID_FALLBACK = "AbdooMatrix/distilbert-medical-classifier"
 
 
 class MedicalClassifier:
     """
-    Wrapper for the fine-tuned DistilBERT classifier.
+    Wrapper for the fine-tuned BioBERT classifier.
 
     Loads from local path if available, otherwise downloads from HuggingFace.
+    BioBERT is cased — do NOT lowercase inputs.
     """
 
     def __init__(self, model_path: str = None):
         import torch
-        from transformers import DistilBertTokenizer, DistilBertForSequenceClassification
+        from transformers import AutoTokenizer, AutoModelForSequenceClassification
+
         path = model_path or str(DEFAULT_LOCAL_PATH)
 
-        # Check if local model exists and has actual model files
         local_exists = (
             os.path.exists(path)
             and os.path.isdir(path)
@@ -55,8 +63,14 @@ class MedicalClassifier:
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        self.tokenizer = DistilBertTokenizer.from_pretrained(source)
-        self.model = DistilBertForSequenceClassification.from_pretrained(source)
+        try:
+            self.tokenizer = AutoTokenizer.from_pretrained(source)
+            self.model     = AutoModelForSequenceClassification.from_pretrained(source)
+        except Exception:
+            print(f"⚠️  BioBERT repo not found, falling back to: {HF_REPO_ID_FALLBACK}")
+            self.tokenizer = AutoTokenizer.from_pretrained(HF_REPO_ID_FALLBACK)
+            self.model     = AutoModelForSequenceClassification.from_pretrained(HF_REPO_ID_FALLBACK)
+
         self.model.to(self.device)
         self.model.eval()
 
@@ -96,11 +110,11 @@ class MedicalClassifier:
         with torch.no_grad():
             outputs = self.model(**inputs)
 
-        probs = torch.softmax(outputs.logits, dim=1)[0]
+        probs   = torch.softmax(outputs.logits, dim=1)[0]
         pred_id = torch.argmax(probs).item()
 
         return {
-            "category": self.id2label[pred_id],
+            "category":   self.id2label[pred_id],
             "confidence": float(probs[pred_id]),
             "all_scores": {
                 self.id2label[i]: float(probs[i])
@@ -108,20 +122,21 @@ class MedicalClassifier:
             }
         }
 
-    def predict_batch(self, texts: list[str]) -> list[str]:
+    def predict_batch(self, texts: list) -> list:
         """Predict categories for a list of texts."""
         return [self.predict(t) for t in texts]
 
 
-# ── Module-level convenience functions ───────────────────────────────────
+# ── Module-level convenience functions ────────────────────────────────────────
 
 _classifier_instance = None
 
 
 def load_classifier(**kwargs) -> MedicalClassifier:
-    """Load and cache classifier instance."""
+    """Load and cache classifier instance (no-op if already loaded)."""
     global _classifier_instance
-    _classifier_instance = MedicalClassifier(**kwargs)
+    if _classifier_instance is None:
+        _classifier_instance = MedicalClassifier(**kwargs)
     return _classifier_instance
 
 
