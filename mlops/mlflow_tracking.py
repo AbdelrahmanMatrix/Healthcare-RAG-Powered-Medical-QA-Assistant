@@ -41,12 +41,19 @@ CLASSIFIER_PATH = PROJECT_ROOT / "models" / "classifier" / "distilbert_classifie
 
 
 def _load_eval_metrics() -> dict:
-    """Compute BLEU and ROUGE-L from the raw evaluation CSV."""
+    """Compute BLEU and ROUGE-L from the raw evaluation CSV.
+
+    Uses the canonical compute_rouge() from src.evaluation.metrics so that
+    ROUGE-L measurement is consistent across the entire codebase.
+    """
     if not EVAL_REPORT_PATH.exists():
         return {}
+    import sys
+    sys.path.insert(0, str(PROJECT_ROOT))
+
     import pandas as pd
     from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
-    from rouge_score import rouge_scorer as rs_mod
+    from src.evaluation.metrics import compute_rouge
     import nltk
     # NLTK 3.8.1+ requires punkt_tab; download both for backward compat.
     for _pkg in ("punkt", "punkt_tab"):
@@ -58,27 +65,38 @@ def _load_eval_metrics() -> dict:
     df = pd.read_csv(EVAL_REPORT_PATH).dropna(subset=["rag_answer", "llm_answer", "reference"])
 
     smoother = SmoothingFunction().method1
-    scorer = rs_mod.RougeScorer(["rougeL"], use_stemmer=True)
 
-    bleu_rag, bleu_llm, rouge_rag, rouge_llm = [], [], [], []
+    bleu_rag, bleu_llm = [], []
+    rag_answers, llm_answers, refs = [], [], []
     for _, row in df.iterrows():
-        ref = row["reference"].lower().split()
-        for col, b_list, r_list in [
-            ("rag_answer", bleu_rag, rouge_rag),
-            ("llm_answer", bleu_llm, rouge_llm),
+        ref_tokens = row["reference"].lower().split()
+        for col, b_list, ans_list in [
+            ("rag_answer", bleu_rag, rag_answers),
+            ("llm_answer", bleu_llm, llm_answers),
         ]:
-            pred = str(row[col]).lower().split()
-            b_list.append(sentence_bleu([ref], pred, smoothing_function=smoother))
-            r_list.append(scorer.score(row["reference"], str(row[col]))["rougeL"].fmeasure)
+            pred_tokens = str(row[col]).lower().split()
+            b_list.append(sentence_bleu([ref_tokens], pred_tokens, smoothing_function=smoother))
+            ans_list.append(str(row[col]))
+        refs.append(row["reference"])
+
+    # Use canonical compute_rouge() from metrics.py — consistent with notebook 08
+    rouge_rag = compute_rouge(rag_answers, refs)
+    rouge_llm = compute_rouge(llm_answers, refs)
 
     import numpy as np
+    mean_bleu_rag = float(np.mean(bleu_rag))
+    mean_bleu_llm = float(np.mean(bleu_llm))
+
     return {
-        "bleu_rag":     float(np.mean(bleu_rag)),
-        "bleu_baseline": float(np.mean(bleu_llm)),
-        "rouge_rag":    float(np.mean(rouge_rag)),
-        "rouge_baseline": float(np.mean(rouge_llm)),
-        "bleu_improvement_pct": float(
-            (np.mean(bleu_rag) - np.mean(bleu_llm)) / max(np.mean(bleu_llm), 1e-9) * 100
+        "bleu_rag":      round(mean_bleu_rag, 4),
+        "bleu_baseline": round(mean_bleu_llm, 4),
+        "rouge_rag":     round(rouge_rag, 4),
+        "rouge_baseline": round(rouge_llm, 4),
+        "bleu_improvement_pct": round(
+            ((mean_bleu_rag - mean_bleu_llm) / max(mean_bleu_llm, 1e-9)) * 100, 2
+        ),
+        "rouge_improvement_pct": round(
+            ((rouge_rag - rouge_llm) / max(rouge_llm, 1e-9)) * 100, 2
         ),
     }
 

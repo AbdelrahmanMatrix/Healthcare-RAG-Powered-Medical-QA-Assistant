@@ -40,12 +40,26 @@ def compute_bleu(predictions: list, references: list) -> float:
 # ── ROUGE-L ───────────────────────────────────────────────────────────────────
 
 def compute_rouge(predictions: list, references: list) -> float:
-    """Average ROUGE-L F1 score across all pairs."""
+    """
+    Average ROUGE-L F1 score across all pairs.
+
+    Handles edge cases:
+      - Empty predictions or references    → 0.0
+      - Unequal list lengths               → truncated to shorter list
+      - Empty strings within pairs         → 0.0 for that pair
+    """
+    if not predictions or not references:
+        return 0.0
+
     scorer = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
-    scores = [
-        scorer.score(ref, pred)['rougeL'].fmeasure
-        for pred, ref in zip(predictions, references)
-    ]
+    scores = []
+    for pred, ref in zip(predictions, references):
+        if not pred or not ref:
+            scores.append(0.0)
+            continue
+        result = scorer.score(ref, pred)
+        scores.append(result['rougeL'].fmeasure)
+
     return float(np.mean(scores))
 
 
