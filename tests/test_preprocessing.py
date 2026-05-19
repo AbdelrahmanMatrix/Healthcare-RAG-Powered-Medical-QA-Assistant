@@ -31,6 +31,16 @@ def test_extract_context_finds_text():
     assert "diabetes" in result
 
 
+def test_extract_context_dict_string():
+    """Handle dict string format from CSV re-load of qiaojin/PubMedQA."""
+    text = "{'contexts': ['Patient has diabetes.', 'Blood sugar is high.'], 'labels': ['BACKGROUND'], 'meshes': ['Diabetes']}"
+    result = extract_context(text)
+    assert "diabetes" in result
+    assert "blood sugar" in result.lower()
+    assert "BACKGROUND" not in result  # labels should NOT leak
+    assert "meshes" not in result  # meshes key should NOT appear
+
+
 def test_labeller_returns_valid_category():
     valid = {"Symptoms", "Diagnosis", "Treatment", "Medication", "Prevention", "General"}
     assert assign_category("What are the symptoms of flu?") in valid

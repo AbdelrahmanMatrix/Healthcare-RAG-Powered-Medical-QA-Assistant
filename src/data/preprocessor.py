@@ -1,21 +1,27 @@
 """
-Text cleaning & normalisation pipeline for PubMedQA dataset.
+Text cleaning & normalisation pipeline for PubMedQA dataset (qiaojin/PubMedQA).
+
+The raw dataset has these columns:
+- pubid: int32
+- question: string (already clean)
+- context: list of strings (PubMed abstract snippets)
+- long_answer: string (detailed answer)
+- final_decision: string (yes/no/maybe)
 
 Steps applied (in order):
-1. Strip HTML tags
-2. Remove special characters (keep basic punctuation)
-3. Collapse whitespace
-4. Lowercase normalisation
-5. Strip leading/trailing whitespace
-6. Remove non-English rows (langdetect)
-7. Remove rows with missing question or answer
-8. Remove exact duplicate rows
+1. Validate schema (expect question, context, long_answer)
+2. Extract clean columns (join context list, use question/long_answer directly)
+3. Clean text (HTML, special chars, whitespace, lowercase)
+4. Remove rows with missing question or answer
+5. Remove non-English rows (langdetect)
+6. Remove exact duplicate rows
 
 Usage:
     from src.data.preprocessor import run_preprocessing_pipeline
     df_clean, log = run_preprocessing_pipeline(df_raw)
 """
 
+import ast
 import re
 import pandas as pd
 from langdetect import detect, LangDetectException
@@ -64,20 +70,51 @@ def is_english(text: str) -> bool:
 
 # ── Column extraction helpers ────────────────────────────────────────────────
 
-def extract_context(instruction: str) -> str:
-    """Extract context from instruction column (remove prefix)."""
-    match = re.search(r'context:\s*(.*)', str(instruction), re.IGNORECASE | re.DOTALL)
+def extract_context(context_data) -> str:
+    """
+    Extract context text from raw context data.
+    
+    Handles three formats:
+    - List of strings (qiaojin/PubMedQA from datasets lib) — joins with space
+    - Dict string ``{"contexts": [...], ...}`` (qiaojin/PubMedQA reloaded from CSV) — parses dict
+    - Pre-formatted string with 'context:' prefix (legacy llamafactory/PubMedQA) — strips prefix
+    """
+    # Handle list of strings (qiaojin/PubMedQA from datasets library)
+    if isinstance(context_data, list):
+        return ' '.join(str(c).strip() for c in context_data if c)
+
+    text = str(context_data).strip()
+
+    # Handle dict string (CSV re-load — pandas reads dicts as strings)
+    if text.startswith('{'):
+        try:
+            parsed = ast.literal_eval(text)
+            if isinstance(parsed, dict) and 'contexts' in parsed:
+                contexts = parsed['contexts']
+                if isinstance(contexts, list):
+                    return ' '.join(str(c).strip() for c in contexts if c)
+        except (ValueError, SyntaxError, MemoryError):
+            pass
+
+    # Handle pre-formatted string (legacy llamafactory/PubMedQA)
+    match = re.search(r'context:\s*(.*)', text, re.IGNORECASE | re.DOTALL)
     if match:
         return match.group(1).strip()
-    return str(instruction).strip()
+    return text
 
 
-def extract_question(input_text: str) -> str:
-    """Extract question from input column (remove 'Question:' prefix)."""
-    match = re.search(r'Question:\s*(.*)', str(input_text), re.IGNORECASE | re.DOTALL)
+def extract_question(question_data: str) -> str:
+    """Extract question text from raw question data.
+    
+    Handles both:
+    - Already clean question (qiaojin/PubMedQA) — strips only
+    - Pre-formatted with 'Question:' prefix (legacy llamafactory/PubMedQA)
+    """
+    text = str(question_data).strip()
+    match = re.search(r'Question:\s*(.*)', text, re.IGNORECASE | re.DOTALL)
     if match:
         return match.group(1).strip()
-    return str(input_text).strip()
+    return text
 
 
 # ── Main pipeline ────────────────────────────────────────────────────────────
@@ -89,7 +126,11 @@ def run_preprocessing_pipeline(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     Parameters
     ----------
     df : pd.DataFrame
-        Raw DataFrame with columns: instruction, input, output
+        Raw DataFrame with columns from qiaojin/PubMedQA:
+        - question: str (already clean)
+        - context: list of strings (PubMed abstracts)
+        - long_answer: str (detailed answer)
+        - final_decision: str (yes/no/maybe)
 
     Returns
     -------
@@ -101,18 +142,31 @@ def run_preprocessing_pipeline(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     log['raw_rows'] = len(df)
 
     # ── Step 1: Validate schema ──────────────────────────────────────────
-    required = {'instruction', 'input', 'output'}
-    missing = required - set(df.columns)
-    if missing:
-        raise ValueError(f"Missing required columns: {missing}")
+    # Support both old (llamafactory) and new (qiaojin) schemas
+    old_required = {'instruction', 'input', 'output'}
+    new_required = {'question', 'context', 'long_answer'}
+    
+    if old_required.issubset(set(df.columns)):
+        # Legacy llamafactory/PubMedQA schema
+        df = df.copy()
+        df['question'] = df['input'].apply(extract_question)
+        df['context'] = df['instruction'].apply(extract_context)
+        df['answer'] = df['output'].astype(str).str.strip()
+    elif new_required.issubset(set(df.columns)):
+        # New qiaojin/PubMedQA schema
+        df = df.copy()
+        df['question'] = df['question'].apply(extract_question)
+        df['context'] = df['context'].apply(extract_context)
+        df['answer'] = df['long_answer'].astype(str).str.strip()
+    else:
+        missing_old = old_required - set(df.columns)
+        missing_new = new_required - set(df.columns)
+        raise ValueError(
+            f"Unrecognized schema. Missing old columns: {missing_old}, "
+            f"Missing new columns: {missing_new}"
+        )
 
-    # ── Step 2: Extract clean columns ────────────────────────────────────
-    df = df.copy()
-    df['question'] = df['input'].apply(extract_question)
-    df['context'] = df['instruction'].apply(extract_context)
-    df['answer'] = df['output'].astype(str).str.strip()
-
-    # Keep only the 3 new columns
+    # Keep only the 3 standard columns
     df = df[['question', 'context', 'answer']]
     log['after_extraction'] = len(df)
 

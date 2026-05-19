@@ -27,6 +27,23 @@ DATA_FILES = [
 ]
 
 
+def _get_hf_token() -> str | None:
+    """
+    Resolve the HuggingFace token.
+
+    Checks both HF_TOKEN and HUGGINGFACEHUB_API_TOKEN env vars.
+    Returns None if neither is set (prints a helpful message).
+    """
+    token = os.getenv("HF_TOKEN") or os.getenv("HUGGINGFACEHUB_API_TOKEN") or None
+    if not token:
+        print(
+            "  ⚠️  HF_TOKEN not set.\n"
+            "     Set the HF_TOKEN env var in your .env file or run:\n"
+            "     export HF_TOKEN=hf_xxxxx"
+        )
+    return token
+
+
 def upload_file(local_relative_path: str, repo_path: str) -> bool:
     """Upload a single file to HuggingFace."""
     local_full = PROJECT_ROOT / local_relative_path
@@ -35,8 +52,11 @@ def upload_file(local_relative_path: str, repo_path: str) -> bool:
         print(f"  ⚠️  Skipped (not found): {local_relative_path}")
         return False
 
+    hf_token = _get_hf_token()
+    if not hf_token:
+        return False
+
     try:
-        hf_token = os.getenv("HF_TOKEN", "") or None
         api = HfApi(token=hf_token)
         api.upload_file(
             path_or_fileobj=str(local_full),
@@ -57,7 +77,11 @@ def upload_all_data() -> dict:
     print(f"📤 Uploading data to: huggingface.co/datasets/{HF_DATA_REPO}")
     print("─" * 60)
 
-    hf_token = os.getenv("HF_TOKEN", "") or None
+    hf_token = _get_hf_token()
+    if not hf_token:
+        print("\n⚠️  No upload token — skipping all files.")
+        return {"uploaded": 0, "skipped": len(DATA_FILES), "failed": 0}
+
     api = HfApi(token=hf_token)
     api.create_repo(
         repo_id=HF_DATA_REPO,
@@ -92,7 +116,7 @@ def download_file(repo_path: str, local_relative_path: str) -> bool:
     try:
         os.makedirs(local_full.parent, exist_ok=True)
 
-        hf_token = os.getenv("HF_TOKEN", "") or None
+        hf_token = _get_hf_token()
         downloaded_path = hf_hub_download(
             repo_id=HF_DATA_REPO,
             filename=repo_path,

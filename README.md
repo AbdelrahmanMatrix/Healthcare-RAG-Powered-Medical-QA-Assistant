@@ -108,8 +108,8 @@ User Query
 
 | Item | Value |
 |------|-------|
-| Source | [llamafactory/PubMedQA](https://huggingface.co/datasets/llamafactory/PubMedQA) |
-| Rows | ~10,000 |
+| Source | [qiaojin/PubMedQA](https://huggingface.co/datasets/qiaojin/PubMedQA) |
+| Rows | ~211,000 (pqa_artificial subset)
 | Columns | question, context, answer, category |
 | Categories | Symptoms, Diagnosis, Treatment, Medication, Prevention, General |
 
