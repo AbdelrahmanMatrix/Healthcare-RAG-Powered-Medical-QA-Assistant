@@ -86,3 +86,7 @@ htmlcov/
 .cache/
 huggingface/
 **/.cache/
+/data
+data/processed/pubmedqa_labelled.csv
+data/processed/pubmedqa_labelled.csv
+/data/processed

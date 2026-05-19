@@ -1,25 +1,25 @@
 # EDA Report — M1 Task 4
 **Healthcare RAG-Powered Medical Q&A Assistant**
 **Owner:** Doha Khaled Mahmoud
-**Generated:** 2026-05-19 11:16:31
+**Generated:** 2026-05-19 19:43:22
 
 ---
 
 ## Dataset Overview
 - **Source:** `pubmedqa_labelled.csv`
-- **Total rows:** 10,000
+- **Total rows:** 211,188
 - **Columns:** ['question', 'context', 'answer', 'category', 'question_length', 'context_length', 'answer_length']
 
 ## 1. Category Distribution
 
 | Category | Count | Percentage | Flag |
 |----------|-------|------------|------|
-| Treatment | 3,634 | 36.3% |  |
-| Diagnosis | 1,833 | 18.3% |  |
-| Medication | 1,492 | 14.9% |  |
-| General | 1,350 | 13.5% |  |
-| Prevention | 1,151 | 11.5% |  |
-| Symptoms | 540 | 5.4% |  |
+| Medication | 71,539 | 33.9% |  |
+| Treatment | 48,580 | 23.0% |  |
+| Diagnosis | 31,919 | 15.1% |  |
+| General | 28,252 | 13.4% |  |
+| Prevention | 22,179 | 10.5% |  |
+| Symptoms | 8,719 | 4.1% |  |
 
 **KPI Check:** All 6 categories present with ≥ 1% representation ✅
 **Skew Analysis:** ✅ No critically skewed categories
@@ -28,50 +28,50 @@
 
 | Metric | Question | Context | Answer |
 |--------|----------|---------|--------|
-| Mean | 13.3 | 197.3 | 42.3 |
-| Median | 13.0 | 195.0 | 39.0 |
-| Min | 3 | 26 | 6 |
-| Max | 45 | 606 | 313 |
+| Mean | 15.3 | 197.3 | 37.6 |
+| Median | 15.0 | 197.0 | 34.0 |
+| Min | 3 | 1 | 1 |
+| Max | 109 | 908 | 510 |
 
 ## 3. Top 20 Medical Terms
 
 | Term | Frequency |
 |------|-----------|
-| treatment | 4,354 |
-| clinical | 4,097 |
-| health | 3,511 |
-| disease | 3,440 |
-| care | 3,265 |
-| both | 3,176 |
-| patient | 3,145 |
-| whether | 3,078 |
-| cancer | 3,068 |
-| surgery | 3,060 |
-| those | 2,959 |
-| only | 2,762 |
-| levels | 2,733 |
-| been | 2,567 |
-| other | 2,511 |
-| factors | 2,499 |
-| when | 2,468 |
-| followup | 2,242 |
-| blood | 2,168 |
-| studies | 2,143 |
+| cells | 172,210 |
+| expression | 154,854 |
+| levels | 120,421 |
+| cell | 112,137 |
+| treatment | 94,167 |
+| both | 74,582 |
+| mice | 73,715 |
+| cancer | 73,703 |
+| disease | 73,502 |
+| protein | 73,359 |
+| activity | 63,635 |
+| been | 59,733 |
+| clinical | 58,320 |
+| blood | 57,654 |
+| human | 54,240 |
+| gene | 54,093 |
+| serum | 51,237 |
+| role | 50,718 |
+| response | 50,569 |
+| whether | 48,510 |
 
 ## 4. Average Answer Length per Category
 
 | Category | Avg Words |
 |----------|-----------|
-| General | 43.0 |
-| Treatment | 42.8 |
-| Medication | 42.5 |
-| Prevention | 42.0 |
-| Symptoms | 41.3 |
-| Diagnosis | 41.2 |
+| General | 39.8 |
+| Diagnosis | 38.4 |
+| Symptoms | 37.8 |
+| Treatment | 37.6 |
+| Prevention | 37.0 |
+| Medication | 36.5 |
 
 ## 5. Key Findings
-- Strongest length correlation: context ↔ answer (0.147)
-- Dataset is dominated by Symptoms (36.3%) and Diagnosis (18.3%)
+- Strongest length correlation: context ↔ answer (0.063)
+- Dataset is dominated by Symptoms (33.9%) and Diagnosis (23.0%)
 - ✅ No critically skewed categories
 - Dataset is ready for RAG + Classification training
 

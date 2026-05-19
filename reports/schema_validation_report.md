@@ -1,7 +1,7 @@
 # Schema Validation Report
 **Healthcare RAG-Powered Medical Q&A Assistant**
 
-Generated: 2026-05-19 17:42:24
+Generated: 2026-05-19 19:17:42
 
 ## Dataset Info
 | Item | Value |
