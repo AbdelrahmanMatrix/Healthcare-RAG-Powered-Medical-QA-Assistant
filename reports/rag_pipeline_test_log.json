@@ -10,34 +10,44 @@
         "chunk_id": 40,
         "question": "Does overnight normalization of plasma glucose by insulin infusion affect assessment of glucose metabolism in Type 2 diabetes?",
         "category": "Medication",
-        "distance": -23.900191054364367
+        "distance": -23.9002,
+        "relevance_score": 0.7967,
+        "excerpt": "In order to perform euglycaemic clamp studies in Type 2 diabetic patients, plasma glucose must be reduced to normal levels. This can be done either (i"
       },
       {
         "chunk_id": 5728,
         "question": "Is prehypertension a risk factor for the development of type 2 diabetes?",
         "category": "Prevention",
-        "distance": -23.847986594036897
+        "distance": -23.848,
+        "relevance_score": 0.7949,
+        "excerpt": "Prehypertension is associated with cardiovascular disease and insulin resistance. However, whether subjects with prehypertension have more diabetes ri"
       },
       {
         "chunk_id": 4555,
         "question": "Is there a link between components of health-related functioning and incident impaired glucose metabolism and type 2 diabetes?",
         "category": "Prevention",
-        "distance": -22.055825294526684
+        "distance": -22.0558,
+        "relevance_score": 0.7352,
+        "excerpt": "To determine the longitudinal association of components of health-related functioning (HRF) with incident impaired glucose metabolism and type 2 diabe"
       },
       {
         "chunk_id": 7064,
         "question": "Is high density lipoprotein cholesterol useful in diagnosis of metabolic syndrome in native Africans with type 2 diabetes?",
         "category": "Diagnosis",
-        "distance": -21.768579126445843
+        "distance": -21.7686,
+        "relevance_score": 0.7256,
+        "excerpt": "High-density lipoprotein (HDL) hypocholesterolemia predicts metabolic syndrome among Caucasians and is one of the World Health Organization (WHO) diag"
       },
       {
         "chunk_id": 4249,
         "question": "Is parity associated with earlier diagnosis of type 2 diabetes?",
         "category": "Diagnosis",
-        "distance": -21.551744754048155
+        "distance": -21.5517,
+        "relevance_score": 0.7184,
+        "excerpt": "A retrospective analysis from a diabetes database was conducted. Data for 2102 women with type 2 diabetes (T2DM), including date of birth, age at diag"
       }
     ],
-    "latency_ms": 2851.27
+    "latency_ms": 2873.16
   },
   {
     "query_num": 2,
@@ -50,34 +60,44 @@
         "chunk_id": 5415,
         "question": "Can diabetes medication be reduced in elderly patients?",
         "category": "Medication",
-        "distance": -17.434545673237167
+        "distance": -17.4345,
+        "relevance_score": 0.5812,
+        "excerpt": "HbA1c was measured in 98 patients with known diabetes in 17 nursing homes in Sweden. Thirty-two subjects with HbA1c<or=6.0% participated in the drug w"
       },
       {
         "chunk_id": 3532,
         "question": "Is extended lymph node dissection necessary for gastric cancer in elderly patients?",
         "category": "Treatment",
-        "distance": -16.24823500711594
+        "distance": -16.2482,
+        "relevance_score": 0.5416,
+        "excerpt": "To compare the outcome after limited and extended gastric resections to find out whether extended lymph node dissection is indicated for gastric cance"
       },
       {
         "chunk_id": 9721,
         "question": "Is it possible to predict hypotension during onset of spinal anesthesia in elderly patients?",
         "category": "Medication",
-        "distance": -15.799749540290023
+        "distance": -15.7997,
+        "relevance_score": 0.5267,
+        "excerpt": "To evaluate the sensitivity and specificity of various predictors of hypotension during onset of spinal anesthesia in elderly patients. Prospective st"
       },
       {
         "chunk_id": 501,
         "question": "Reporting hospitals' antibiotic timing in pneumonia: adverse consequences for patients?",
         "category": "Medication",
-        "distance": -15.441220350238442
+        "distance": -15.4412,
+        "relevance_score": 0.5147,
+        "excerpt": "To determine whether publicly reporting hospital scores on antibiotic timing in pneumonia (percentage of patients with pneumonia receiving antibiotics"
       },
       {
         "chunk_id": 8563,
         "question": "Is decompressive craniectomy for malignant middle cerebral artery territory infarction of any benefit for elderly patients?",
         "category": "Treatment",
-        "distance": -15.142936822442492
+        "distance": -15.1429,
+        "relevance_score": 0.5048,
+        "excerpt": "Malignant middle cerebral artery (MCA) infarction is characterized by mortality rate of up to 80%. The aim of this study was to determine the value of"
       }
     ],
-    "latency_ms": 1480.4
+    "latency_ms": 1512.11
   },
   {
     "query_num": 3,
@@ -90,34 +110,44 @@
         "chunk_id": 8895,
         "question": "Are infant feeding options that are recommended for mothers with HIV acceptable, feasible, affordable, sustainable and safe?",
         "category": "Treatment",
-        "distance": -14.638170341963667
+        "distance": -14.6382,
+        "relevance_score": 0.4879,
+        "excerpt": "To investigate pregnant women's views on infant feeding options recommended for HIV-infected women. A structured interview survey complemented with fo"
       },
       {
         "chunk_id": 7608,
         "question": "Consenting for current genetic research: is Canadian practice adequate?",
         "category": "General",
-        "distance": -14.339823834380713
+        "distance": -14.3398,
+        "relevance_score": 0.478,
+        "excerpt": "In order to ensure an adequate and ongoing protection of individuals participating in scientific research, the impacts of new biomedical technologies,"
       },
       {
         "chunk_id": 4494,
         "question": "An investigation of temperamental traits in patients with somatoform disorder: do they belong in the affective spectrum?",
         "category": "Diagnosis",
-        "distance": -13.350519173621247
+        "distance": -13.3505,
+        "relevance_score": 0.445,
+        "excerpt": "About 10% of the general population report multiple and persisting physical symptoms resulting in extensive screening but with no organic explanation"
       },
       {
         "chunk_id": 6847,
         "question": "Is heroin-assisted treatment effective for patients with no previous maintenance treatment?",
         "category": "Treatment",
-        "distance": -12.776109063996467
+        "distance": -12.7761,
+        "relevance_score": 0.4259,
+        "excerpt": "Until now, the medical prescription of diamorphine (heroin) has been suggested as suitable for patients who have failed previous maintenance treatment"
       },
       {
         "chunk_id": 2548,
         "question": "Native, discount, or premium brand cigarettes: what types of cigarettes are Canadian youth currently smoking?",
         "category": "General",
-        "distance": -12.576167681816269
+        "distance": -12.5762,
+        "relevance_score": 0.4192,
+        "excerpt": "The objective of the study was to determine the brand distribution of premium, discount, and native cigarette brands and to identify the factors assoc"
       }
     ],
-    "latency_ms": 1429.84
+    "latency_ms": 1445.54
   },
   {
     "query_num": 4,
@@ -130,34 +160,44 @@
         "chunk_id": 8807,
         "question": "Sensorimotor dysfunction of grasping in schizophrenia: a side effect of antipsychotic treatment?",
         "category": "Medication",
-        "distance": -20.568807586548882
+        "distance": -20.5688,
+        "relevance_score": 0.6856,
+        "excerpt": "Antipsychotic treatment in schizophrenia is frequently associated with extrapyramidal side effects. Objective behavioural measures to evaluate the sev"
       },
       {
         "chunk_id": 4216,
         "question": "Particular cutaneous side effects with etoposide-containing courses: is VP16 or etoposide phosphate responsible?",
         "category": "Medication",
-        "distance": -18.357743203552346
+        "distance": -18.3577,
+        "relevance_score": 0.6119,
+        "excerpt": "Etoposide is commercially available in France in two different pharmaceutical forms: VP16 and its phosphate ester (etoposide phosphate, EP). EP shows"
       },
       {
         "chunk_id": 1088,
         "question": "Does lidocaine ointment addition increase fluoxetine efficacy in the same group of patients with premature ejaculation?",
         "category": "Treatment",
-        "distance": -17.028137624013993
+        "distance": -17.0281,
+        "relevance_score": 0.5676,
+        "excerpt": "To evaluate the efficacy of fluoxetine alone and fluoxetine+lidocaine ointment in the same patient group with premature ejaculation (PE). 78 patients"
       },
       {
         "chunk_id": 8780,
         "question": "Productivity costs in health-state valuations : does explicit instruction matter?",
         "category": "Medication",
-        "distance": -17.011364159263053
+        "distance": -17.0114,
+        "relevance_score": 0.567,
+        "excerpt": "There has been considerable debate on whether productivity costs should be captured in the numerator or the denominator of the cost-effectiveness rati"
       },
       {
         "chunk_id": 3883,
         "question": "Does cyclosporin A have any effect on accelerated atherosclerosis in absence of graft rejection?",
         "category": "Medication",
-        "distance": -16.9734270663782
+        "distance": -16.9734,
+        "relevance_score": 0.5658,
+        "excerpt": "The effects of cyclosporin A on accelerated atherosclerosis were studied in an experimental model of aortic isotransplantation. Seventy-six Lewis rats"
       }
     ],
-    "latency_ms": 2816.98
+    "latency_ms": 2849.1
   },
   {
     "query_num": 5,
@@ -170,34 +210,44 @@
         "chunk_id": 3621,
         "question": "Stress responsivity and socioeconomic status: a mechanism for increased cardiovascular disease risk?",
         "category": "General",
-        "distance": -16.13177391536176
+        "distance": -16.1318,
+        "relevance_score": 0.5377,
+        "excerpt": "Low socioeconomic status is associated with increased cardiovascular disease risk. We hypothesized that psychobiological pathways, specifically slow r"
       },
       {
         "chunk_id": 8902,
         "question": "Can cardiovascular risk factors and lifestyle explain the educational inequalities in mortality from ischaemic heart disease and from other heart diseases?",
         "category": "Prevention",
-        "distance": -14.61014481184343
+        "distance": -14.6101,
+        "relevance_score": 0.487,
+        "excerpt": "Investigate the degree to which smoking, physical activity, marital status, BMI, blood pressure, and cholesterol explain the association between educa"
       },
       {
         "chunk_id": 7911,
         "question": "Androgen deprivation therapy and morbid obesity: do they share cardiovascular risk through metabolic syndrome?",
         "category": "Prevention",
-        "distance": -13.34125337817537
+        "distance": -13.3413,
+        "relevance_score": 0.4447,
+        "excerpt": "Although the use of androgen deprivation therapy (ADT) has resulted in improved survival in men with advanced prostate cancer, the resulting hypogonad"
       },
       {
         "chunk_id": 3632,
         "question": "Governing the conduct of conduct: are restraints inevitable?",
         "category": "Treatment",
-        "distance": -12.915441586201615
+        "distance": -12.9154,
+        "relevance_score": 0.4305,
+        "excerpt": "The purpose of this article is to provide an interpretation of how restraint use is maintained and legitimized despite negative reports on its efficac"
       },
       {
         "chunk_id": 333,
         "question": "Can dietary interventions change diet and cardiovascular risk factors?",
         "category": "Prevention",
-        "distance": -12.687832090615355
+        "distance": -12.6878,
+        "relevance_score": 0.4229,
+        "excerpt": "This study evaluated the effectiveness of dietary advice in primary prevention of chronic disease. A meta-analysis was conducted of 17 randomized cont"
       }
     ],
-    "latency_ms": 4080.3
+    "latency_ms": 4136.53
   },
   {
     "query_num": 6,
@@ -210,34 +260,44 @@
         "chunk_id": 8748,
         "question": "Lymphocyte subpopulations and cytokines in nasal polyps: is there a local immune system in the nasal polyp?",
         "category": "Medication",
-        "distance": -27.276669419666973
+        "distance": -27.2767,
+        "relevance_score": 0.9092,
+        "excerpt": "The pathogenesis of chronic hyperplastic rhinosinusitis with massive nasal polyposis is still not entirely known. The present study evaluates the lymp"
       },
       {
         "chunk_id": 4873,
         "question": "Functional and phenotypical impairment of polymorphonuclear cells in atopic dermatitis: an additional cause for the known susceptibility to infections?",
         "category": "Medication",
-        "distance": -27.07102576561242
+        "distance": -27.071,
+        "relevance_score": 0.9024,
+        "excerpt": "Atopic dermatitis (AD) patients present an high susceptibility to infections. The phagocytic activity of polymorphonuclear granulocytes (PMNs) is medi"
       },
       {
         "chunk_id": 7652,
         "question": "Donation rates: what matters?",
         "category": "Treatment",
-        "distance": -25.783744186535298
+        "distance": -25.7837,
+        "relevance_score": 0.8595,
+        "excerpt": "The increase in the number of donors is the main objective of all transplantation organizations around the world. Further understanding of the factors"
       },
       {
         "chunk_id": 7091,
         "question": "Improvement of chronic idiopathic urticaria with L-thyroxine: a new TSH role in immune response?",
         "category": "Treatment",
-        "distance": -25.734612024461725
+        "distance": -25.7346,
+        "relevance_score": 0.8578,
+        "excerpt": "The association between chronic idiopathic urticaria (CIU) and autoimmune thyroiditis (AT) is known, as well as major prevalence of antithyroid antibo"
       },
       {
         "chunk_id": 7098,
         "question": "Does prolonged cycling of moderate intensity affect immune cell function?",
         "category": "Prevention",
-        "distance": -25.044087365381905
+        "distance": -25.0441,
+        "relevance_score": 0.8348,
+        "excerpt": "Prolonged exercise may induce temporary immunosuppression with a presumed increased susceptibility for infection. However, there are only few data on"
       }
     ],
-    "latency_ms": 1994.65
+    "latency_ms": 1979.35
   },
   {
     "query_num": 7,
@@ -250,34 +310,44 @@
         "chunk_id": 2,
         "question": "Is laparoscopic radical prostatectomy better than traditional retropubic radical prostatectomy?",
         "category": "Treatment",
-        "distance": -21.789290911686436
+        "distance": -21.7893,
+        "relevance_score": 0.7263,
+        "excerpt": "To compare morbidity in two groups of patients who underwent retropubic or laparoscopic radical prostatectomy in the same period. The clinical and pat"
       },
       {
         "chunk_id": 1613,
         "question": "Is laparoscopic colorectal cancer surgery associated with an increased risk in obese patients?",
         "category": "Treatment",
-        "distance": -21.202797670618633
+        "distance": -21.2028,
+        "relevance_score": 0.7068,
+        "excerpt": "The impact of obesity on surgical outcomes after laparoscopic colorectal cancer resection in Chinese patients is still unclear. We retrospectively rev"
       },
       {
         "chunk_id": 5856,
         "question": "Can community surgeons perform laparoscopic colorectal surgery with outcomes similar to tertiary care centres?",
         "category": "Treatment",
-        "distance": -20.26745420948595
+        "distance": -20.2675,
+        "relevance_score": 0.6756,
+        "excerpt": "The use of the laparoscopic approach in colorectal surgery (LCS) is the subject of active debate. Studies demonstrating its safety and feasibility in"
       },
       {
         "chunk_id": 119,
         "question": "Access to the hypertrophic pylorus: does it make a difference to the patient?",
         "category": "Treatment",
-        "distance": -20.186352708365078
+        "distance": -20.1864,
+        "relevance_score": 0.6729,
+        "excerpt": "The aim of the study was to evaluate the effects of different access methods for the treatment of pyloric stenosis (PS). Since 2001, we have operated"
       },
       {
         "chunk_id": 2690,
         "question": "Does prior abdominal surgery influence outcomes or complications of robotic-assisted laparoscopic radical prostatectomy?",
         "category": "Treatment",
-        "distance": -20.008499929538893
+        "distance": -20.0085,
+        "relevance_score": 0.6669,
+        "excerpt": "To determine whether robotic-assisted laparoscopic radical prostatectomy (RALP) in patients with prior abdominal surgery is associated with increased"
       }
     ],
-    "latency_ms": 3160.97
+    "latency_ms": 3203.16
   },
   {
     "query_num": 8,
@@ -290,34 +360,44 @@
         "chunk_id": 1826,
         "question": "Does routine abdominal ultrasound enhance diagnostic accuracy in irritable bowel syndrome?",
         "category": "Diagnosis",
-        "distance": -22.13062663303603
+        "distance": -22.1306,
+        "relevance_score": 0.7377,
+        "excerpt": "The current recommendation that irritable bowel syndrome (IBS) should be diagnosed positively using minimum investigation raises the possibility that"
       },
       {
         "chunk_id": 6504,
         "question": "Chlamydia trachomatis infection: is it relevant in irritable bowel syndrome?",
         "category": "Treatment",
-        "distance": -21.696710452210986
+        "distance": -21.6967,
+        "relevance_score": 0.7232,
+        "excerpt": "Irritable bowel syndrome can present with gynaecological symptoms similar to those of chronic pelvic inflammatory disease, which is commonly caused by"
       },
       {
         "chunk_id": 32,
         "question": "Does depression influence symptom severity in irritable bowel syndrome?",
         "category": "Symptoms",
-        "distance": -20.933002584360352
+        "distance": -20.933,
+        "relevance_score": 0.6978,
+        "excerpt": "Irritable bowel syndrome (IBS) is frequently associated with mood disorder. However, it is typically difficult to distinguish between disturbed mood a"
       },
       {
         "chunk_id": 3,
         "question": "Does bacterial gastroenteritis predispose people to functional gastrointestinal disorders?",
         "category": "Medication",
-        "distance": -20.327440166733677
+        "distance": -20.3274,
+        "relevance_score": 0.6776,
+        "excerpt": "Irritable bowel syndrome (IBS) might develop after gastroenteritis. Most previous studies of this relationship have been uncontrolled, and little is k"
       },
       {
         "chunk_id": 6053,
         "question": "Is childhood abuse or neglect associated with symptom reports and physiological measures in women with irritable bowel syndrome?",
         "category": "Symptoms",
-        "distance": -20.314480742902003
+        "distance": -20.3145,
+        "relevance_score": 0.6771,
+        "excerpt": "Early childhood traumatic experiences (e.g., abuse or neglect) may contribute to sleep disturbances as well as to other indicators of arousal in patie"
       }
     ],
-    "latency_ms": 4336.73
+    "latency_ms": 4444.83
   },
   {
     "query_num": 9,
@@ -330,34 +410,44 @@
         "chunk_id": 0,
         "question": "Is naturopathy as effective as conventional therapy for treatment of menopausal symptoms?",
         "category": "Treatment",
-        "distance": -33.3245780612844
+        "distance": -33.3246,
+        "relevance_score": 1.0,
+        "excerpt": "Although the use of alternative medicine in the United States is increasing, no published studies have documented the effectiveness of naturopathy for"
       },
       {
         "chunk_id": 8171,
         "question": "Does there exist one specific \"view of man\" in naturopathy / complementary medicine?",
         "category": "Treatment",
-        "distance": -12.617779707239865
+        "distance": -12.6178,
+        "relevance_score": 0.4206,
+        "excerpt": "Practitioners and users of naturopathic therapies claim that one of the assumptions underlying their work is a holistic \"view of man\". Does there exis"
       },
       {
         "chunk_id": 5834,
         "question": "The impact of extroversion or menopause status on depressive symptoms among climacteric women in Taiwan: neuroticism as moderator or mediator?",
         "category": "Symptoms",
-        "distance": -10.383769334422096
+        "distance": -10.3838,
+        "relevance_score": 0.3461,
+        "excerpt": "The study was designed to test whether neuroticism moderated the effect of extroversion and mediated the impact of menopause status on depressive symp"
       },
       {
         "chunk_id": 8309,
         "question": "Is incontinence associated with menopause?",
         "category": "Treatment",
-        "distance": -9.640406674699872
+        "distance": -9.6404,
+        "relevance_score": 0.3213,
+        "excerpt": "To estimate (1) the prevalence of urinary incontinence in a population-based sample of Australian women aged 45-55 and to identify the factors associa"
       },
       {
         "chunk_id": 1366,
         "question": "Does sex matter?",
         "category": "Medication",
-        "distance": -8.521442128082896
+        "distance": -8.5214,
+        "relevance_score": 0.284,
+        "excerpt": "Sex is associated with disparate risk of venous thromboembolism (VTE) in nontrauma patients, with increased risk seen during pregnancy and in women on"
       }
     ],
-    "latency_ms": 2187.26
+    "latency_ms": 2233.4
   },
   {
     "query_num": 10,
@@ -370,33 +460,43 @@
         "chunk_id": 4,
         "question": "Is early colonoscopy after admission for acute diverticular bleeding needed?",
         "category": "Symptoms",
-        "distance": -33.01598305924706
+        "distance": -33.016,
+        "relevance_score": 1.0,
+        "excerpt": "Urgent colonoscopy has been proposed for the diagnosis and management of acute colonic diverticular bleeding. Identification of active bleeding and no"
       },
       {
         "chunk_id": 4665,
         "question": "Is hospital admission urgent in stroke?",
         "category": "Medication",
-        "distance": -21.336811586773862
+        "distance": -21.3368,
+        "relevance_score": 0.7112,
+        "excerpt": "To review the evidence that strokes need urgent hospital admission. The need for urgent hospitalization varies with stroke type. Immediate hospital ad"
       },
       {
         "chunk_id": 6477,
         "question": "Are altered pharmacokinetics of non-steroidal anti-inflammatory drugs (NSAIDs) a risk factor for gastrointestinal bleeding?",
         "category": "Medication",
-        "distance": -14.556760820325099
+        "distance": -14.5568,
+        "relevance_score": 0.4852,
+        "excerpt": "We hypothesised that pharmacokinetic factors might go some way to explaining the risk of major gastrointestinal haemorrhage with non-steroidal anti-in"
       },
       {
         "chunk_id": 6595,
         "question": "The high yield of 1-year colonoscopy after resection: is it the handoff?",
         "category": "Treatment",
-        "distance": -14.219494346802811
+        "distance": -14.2195,
+        "relevance_score": 0.474,
+        "excerpt": "This study aimed to determine the diagnostic yield of colonoscopy 1 year after colorectal cancer (CRC) resection based on whether the index colonoscop"
       },
       {
         "chunk_id": 2348,
         "question": "Day and night surgery: is there any influence in the patient postoperative period of urgent colorectal intervention?",
         "category": "Treatment",
-        "distance": -13.533519873459738
+        "distance": -13.5335,
+        "relevance_score": 0.4511,
+        "excerpt": "Medical activity performed outside regular work hours may increase risk for patients and professionals. There is few data with respect to urgent color"
       }
     ],
-    "latency_ms": 1674.59
+    "latency_ms": 1648.3
   }
 ]

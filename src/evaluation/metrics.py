@@ -79,3 +79,18 @@ def evaluate_pair(
         "rouge_l": round(rouge, 4),
         "n_samples": len(predictions),
     }
+
+
+def compute_bertscore(predictions: list[str], references: list[str]) -> float:
+    """
+    Compute average BERTScore F1. Measures semantic similarity, not
+    word overlap — appropriate for abstractive LLM generation.
+    """
+    from bert_score import score
+    P, R, F1 = score(
+        predictions, references,
+        lang="en",
+        model_type="distilbert-base-uncased",
+        verbose=False
+    )
+    return float(F1.mean())
