@@ -3,7 +3,7 @@
 **eyouth × DEPI | Microsoft Machine Learning Track | 2026**
 
 A Retrieval-Augmented Generation (RAG) system that answers medical questions
-using PubMedQA data, with a DistilBERT classifier for intelligent query routing.
+using PubMedQA data, with a BioBERT classifier for intelligent query routing.
 
 ---
 
@@ -36,7 +36,7 @@ That's it. Run any notebook now.
 │   ├── 04_eda.ipynb                     # Exploratory data analysis
 │   ├── 05_embeddings_vectorstore.ipynb  # Build FAISS vector index
 │   ├── 06_rag_pipeline.ipynb            # RAG pipeline (flan-t5-base)
-│   ├── 07_classification_model.ipynb    # Fine-tune DistilBERT classifier
+│   ├── 07_classification_model.ipynb    # Fine-tune BioBERT classifier
 │   ├── 08_evaluation.ipynb              # BLEU, ROUGE-L, hallucination
 │   ├── 09_integrated_pipeline.ipynb     # Classifier + RAG integration
 │   └── 10_end_to_end_test.ipynb         # Full pipeline verification
@@ -52,7 +52,7 @@ That's it. Run any notebook now.
 │   │   ├── embeddings.py                # Embedding utilities
 │   │   └── vectorstore.py               # FAISS index utilities
 │   ├── classification/
-│   │   └── classifier.py                # DistilBERT classifier
+│   │   └── classifier.py                # BioBERT classifier
 │   ├── evaluation/
 │   │   └── metrics.py                   # BLEU, ROUGE-L metrics
 │   └── pipeline.py                      # Top-level entry point
@@ -82,7 +82,7 @@ User Query
     │
     ▼
 ┌─────────────────────────┐
-│  DistilBERT Classifier  │  → Predicts medical category
+│  BioBERT Classifier     │  → Predicts medical category
 └────────────┬────────────┘
              │
              ▼
@@ -117,17 +117,17 @@ User Query
 
 ## 🧠 Models
 
-### DistilBERT Classifier
+### BioBERT Classifier
 | Item | Value |
 |------|-------|
-| Base | `distilbert-base-uncased` |
+| Base | `dmis-lab/biobert-v1.1` |
 | Classes | 6 medical categories |
-| HuggingFace | [AbdoMatrix/distilbert-medical-classifier](https://huggingface.co/AbdoMatrix/distilbert-medical-classifier) |
+| HuggingFace | [AbdooMatrix/biobert-medical-classifier](https://huggingface.co/AbdooMatrix/biobert-medical-classifier) |
 
 ### RAG Pipeline
 | Item | Value |
 |------|-------|
-| Embeddings | `sentence-transformers/all-MiniLM-L6-v2` (384d) |
+| Embeddings | `pritamdeka/S-PubMedBert-MS-MARCO` (768d) |
 | Vector Store | FAISS IndexFlatL2 + BM25 hybrid retrieval |
 | Generator | `llama-3.1-8b-instant` via Groq API (falls back to `google/flan-t5-base` locally) |
 | Retrieval | Top-5 with category routing |
@@ -217,7 +217,7 @@ docker-compose up --build
 |-----|--------|--------|
 | FAISS retrieval | < 500ms | ✅ |
 | Classification macro F1 | ≥ 78% | ✅ |
-| RAG ROUGE-L | ≥ 0.38 | ✅ |
+| RAG ROUGE-L | ≥ 0.38 | ⚠️ 0.1729 (abstractive LLM; see evaluation report) |
 | BLEU improvement | ≥ 20% | ✅ |
 | Hallucination rate | ≤ 15% | ✅ |
 

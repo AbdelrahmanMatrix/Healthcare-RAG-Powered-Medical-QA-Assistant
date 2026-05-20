@@ -15,7 +15,7 @@ This document describes the complete end-to-end M1 pipeline:
 
 | Step | Notebook/Script                  | Output File                                      | Key Results |
 |------|----------------------------------|--------------------------------------------------|-----------|
-| 1    | 01_data_loading.ipynb            | `data/raw/pubmedqa_raw.csv`                      | 9,994 rows loaded |
+| 1    | 01_data_loading.ipynb            | `data/raw/pubmedqa_raw.csv`                      | 211,269 rows loaded (qiaojin/PubMedQA pqa_artificial) |
 | 2    | 02_preprocessing.ipynb           | `data/processed/pubmedqa_cleaned.csv`            | Cleaned + normalised |
 | 3    | 8-Category_Labeling.ipynb        | `data/processed/pubmedqa_cleaned_Labeled.csv`    | 6 categories added |
 | 4    | 03_eda.ipynb                     | `reports/eda_report.md`                          | Full EDA + visuals |

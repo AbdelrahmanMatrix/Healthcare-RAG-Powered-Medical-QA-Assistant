@@ -1,5 +1,5 @@
 """
-Download the DistilBERT medical classifier weights from HuggingFace Hub.
+Download the BioBERT medical classifier weights from HuggingFace Hub.
 
 Run this once after cloning to avoid a 30-90s cold-start download on first inference:
     python scripts/download_classifier.py
@@ -18,7 +18,7 @@ load_dotenv()
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 LOCAL_PATH = PROJECT_ROOT / "models" / "classifier" / "distilbert_classifier"
-HF_REPO = "AbdoMatrix/distilbert-medical-classifier"
+HF_REPO = "AbdooMatrix/biobert-medical-classifier"
 
 WEIGHT_EXTENSIONS = (".bin", ".safetensors")
 

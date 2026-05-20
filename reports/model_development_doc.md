@@ -10,7 +10,7 @@ User Query
 │
 ▼
 ┌─────────────────────────┐
-│ DistilBERT Classifier │ → Predicts medical category
+│  BioBERT Classifier   │ → Predicts medical category
 └────────────┬────────────┘
 │ category
 ▼
@@ -35,34 +35,34 @@ User Query
 ### 2a. Embedding Model
 | Item | Value |
 |---|---|
-| Model | `sentence-transformers/all-MiniLM-L6-v2` |
-| Dimension | 384 |
+| Model | `pritamdeka/S-PubMedBert-MS-MARCO` |
+| Dimension | 768 |
 | Purpose | Encode text chunks and queries for semantic similarity |
-| Rationale | Lightweight, fast inference, strong semantic quality. Good balance between speed and accuracy for a medical Q&A system. |
+| Rationale | Biomedical-domain model pre-trained on PubMed/PMC. Significantly better retrieval precision for medical text than general-purpose models. |
 
 ### 2b. Vector Store
 | Item | Value |
 |---|---|
 | Type | FAISS `IndexFlatL2` |
-| Vectors | 9,000 |
+| Vectors | ~211,000 (full corpus from qiaojin/PubMedQA pqa_artificial) |
 | Chunk format | Question + Context + Answer |
-| Rationale | Exact search (no approximation errors). IndexFlatL2 chosen for correctness — acceptable for 10K vectors. |
+| Rationale | Exact search (no approximation errors). IndexFlatL2 chosen for correctness over IndexIVFFlat for training-set scale. |
 
 ### 2c. Classifier (Routing Layer)
 | Item | Value |
 |---|---|
-| Model | `distilbert-base-uncased` (fine-tuned) |
+| Model | `dmis-lab/biobert-v1.1` (fine-tuned) |
 | Classes | 6 (Symptoms, Diagnosis, Treatment, Medication, Prevention, General) |
 | Purpose | Route queries to category-relevant chunks |
-| Rationale | Lightweight transformer, fast inference. Category routing improves retrieval precision by prioritising domain-relevant sources. |
+| Rationale | BioBERT pre-trained on PubMed abstracts and PMC full text — superior domain fit for medical text classification vs general-purpose transformers. |
 
 ### 2d. Language Model
 | Item | Value |
 |---|---|
-| Model | `google/flan-t5-base` |
-| Type | Text-to-text generation |
+| Model | `llama-3.1-8b-instant` via Groq API (fallback: `google/flan-t5-base` locally) |
+| Type | Chat completion (Groq) / text-to-text generation (flan-t5 fallback) |
 | Max tokens | 256 |
-| Rationale | Free, local (no API key needed), instruction-tuned, good at following prompts. Chosen over paid APIs for reproducibility and reliability during demos. |
+| Rationale | Groq API provides high-quality generation with minimal latency. flan-t5-base used as offline fallback for reproducibility without API keys. |
 
 ## 3. Evaluation Methodology
 
@@ -73,7 +73,7 @@ User Query
 
 ### 3b. RAG Pipeline
 - **Held-out set:** 200 queries NOT in FAISS index
-- **Baseline:** Same LLM (flan-t5-base) without retrieval context
+- **Baseline:** flan-t5-base without retrieval context
 - **Metrics:** BLEU (NLTK), ROUGE-L (rouge-score library)
 - **Targets:** ROUGE-L ≥ 0.38, BLEU improvement ≥ 20%
 
@@ -106,7 +106,7 @@ The classifier doesn't just label queries — it improves retrieval:
 
 ## 6. Known Limitations
 - flan-t5-base has limited generation quality compared to larger models
-- FAISS IndexFlatL2 is exact search — may need IVF for larger datasets
+- FAISS IndexFlatL2 is exact search — suitable for the current corpus size
 - Category routing depends on classifier accuracy
 - Free-tier Azure deployment has cold-start latency
 - Medical disclaimer is static — doesn't adapt to confidence level

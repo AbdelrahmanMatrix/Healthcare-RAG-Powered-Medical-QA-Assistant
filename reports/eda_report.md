@@ -1,25 +1,25 @@
 # EDA Report — M1 Task 4
 **Healthcare RAG-Powered Medical Q&A Assistant**
 **Owner:** Doha Khaled Mahmoud
-**Generated:** 2026-05-19 19:43:22
+**Generated:** 2026-05-20 00:05:48
 
 ---
 
 ## Dataset Overview
 - **Source:** `pubmedqa_labelled.csv`
-- **Total rows:** 211,188
+- **Total rows:** 211,186
 - **Columns:** ['question', 'context', 'answer', 'category', 'question_length', 'context_length', 'answer_length']
 
 ## 1. Category Distribution
 
 | Category | Count | Percentage | Flag |
 |----------|-------|------------|------|
-| Medication | 71,539 | 33.9% |  |
-| Treatment | 48,580 | 23.0% |  |
+| Medication | 71,537 | 33.9% |  |
+| Treatment | 48,579 | 23.0% |  |
 | Diagnosis | 31,919 | 15.1% |  |
-| General | 28,252 | 13.4% |  |
-| Prevention | 22,179 | 10.5% |  |
-| Symptoms | 8,719 | 4.1% |  |
+| General | 28,251 | 13.4% |  |
+| Prevention | 22,180 | 10.5% |  |
+| Symptoms | 8,720 | 4.1% |  |
 
 **KPI Check:** All 6 categories present with ≥ 1% representation ✅
 **Skew Analysis:** ✅ No critically skewed categories
@@ -37,26 +37,26 @@
 
 | Term | Frequency |
 |------|-----------|
-| cells | 172,210 |
-| expression | 154,854 |
-| levels | 120,421 |
-| cell | 112,137 |
-| treatment | 94,167 |
-| both | 74,582 |
-| mice | 73,715 |
-| cancer | 73,703 |
-| disease | 73,502 |
-| protein | 73,359 |
-| activity | 63,635 |
-| been | 59,733 |
-| clinical | 58,320 |
-| blood | 57,654 |
-| human | 54,240 |
-| gene | 54,093 |
-| serum | 51,237 |
-| role | 50,718 |
-| response | 50,569 |
-| whether | 48,510 |
+| cells | 172,201 |
+| expression | 154,842 |
+| levels | 120,417 |
+| cell | 112,130 |
+| treatment | 94,172 |
+| both | 74,581 |
+| mice | 73,722 |
+| cancer | 73,706 |
+| disease | 73,496 |
+| protein | 73,352 |
+| activity | 63,639 |
+| been | 59,730 |
+| clinical | 58,319 |
+| blood | 57,650 |
+| human | 54,233 |
+| gene | 54,083 |
+| serum | 51,236 |
+| role | 50,717 |
+| response | 50,577 |
+| whether | 48,512 |
 
 ## 4. Average Answer Length per Category
 

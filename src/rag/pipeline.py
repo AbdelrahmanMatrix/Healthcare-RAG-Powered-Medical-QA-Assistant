@@ -193,17 +193,22 @@ class RAGPipeline:
             print("✅ Groq client ready")
         else:
             print("GROQ_API_KEY not set — falling back to local flan-t5-base")
-            from transformers import pipeline as hf_pipeline
-            self.generator = hf_pipeline(
-                "text2text-generation",
-                model="google/flan-t5-base",
-                max_new_tokens=max_new_tokens,
-                min_new_tokens=15,
-                num_beams=4,
-                early_stopping=True,
-                no_repeat_ngram_size=3,
-                do_sample=False,
+
+            from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+            import torch
+
+            model_name = "google/flan-t5-base"
+
+            self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+            self.model = AutoModelForSeq2SeqLM.from_pretrained(
+                model_name
             )
+
+            self.max_new_tokens = max_new_tokens
+
+            self._torch = torch
+
             self._use_groq = False
 
         print("✅ RAG Pipeline ready")
@@ -369,7 +374,27 @@ class RAGPipeline:
         if self._use_groq:
             raw = self._call_groq(prompt)
         else:
-            raw = self.generator(prompt)[0]["generated_text"]
+            inputs = self.tokenizer(
+                prompt,
+                return_tensors="pt",
+                truncation=True,
+                max_length=1024,
+            )
+
+            with self._torch.no_grad():
+                outputs = self.model.generate(
+                    **inputs,
+                    max_new_tokens=self.max_new_tokens,
+                    num_beams=4,
+                    early_stopping=True,
+                    no_repeat_ngram_size=3,
+                    do_sample=False,
+                )
+
+            raw = self.tokenizer.decode(
+                outputs[0],
+                skip_special_tokens=True
+            )
 
         cleaned = _clean_answer(raw)
 

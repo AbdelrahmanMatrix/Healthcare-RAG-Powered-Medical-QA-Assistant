@@ -2,1001 +2,1001 @@
   {
     "query_num": 1,
     "question": "What are the early symptoms of type 2 diabetes?",
-    "answer_raw": "IFG, IGT, and newly diagnosed type 2 diabetes are associated with reduced HRF independent of cardiovascular disease.",
+    "answer_raw": "apo e4 allele is associated with impaired endothelium-dependent arterial dilation in women with type 2 diabetes.",
     "disclaimer_present": true,
     "top_k": 10,
     "sources": [
       {
-        "chunk_id": 4555,
-        "question": "Is there a link between components of health-related functioning and incident impaired glucose metabolism and type 2 diabetes?",
+        "chunk_id": 18931,
+        "question": "is reduced peripheral blood mitochondrial dna content a risk factor for type 2 diabetes?",
         "category": "Prevention",
-        "distance": -21.8665,
-        "relevance_score": 0.7289,
-        "reranker_score": 0.6087,
-        "excerpt": "To determine the longitudinal association of components of health-related functioning (HRF) with incident impaired glucose metabolism and type 2 diabe"
+        "distance": -28.2271,
+        "relevance_score": 0.9409,
+        "reranker_score": 2.5426,
+        "excerpt": "mitochondrial depletion in pancreatic beta cells is known to reduce glucose stimulated insulin secretion. we aimed to determine whether the offspring"
       },
       {
-        "chunk_id": 865,
-        "question": "Difficult diagnosis in a 17-year-old patient: Type 1 diabetes?",
+        "chunk_id": 30504,
+        "question": "does erectile dysfunction predict coronary heart disease in type 2 diabetes?",
+        "category": "Symptoms",
+        "distance": -27.7179,
+        "relevance_score": 0.9239,
+        "reranker_score": 1.4853,
+        "excerpt": "we examined the predictive power of erectile dysfunction (ed) on coronary heart disease (chd) events in chinese men with type 2 diabetes. subjects wit"
+      },
+      {
+        "chunk_id": 160086,
+        "question": "is apo e4 allele associated with endothelium-dependent arterial dilation in women with type 2 diabetes?",
         "category": "Diagnosis",
-        "distance": -19.9519,
-        "relevance_score": 0.6651,
-        "reranker_score": 0.0235,
-        "excerpt": "We report on a 17-year-old boy with elevated blood glucose levels, elevated liver enzymes and obesity (BMI 32.3 kg/m2). Clinical examination showed ac"
+        "distance": -28.8791,
+        "relevance_score": 0.9626,
+        "reranker_score": 0.9972,
+        "excerpt": "previous studies have suggested that the e4 allele of apolipoprotein e (apo e) relates to the endothelium-dependent arterial dilation in men with type"
       },
       {
-        "chunk_id": 5728,
-        "question": "Is prehypertension a risk factor for the development of type 2 diabetes?",
+        "chunk_id": 62968,
+        "question": "is low-grade albuminuria associated with early but not late carotid atherosclerotic lesions in community-based patients with type 2 diabetes?",
         "category": "Prevention",
-        "distance": -23.6394,
-        "relevance_score": 0.788,
-        "reranker_score": -0.9428,
-        "excerpt": "Prehypertension is associated with cardiovascular disease and insulin resistance. However, whether subjects with prehypertension have more diabetes ri"
+        "distance": -27.2485,
+        "relevance_score": 0.9083,
+        "reranker_score": 0.5993,
+        "excerpt": "low-grade albuminuria is associated with cardiovascular risk factors and mortality. our aim was to investigate the association between low-grade album"
       },
       {
-        "chunk_id": 4249,
-        "question": "Is parity associated with earlier diagnosis of type 2 diabetes?",
-        "category": "Diagnosis",
-        "distance": -21.3479,
-        "relevance_score": 0.7116,
-        "reranker_score": -1.1319,
-        "excerpt": "A retrospective analysis from a diabetes database was conducted. Data for 2102 women with type 2 diabetes (T2DM), including date of birth, age at diag"
-      },
-      {
-        "chunk_id": 7064,
-        "question": "Is high density lipoprotein cholesterol useful in diagnosis of metabolic syndrome in native Africans with type 2 diabetes?",
-        "category": "Diagnosis",
-        "distance": -21.5738,
-        "relevance_score": 0.7191,
-        "reranker_score": -1.5927,
-        "excerpt": "High-density lipoprotein (HDL) hypocholesterolemia predicts metabolic syndrome among Caucasians and is one of the World Health Organization (WHO) diag"
-      },
-      {
-        "chunk_id": 4366,
-        "question": "Can data science inform environmental justice and community risk screening for type 2 diabetes?",
-        "category": "Diagnosis",
-        "distance": -19.8753,
-        "relevance_score": 0.6625,
-        "reranker_score": -3.0547,
-        "excerpt": "Having the ability to scan the entire country for potential \"hotspots\" with increased risk of developing chronic diseases due to various environmental"
-      },
-      {
-        "chunk_id": 40,
-        "question": "Does overnight normalization of plasma glucose by insulin infusion affect assessment of glucose metabolism in Type 2 diabetes?",
+        "chunk_id": 148106,
+        "question": "does inhibition of dipeptidyl peptidase iv improve metabolic control over a 4-week study period in type 2 diabetes?",
         "category": "Medication",
-        "distance": -23.6945,
-        "relevance_score": 0.7898,
-        "reranker_score": -3.6608,
-        "excerpt": "In order to perform euglycaemic clamp studies in Type 2 diabetic patients, plasma glucose must be reduced to normal levels. This can be done either (i"
+        "distance": -29.2823,
+        "relevance_score": 0.9761,
+        "reranker_score": 0.2772,
+        "excerpt": "glucagon-like peptide-1 (glp-1) has been proposed as a new treatment modality for type 2 diabetes. to circumvent the drawback of the short half-life o"
       },
       {
-        "chunk_id": 4521,
-        "question": "Does an advanced insulin education programme improve outcomes and health service use for people with Type 2 diabetes?",
-        "category": "Medication",
-        "distance": -18.4504,
-        "relevance_score": 0.615,
-        "reranker_score": -4.0338,
-        "excerpt": "To show that an advanced diabetes education programme delivers sustained benefits to people with diabetes prescribed insulin and healthcare providers"
-      },
-      {
-        "chunk_id": 2887,
-        "question": "Are zinc transporter type 8 antibodies a marker of autoimmune thyroiditis in non-obese adults with new-onset diabetes?",
+        "chunk_id": 122912,
+        "question": "are physiological serum bilirubin concentrations inversely associated with the prevalence of cardiovascular autonomic neuropathy in patients with type 2 diabetes?",
         "category": "Diagnosis",
-        "distance": -18.7761,
-        "relevance_score": 0.6259,
-        "reranker_score": -4.8814,
-        "excerpt": "The diagnosis of autoimmune diabetes in non-obese adults is based on the detection of glutamic acid decarboxylase autoantibodies (GADA), islet cell an"
+        "distance": -26.7631,
+        "relevance_score": 0.8921,
+        "reranker_score": -1.5082,
+        "excerpt": "although severe hyperbilirubinaemia causes kernicterus in neonates, normal to modestly elevated bilirubin concentrations have been reported to be neur"
       },
       {
-        "chunk_id": 5271,
-        "question": "Are particulate matter exposures associated with risk of type 2 diabetes?",
-        "category": "Medication",
-        "distance": -19.7939,
-        "relevance_score": 0.6598,
-        "reranker_score": -6.047,
-        "excerpt": "Although studies have found that diabetes mellitus (DM) modifies the impact of exposures from air pollution on cardiovascular outcomes, information is"
+        "chunk_id": 111830,
+        "question": "do common type 2 diabetes risk gene variants associate with gestational diabetes?",
+        "category": "General",
+        "distance": -27.6648,
+        "relevance_score": 0.9222,
+        "reranker_score": -1.6873,
+        "excerpt": "we aimed to examine the association between gestational diabetes mellitus (gdm) and 11 recently identified type 2 diabetes susceptibility loci. type 2"
+      },
+      {
+        "chunk_id": 196356,
+        "question": "are markers of platelet activation increased in adolescents with type 2 diabetes?",
+        "category": "Diagnosis",
+        "distance": -27.7493,
+        "relevance_score": 0.925,
+        "reranker_score": -3.3308,
+        "excerpt": "in adults with diabetes, in vivo platelet activation is a marker for atherosclerosis and cardiovascular disease (cvd). this pilot study investigated w"
+      },
+      {
+        "chunk_id": 8137,
+        "question": "are single nucleotide polymorphisms of vascular endothelial growth factor gene intron 2 markers for early progression of diabetic retinopathy in japanese with type 1 diabetes?",
+        "category": "Diagnosis",
+        "distance": -28.0716,
+        "relevance_score": 0.9357,
+        "reranker_score": -3.5686,
+        "excerpt": "few studies investigated the relationship between single nucleotide polymorphisms (snps) of vascular endothelial growth factor (vegf) gene and time to"
+      },
+      {
+        "chunk_id": 84818,
+        "question": "are polymorphisms of the kcnq1 gene associated with the therapeutic responses of sulfonylureas in chinese patients with type 2 diabetes?",
+        "category": "Treatment",
+        "distance": -27.8802,
+        "relevance_score": 0.9293,
+        "reranker_score": -4.4233,
+        "excerpt": "kcnq1 channel is a member of the voltage-gated potassium channel kqt-like subfamily. the kcnq1 gene has recently been identified as a susceptibility l"
       }
     ],
-    "latency_ms": 1890.66
+    "latency_ms": 2684.64
   },
   {
     "query_num": 2,
     "question": "How is pneumonia diagnosed in elderly patients?",
-    "answer_raw": "Pneumocystis carinii pneumonia is characterized by atypical clinical presentation.",
+    "answer_raw": "In-patients aged 70 years or over (mean age, 85 6.2 years) were recruited and followed for 24 months. The prevalence of nosocomial infections and the immune risk phenotype (irp) were assessed.",
     "disclaimer_present": true,
     "top_k": 10,
     "sources": [
       {
-        "chunk_id": 8358,
-        "question": "Pneumonia in the aged patient: is the clinical presentation atypical?",
-        "category": "Symptoms",
-        "distance": -14.9017,
-        "relevance_score": 0.4967,
-        "reranker_score": 5.5712,
-        "excerpt": "Some new studies have questioned the often atypical character of pneumonia in aged patients. Therefore to study the different clinical presentation of"
-      },
-      {
-        "chunk_id": 501,
-        "question": "Reporting hospitals' antibiotic timing in pneumonia: adverse consequences for patients?",
+        "chunk_id": 44942,
+        "question": "is severe pneumonia mortality in elderly patients associated with downregulation of toll-like receptors 2 and 4 on monocytes?",
         "category": "Medication",
-        "distance": -15.3613,
-        "relevance_score": 0.512,
-        "reranker_score": 0.307,
-        "excerpt": "To determine whether publicly reporting hospital scores on antibiotic timing in pneumonia (percentage of patients with pneumonia receiving antibiotics"
+        "distance": -20.3182,
+        "relevance_score": 0.6773,
+        "reranker_score": 3.5777,
+        "excerpt": "elderly patients with pneumonia have a high mortality rate. since toll-like receptor (tlr) signaling is involved in the inflammatory response, we cond"
       },
       {
-        "chunk_id": 4641,
-        "question": "Pneumocystis carinii pneumonia postrestorative proctocolectomy for ulcerative colitis: a role for perioperative prophylaxis in the cyclosporine era?",
-        "category": "Treatment",
-        "distance": -13.5865,
-        "relevance_score": 0.4529,
-        "reranker_score": -3.8285,
-        "excerpt": "Medical management of severe ulcerative colitis has used cyclosporine with increasing frequency as an adjuvant to systemic steroids and mercaptopurine"
-      },
-      {
-        "chunk_id": 3532,
-        "question": "Is extended lymph node dissection necessary for gastric cancer in elderly patients?",
-        "category": "Treatment",
-        "distance": -16.1365,
-        "relevance_score": 0.5379,
-        "reranker_score": -4.6893,
-        "excerpt": "To compare the outcome after limited and extended gastric resections to find out whether extended lymph node dissection is indicated for gastric cance"
-      },
-      {
-        "chunk_id": 3558,
-        "question": "Is anti-hepatitis B virus (HBV) immunization successful in elderly hemodialysis (HD) patients?",
-        "category": "Medication",
-        "distance": -13.8687,
-        "relevance_score": 0.4623,
-        "reranker_score": -4.9853,
-        "excerpt": "The success rate of anti-hepatitis B virus (HBV) immunization is known from the early 80s to be markedly lower in hemodialysis (HD) patients (around 6"
-      },
-      {
-        "chunk_id": 8398,
-        "question": "Is short-term percutaneous endoscopic gastrostomy tube placement beneficial in acutely ill cognitively intact elderly patients?",
+        "chunk_id": 75283,
+        "question": "is oropharyngeal dysphagia a risk factor for readmission for pneumonia in the very elderly persons : observational prospective study?",
         "category": "Prevention",
-        "distance": -14.8437,
-        "relevance_score": 0.4948,
-        "reranker_score": -5.9014,
-        "excerpt": "We present a series of seven, cognitively intact patients (age range 72-93 years), who had PEG tubes placed for short periods. These patients were dia"
+        "distance": -21.4463,
+        "relevance_score": 0.7149,
+        "reranker_score": 3.5178,
+        "excerpt": "to determine whether oropharyngeal dysphagia is a risk factor for readmission for pneumonia in elderly persons discharged from an acute geriatric unit"
       },
       {
-        "chunk_id": 5415,
-        "question": "Can diabetes medication be reduced in elderly patients?",
+        "chunk_id": 197911,
+        "question": "is immune risk phenotype associated with nosocomial lung infections in elderly in-patients?",
+        "category": "Prevention",
+        "distance": -18.6477,
+        "relevance_score": 0.6216,
+        "reranker_score": 2.3897,
+        "excerpt": "nosocomial infections are extremely common in the elderly and may be related to ageing of the immune system. the immune risk phenotype (irp), which pr"
+      },
+      {
+        "chunk_id": 145016,
+        "question": "is presence of an alcohol use disorder associated with greater pneumonia severity in hospitalized hiv-infected patients?",
+        "category": "Prevention",
+        "distance": -19.6666,
+        "relevance_score": 0.6556,
+        "reranker_score": -0.7695,
+        "excerpt": "pneumonia is common and more severe in human immunodeficiency virus (hiv)-infected patients. alcohol consumption in pneumonia patients without hiv is"
+      },
+      {
+        "chunk_id": 136356,
+        "question": "is the stomach a source for colonization of the upper respiratory tract and pneumonia in icu patients?",
         "category": "Medication",
-        "distance": -17.3292,
-        "relevance_score": 0.5776,
-        "reranker_score": -6.5546,
-        "excerpt": "HbA1c was measured in 98 patients with known diabetes in 17 nursing homes in Sweden. Thirty-two subjects with HbA1c<or=6.0% participated in the drug w"
+        "distance": -21.0358,
+        "relevance_score": 0.7012,
+        "reranker_score": -0.8692,
+        "excerpt": "to study sequences of colonization of different species of microorganisms and to determine the importance of gastric colonization for the development"
       },
       {
-        "chunk_id": 8563,
-        "question": "Is decompressive craniectomy for malignant middle cerebral artery territory infarction of any benefit for elderly patients?",
-        "category": "Treatment",
-        "distance": -15.0492,
-        "relevance_score": 0.5016,
-        "reranker_score": -7.0581,
-        "excerpt": "Malignant middle cerebral artery (MCA) infarction is characterized by mortality rate of up to 80%. The aim of this study was to determine the value of"
+        "chunk_id": 4752,
+        "question": "is early trauma-induced coagulopathy associated with increased ventilator-associated pneumonia in spinal cord injury patients?",
+        "category": "Prevention",
+        "distance": -18.9131,
+        "relevance_score": 0.6304,
+        "reranker_score": -3.5238,
+        "excerpt": "early trauma-induced coagulopathy may increase susceptibility to nosocomial infections such as ventilator-associated pneumonia. however, the relations"
       },
       {
-        "chunk_id": 7736,
-        "question": "Dysfunctional elimination syndrome: is it related to urinary tract infection or vesicoureteral reflux diagnosed early in life?",
+        "chunk_id": 106753,
+        "question": "is a novel missense mutation in the myosin binding protein-c gene responsible for hypertrophic cardiomyopathy with left ventricular dysfunction and dilation in elderly patients?",
         "category": "Symptoms",
-        "distance": -14.0453,
-        "relevance_score": 0.4682,
-        "reranker_score": -8.1487,
-        "excerpt": "It has been suggested that urinary tract infections (UTIs) early in life predispose to dysfunctional elimination syndrome (DES). This study evaluated"
+        "distance": -19.653,
+        "relevance_score": 0.6551,
+        "reranker_score": -4.8096,
+        "excerpt": "we studied the clinical features of hypertrophic cardiomyopathy (hcm) caused by a novel mutation in the myosin binding protein-c (mybp-c) gene in pati"
       },
       {
-        "chunk_id": 6247,
-        "question": "Does self-reported sleep quality predict poor cognitive performance among elderly living in elderly homes?",
-        "category": "Medication",
-        "distance": -13.787,
-        "relevance_score": 0.4596,
-        "reranker_score": -9.3963,
-        "excerpt": "Sleep complaints are common among elderly, especially institutionalized elderly, as they experience poorer sleep quality and higher use of sedative hy"
+        "chunk_id": 144984,
+        "question": "is laparoscopic paraesophageal hernia repair safe in elderly patients?",
+        "category": "Treatment",
+        "distance": -18.0342,
+        "relevance_score": 0.6011,
+        "reranker_score": -6.5853,
+        "excerpt": "paraesophageal hernias (pehs) occur frequently in the elderly. patients may not be referred for repair due to age or concern for high operative morbid"
+      },
+      {
+        "chunk_id": 182596,
+        "question": "are peripheral blood regulatory t cell levels correlated with some poor prognostic markers in newly diagnosed lymphoma patients?",
+        "category": "Diagnosis",
+        "distance": -20.2133,
+        "relevance_score": 0.6738,
+        "reranker_score": -9.7101,
+        "excerpt": "regulatory t cells (tregs) are a specialized subpopulation of cd4 t cells which maintain the immune system homeostasis. they may increase during cance"
+      },
+      {
+        "chunk_id": 39036,
+        "question": "is neuropeptide y a minor autoantigen in newly diagnosed type 1 diabetes patients?",
+        "category": "Diagnosis",
+        "distance": -18.7632,
+        "relevance_score": 0.6254,
+        "reranker_score": -10.0871,
+        "excerpt": "autoantibodies (a) against neuropeptide y (npy), was reported in 9 newly diagnosed type 1 diabetes (t1d) patients. a single nucleotide polymorphism (s"
       }
     ],
-    "latency_ms": 2011.41
+    "latency_ms": 3865.73
   },
   {
     "query_num": 3,
     "question": "What are the current treatment options for hypertension?",
-    "answer_raw": "LVEF 30-35% is widely accepted as a cut-off for primary prevention with an implantable cardiac defibrillator (ICD) in patients with both ischaemic and non-ischaemic cardiomyopathy supposedly on optimal medical therapy.",
+    "answer_raw": "high-voltage electric burn wounds in the limbs.",
     "disclaimer_present": true,
     "top_k": 10,
     "sources": [
       {
-        "chunk_id": 6847,
-        "question": "Is heroin-assisted treatment effective for patients with no previous maintenance treatment?",
+        "chunk_id": 132688,
+        "question": "does treatment of hypophosphataemic rickets in children remain a challenge?",
         "category": "Treatment",
-        "distance": -12.6796,
-        "relevance_score": 0.4227,
-        "reranker_score": -7.326,
-        "excerpt": "Until now, the medical prescription of diamorphine (heroin) has been suggested as suitable for patients who have failed previous maintenance treatment"
+        "distance": -24.1256,
+        "relevance_score": 0.8042,
+        "reranker_score": -2.6846,
+        "excerpt": "hypophosphataemic rickets (hr) is a rare hereditary disease characterised by hypophosphataemia, defects in bone mineralisation and rickets. we searche"
       },
       {
-        "chunk_id": 4494,
-        "question": "An investigation of temperamental traits in patients with somatoform disorder: do they belong in the affective spectrum?",
-        "category": "Diagnosis",
-        "distance": -13.2149,
-        "relevance_score": 0.4405,
-        "reranker_score": -7.561,
-        "excerpt": "About 10% of the general population report multiple and persisting physical symptoms resulting in extensive screening but with no organic explanation"
-      },
-      {
-        "chunk_id": 4816,
-        "question": "Primary prevention with a defibrillator: are therapies always really optimized before implantation?",
-        "category": "Treatment",
-        "distance": -11.3025,
-        "relevance_score": 0.3767,
-        "reranker_score": -8.7315,
-        "excerpt": "Left ventricle ejection fraction (LVEF) ≤ 30-35% is widely accepted as a cut-off for primary prevention with an implantable cardiac defibrillator (ICD"
-      },
-      {
-        "chunk_id": 2809,
-        "question": "Follow-up after cystectomy: regularly scheduled, risk adjusted, or symptom guided?",
-        "category": "Symptoms",
-        "distance": -11.4779,
-        "relevance_score": 0.3826,
-        "reranker_score": -9.2713,
-        "excerpt": "To evaluate the efficacy of follow-up based on the patterns of recurrence, relapse presentation and survival after cystectomy, and to define a risk ad"
-      },
-      {
-        "chunk_id": 416,
-        "question": "Are increased oxidative stress and asymmetric dimethylarginine levels associated with masked hypertension?",
-        "category": "Prevention",
-        "distance": -12.2184,
-        "relevance_score": 0.4073,
-        "reranker_score": -9.6409,
-        "excerpt": "In this study, our aim was to determine total oxidative stress and asymmetric dimethylarginine (ADMA) levels in patients with masked hypertension (MHT"
-      },
-      {
-        "chunk_id": 8103,
-        "question": "Childhood catatonia, autism and psychosis past and present: is there an 'iron triangle'?",
-        "category": "Symptoms",
-        "distance": -11.383,
-        "relevance_score": 0.3794,
-        "reranker_score": -10.1007,
-        "excerpt": "To explore the possibility that autism, catatonia and psychoses in children are different manifestations of a single underlying form of brain patholog"
-      },
-      {
-        "chunk_id": 6460,
-        "question": "Cost minimisation analysis of provision of oxygen at home: are the drug tariff guidelines cost effective?",
+        "chunk_id": 97260,
+        "question": "do an update on current pharmacotherapy options in atopic dermatitis?",
         "category": "Medication",
-        "distance": -11.3184,
-        "relevance_score": 0.3773,
-        "reranker_score": -10.8015,
-        "excerpt": "To determine the level of oxygen cylinder use at which it becomes more cost effective to provide oxygen by concentrator at home in Northern Ireland, a"
+        "distance": -18.9203,
+        "relevance_score": 0.6307,
+        "reranker_score": -5.3667,
+        "excerpt": "new knowledge on the pathogenesis of atopic dermatitis (ad) gives us new treatment options. this review emphasizes long-term treatment results. this s"
       },
       {
-        "chunk_id": 8895,
-        "question": "Are infant feeding options that are recommended for mothers with HIV acceptable, feasible, affordable, sustainable and safe?",
+        "chunk_id": 135775,
+        "question": "do early treatment of high-voltage electric burn wound in the limbs ?",
         "category": "Treatment",
-        "distance": -14.4797,
-        "relevance_score": 0.4827,
-        "reranker_score": -10.8938,
-        "excerpt": "To investigate pregnant women's views on infant feeding options recommended for HIV-infected women. A structured interview survey complemented with fo"
+        "distance": -17.1056,
+        "relevance_score": 0.5702,
+        "reranker_score": -7.134,
+        "excerpt": "to summarize the experience of early treatment of high-voltage electric burn wounds in the limbs. fifty-four patients (50 males and 4 females, aged fr"
       },
       {
-        "chunk_id": 2548,
-        "question": "Native, discount, or premium brand cigarettes: what types of cigarettes are Canadian youth currently smoking?",
-        "category": "General",
-        "distance": -12.4181,
-        "relevance_score": 0.4139,
-        "reranker_score": -11.0406,
-        "excerpt": "The objective of the study was to determine the brand distribution of premium, discount, and native cigarette brands and to identify the factors assoc"
+        "chunk_id": 122869,
+        "question": "do an update on the recent literature on sickle cell bone disease?",
+        "category": "Prevention",
+        "distance": -16.7571,
+        "relevance_score": 0.5586,
+        "reranker_score": -8.6893,
+        "excerpt": "to summarize the findings of the recent publications on sickle cell bone disease (sbd). individuals with sickle cell disease (scd) are living longer a"
       },
       {
-        "chunk_id": 7608,
-        "question": "Consenting for current genetic research: is Canadian practice adequate?",
-        "category": "General",
-        "distance": -14.2148,
-        "relevance_score": 0.4738,
-        "reranker_score": -11.0505,
-        "excerpt": "In order to ensure an adequate and ongoing protection of individuals participating in scientific research, the impacts of new biomedical technologies,"
+        "chunk_id": 155267,
+        "question": "is the injury-induced myokine insulin-like 6 protective in experimental autoimmune myositis?",
+        "category": "Medication",
+        "distance": -17.4889,
+        "relevance_score": 0.583,
+        "reranker_score": -8.7076,
+        "excerpt": "the idiopathic inflammatory myopathies represent a group of autoimmune diseases that are characterized by lymphocyte infiltration of muscle and muscle"
+      },
+      {
+        "chunk_id": 31788,
+        "question": "is childhood hydrocephalus - radiological morphology associated with etiology?",
+        "category": "Diagnosis",
+        "distance": -18.0426,
+        "relevance_score": 0.6014,
+        "reranker_score": -8.7915,
+        "excerpt": "clinicians use a non-standardized, intuitive approach when correlating radiological morphology and etiology of hydrocephalus. to investigate the possi"
+      },
+      {
+        "chunk_id": 31904,
+        "question": "does transcriptome sequencing of tumor subpopulations reveal a spectrum of therapeutic options for squamous cell lung cancer?",
+        "category": "Treatment",
+        "distance": -19.5102,
+        "relevance_score": 0.6503,
+        "reranker_score": -8.8886,
+        "excerpt": "the only therapeutic options that exist for squamous cell lung carcinoma (scc) are standard radiation and cytotoxic chemotherapy. cancer stem cells (c"
+      },
+      {
+        "chunk_id": 171983,
+        "question": "do hepatocellular carcinoma surveillance and appropriate treatment options improve survival for patients with liver cirrhosis?",
+        "category": "Treatment",
+        "distance": -17.6581,
+        "relevance_score": 0.5886,
+        "reranker_score": -9.1968,
+        "excerpt": "hepatocellular carcinoma (hcc) surveillance is a common practice for patients with liver cirrhosis. the aims of the study were to assess impacts of su"
+      },
+      {
+        "chunk_id": 80665,
+        "question": "do surgeons agree to disagree on surgical options for degenerative conditions of the cervical and lumbar spine?",
+        "category": "Treatment",
+        "distance": -18.488,
+        "relevance_score": 0.6163,
+        "reranker_score": -9.9112,
+        "excerpt": "this is a survey study designed to evaluate agreement among spine surgeons regarding treatment options for six clinical scenarios involving degenerati"
+      },
+      {
+        "chunk_id": 18152,
+        "question": "does cpg hypermethylation of the promoter region inactivate the estrogen receptor-beta gene in patients with prostate carcinoma?",
+        "category": "Medication",
+        "distance": -16.8932,
+        "relevance_score": 0.5631,
+        "reranker_score": -10.5919,
+        "excerpt": "the down-regulation of the estrogen receptor-beta (erbeta) gene is associated with several malignancies, including prostate carcinoma. the purpose of"
       }
     ],
-    "latency_ms": 5724.97
+    "latency_ms": 2271.18
   },
   {
     "query_num": 4,
     "question": "What are the side effects of metformin?",
-    "answer_raw": "confusion and dizziness, 6 reported a not clearly specified sensation of irritation, and 4 refused to continue the treatment.",
+    "answer_raw": "antioxidants selenomethionine and d-pantethine to partially reverse the negative side effects of dx in nk/ly lymphoma-bearing mice.",
     "disclaimer_present": true,
     "top_k": 10,
     "sources": [
       {
-        "chunk_id": 3883,
-        "question": "Does cyclosporin A have any effect on accelerated atherosclerosis in absence of graft rejection?",
+        "chunk_id": 193895,
+        "question": "does a gene-gene interaction between polymorphisms in the oct2 and mate1 genes influence the renal clearance of metformin?",
         "category": "Medication",
-        "distance": -16.8589,
-        "relevance_score": 0.562,
-        "reranker_score": -4.7628,
-        "excerpt": "The effects of cyclosporin A on accelerated atherosclerosis were studied in an experimental model of aortic isotransplantation. Seventy-six Lewis rats"
+        "distance": -22.0047,
+        "relevance_score": 0.7335,
+        "reranker_score": 0.9759,
+        "excerpt": "the aim of this study was to determine the association between the renal clearance (cl(renal)) of metformin in healthy caucasian volunteers and the si"
       },
       {
-        "chunk_id": 4216,
-        "question": "Particular cutaneous side effects with etoposide-containing courses: is VP16 or etoposide phosphate responsible?",
+        "chunk_id": 23625,
+        "question": "do antioxidants selenomethionine and d-pantethine decrease the negative side effects of doxorubicin in nl/ly lymphoma-bearing mice?",
         "category": "Medication",
-        "distance": -18.2339,
-        "relevance_score": 0.6078,
-        "reranker_score": -5.2422,
-        "excerpt": "Etoposide is commercially available in France in two different pharmaceutical forms: VP16 and its phosphate ester (etoposide phosphate, EP). EP shows"
+        "distance": -22.4124,
+        "relevance_score": 0.7471,
+        "reranker_score": -4.3319,
+        "excerpt": "to investigate the potential tissue-protective effects of antioxidants selenomethionine and d-pantethine applied together with doxorubicin (dx) on nk/"
       },
       {
-        "chunk_id": 5272,
-        "question": "Mirror therapy in the rehabilitation of lower-limb amputation: are there any contraindications?",
-        "category": "Treatment",
-        "distance": -15.2521,
-        "relevance_score": 0.5084,
-        "reranker_score": -6.0586,
-        "excerpt": "Mirror box therapy and its development (immersive virtual reality) is used in pain therapy and in rehabilitation of people with amputation affected by"
-      },
-      {
-        "chunk_id": 7369,
-        "question": "Does hyperbaric oxygen administration decrease side effect and improve quality of life after pelvic radiation?",
-        "category": "Treatment",
-        "distance": -15.4304,
-        "relevance_score": 0.5143,
-        "reranker_score": -6.5517,
-        "excerpt": "this is an open randomized, parallel, prospective study conducted in Department of Obstetrics and Gynecology, Oncology Division and Department of Radi"
-      },
-      {
-        "chunk_id": 8807,
-        "question": "Sensorimotor dysfunction of grasping in schizophrenia: a side effect of antipsychotic treatment?",
+        "chunk_id": 48270,
+        "question": "do patients and partners lack knowledge of androgen deprivation therapy side effects?",
         "category": "Medication",
-        "distance": -20.4284,
-        "relevance_score": 0.6809,
-        "reranker_score": -6.6504,
-        "excerpt": "Antipsychotic treatment in schizophrenia is frequently associated with extrapyramidal side effects. Objective behavioural measures to evaluate the sev"
+        "distance": -22.3547,
+        "relevance_score": 0.7452,
+        "reranker_score": -4.4646,
+        "excerpt": "androgen deprivation therapy (adt) is the primary treatment for advanced prostate cancer (cap). there is growing evidence that adt negatively affects"
       },
       {
-        "chunk_id": 8821,
-        "question": "Is there a role for periurethral collagen injection in the management of urodynamically proven mixed urinary incontinence?",
-        "category": "Treatment",
-        "distance": -16.0848,
-        "relevance_score": 0.5362,
-        "reranker_score": -6.8751,
-        "excerpt": "To investigate the effectiveness of periurethral collagen injection (PCI) in patients presenting with symptoms of mixed urinary incontinence (MUI) and"
+        "chunk_id": 152749,
+        "question": "does concomitant administration of vitamin e change the side effects of isotretinoin as used in acne vulgaris : a randomized trial?",
+        "category": "Medication",
+        "distance": -22.4325,
+        "relevance_score": 0.7478,
+        "reranker_score": -4.476,
+        "excerpt": "isotretinoin treatment is frequently associated with reversible, dose-related side effects. recent studies claimed that combining vitamin e with high-"
       },
       {
-        "chunk_id": 1088,
-        "question": "Does lidocaine ointment addition increase fluoxetine efficacy in the same group of patients with premature ejaculation?",
-        "category": "Treatment",
-        "distance": -16.9036,
-        "relevance_score": 0.5635,
-        "reranker_score": -8.4525,
-        "excerpt": "To evaluate the efficacy of fluoxetine alone and fluoxetine+lidocaine ointment in the same patient group with premature ejaculation (PE). 78 patients"
+        "chunk_id": 81687,
+        "question": "do psychiatric side effects induced by supraphysiological doses of combinations of anabolic steroids correlate to the severity of abuse?",
+        "category": "Medication",
+        "distance": -25.3104,
+        "relevance_score": 0.8437,
+        "reranker_score": -5.1019,
+        "excerpt": "the objective of our study was to evaluate the psychological consequences of real-world aas use in athletes abusing such agents, in comparison with a"
       },
       {
-        "chunk_id": 650,
-        "question": "Deep brain stimulation for obsessive-compulsive disorder: is the side relevant?",
+        "chunk_id": 122500,
+        "question": "does the endopredict score provide prognostic information on late distant metastases in er/her2- breast cancer patients?",
         "category": "Diagnosis",
-        "distance": -15.5625,
-        "relevance_score": 0.5187,
-        "reranker_score": -8.4989,
-        "excerpt": "Deep brain stimulation for obsessive-compulsive disorder (OCD) has targeted several subcortical nuclei, including the subthalamic nucleus (STN) and th"
+        "distance": -22.1875,
+        "relevance_score": 0.7396,
+        "reranker_score": -5.8964,
+        "excerpt": "er/her2- breast cancers have a proclivity for late recurrence. a personalised estimate of relapse risk after 5 years of endocrine treatment can improv"
       },
       {
-        "chunk_id": 8780,
-        "question": "Productivity costs in health-state valuations : does explicit instruction matter?",
+        "chunk_id": 201440,
+        "question": "do glutamatergic gene variants impact the clinical profile of efficacy and side effects of haloperidol?",
         "category": "Medication",
-        "distance": -16.919,
-        "relevance_score": 0.564,
-        "reranker_score": -10.0835,
-        "excerpt": "There has been considerable debate on whether productivity costs should be captured in the numerator or the denominator of the cost-effectiveness rati"
+        "distance": -23.8508,
+        "relevance_score": 0.795,
+        "reranker_score": -6.2665,
+        "excerpt": "the glutamatergic system may be relevant to the pathophysiology of psychosis and to the effects of antipsychotic treatments. we investigated a set of"
       },
       {
-        "chunk_id": 1865,
-        "question": "Can pulmonary angiography be limited to the most suspicious side if the contralateral side appears normal on the ventilation/perfusion lung scan?",
-        "category": "Diagnosis",
-        "distance": -15.6388,
-        "relevance_score": 0.5213,
-        "reranker_score": -10.8515,
-        "excerpt": "The purpose of this investigation was to determine the frequency of pulmonary embolism (PE) in a single lung that showed a normal ventilation/perfusio"
+        "chunk_id": 130082,
+        "question": "are cancer treatments and their side effects associated with aggravation of insomnia : results of a longitudinal study?",
+        "category": "Treatment",
+        "distance": -24.8199,
+        "relevance_score": 0.8273,
+        "reranker_score": -6.649,
+        "excerpt": "insomnia affects between 30 to 60 of patients with cancer but to the authors' knowledge little is known regarding factors associated with its developm"
+      },
+      {
+        "chunk_id": 153837,
+        "question": "are guideline sheets on the side effects of anticancer drugs useful for general practitioners?",
+        "category": "Medication",
+        "distance": -24.002,
+        "relevance_score": 0.8001,
+        "reranker_score": -8.514,
+        "excerpt": "general practitioners (gps) are more and more involved in the treatment of cancer patients but feel not informed enough about anticancer treatments an"
+      },
+      {
+        "chunk_id": 158835,
+        "question": "are doctors in the best position to know '' : the perceived medicalization of contraceptive method choice in ibadan and kaduna , nigeria?",
+        "category": "Medication",
+        "distance": -25.7954,
+        "relevance_score": 0.8598,
+        "reranker_score": -9.1443,
+        "excerpt": "the medicalization and clinic-based distribution of contraceptive methods have been criticized as barriers to increasing levels of contraceptive use i"
       }
     ],
-    "latency_ms": 2407.43
+    "latency_ms": 3433.22
   },
   {
     "query_num": 5,
     "question": "How can cardiovascular disease be prevented through lifestyle changes?",
-    "answer_raw": "Individual dietary interventions in primary prevention can achieve modest improvements in diet and cardiovascular disease risk status that are maintained for 9 to 18 months. Impaired recovery in blood pressure and heart rate variability following mental stress may partly mediate social inequalities in risk.",
+    "answer_raw": "Brachial-ankle pulse wave velocity (ba-pwv) correlates well with coronary atherosclerosis.",
     "disclaimer_present": true,
     "top_k": 10,
     "sources": [
       {
-        "chunk_id": 333,
-        "question": "Can dietary interventions change diet and cardiovascular risk factors?",
+        "chunk_id": 130368,
+        "question": "does multidisciplinary structured lifestyle intervention reduce the estimated risk of cardiovascular morbidity and mortality?",
         "category": "Prevention",
-        "distance": -12.7571,
-        "relevance_score": 0.4252,
-        "reranker_score": 2.5926,
-        "excerpt": "This study evaluated the effectiveness of dietary advice in primary prevention of chronic disease. A meta-analysis was conducted of 17 randomized cont"
+        "distance": -24.2618,
+        "relevance_score": 0.8087,
+        "reranker_score": 3.8162,
+        "excerpt": "current guidelines for prevention and treatment of cardiovascular disease (cvd) emphasise the importance of a healthy lifestyle. however, successful l"
       },
       {
-        "chunk_id": 7327,
-        "question": "Does detection of carotid plaque affect physician behavior or motivate patients?",
+        "chunk_id": 71535,
+        "question": "does lifestyle modification improve risk factors in type 2 diabetes relatives?",
+        "category": "Prevention",
+        "distance": -18.0687,
+        "relevance_score": 0.6023,
+        "reranker_score": 2.0784,
+        "excerpt": "to investigate the short-term (16 weeks) effect of lifestyle intervention on insulin sensitivity, anthropometric and metabolic variables in non-diabet"
+      },
+      {
+        "chunk_id": 52266,
+        "question": "is arterial stiffness measured as pulse wave velocity highly correlated with coronary atherosclerosis in asymptomatic patients?",
         "category": "Diagnosis",
-        "distance": -12.2339,
-        "relevance_score": 0.4078,
-        "reranker_score": -3.8179,
-        "excerpt": "Imaging techniques to identify subclinical atherosclerosis are becoming more widespread, but few data exist regarding their influence on patient or ph"
+        "distance": -15.8644,
+        "relevance_score": 0.5288,
+        "reranker_score": 1.2816,
+        "excerpt": "carotid-femoral pulse wave velocity is a well-known predictor of all-cause and cardiovascular mortality. few studies have evaluated the relationship b"
       },
       {
-        "chunk_id": 3621,
-        "question": "Stress responsivity and socioeconomic status: a mechanism for increased cardiovascular disease risk?",
+        "chunk_id": 171767,
+        "question": "does yoga lifestyle intervention reduce blood pressure in hiv-infected adults with cardiovascular disease risk factors?",
+        "category": "Prevention",
+        "distance": -19.2669,
+        "relevance_score": 0.6422,
+        "reranker_score": -0.1168,
+        "excerpt": "people living with hiv infection are at increased risk for developing cardiovascular disease (cvd). safe and effective interventions for lowering cvd"
+      },
+      {
+        "chunk_id": 117618,
+        "question": "does a simple lifestyle score predict survival in healthy elderly men?",
+        "category": "Prevention",
+        "distance": -20.7715,
+        "relevance_score": 0.6924,
+        "reranker_score": -0.3153,
+        "excerpt": "although improvements in life expectancy have been attributed in part to the adoption of a more prudent lifestyle, few studies have examined the assoc"
+      },
+      {
+        "chunk_id": 149387,
+        "question": "are depressive symptomatology , exercise adherence , and fitness associated with reduced cognitive performance in heart failure?",
+        "category": "Prevention",
+        "distance": -15.1407,
+        "relevance_score": 0.5047,
+        "reranker_score": -4.143,
+        "excerpt": "depression is common in heart failure (hf) and associated with reduced cognitive function. the current study used structrual equation modeling to exam"
+      },
+      {
+        "chunk_id": 14646,
+        "question": "do chronic medical conditions mediate the association between depression and cardiovascular disease mortality?",
+        "category": "Prevention",
+        "distance": -15.6261,
+        "relevance_score": 0.5209,
+        "reranker_score": -6.5031,
+        "excerpt": "to determine whether chronic medical conditions mediate the association between depression and cardiovascular disease (cvd) mortality. data analyzed w"
+      },
+      {
+        "chunk_id": 48920,
+        "question": "does treadmill exercise ameliorate dopaminergic neuronal loss through suppressing microglial activation in parkinson 's disease mice?",
+        "category": "Prevention",
+        "distance": -15.5524,
+        "relevance_score": 0.5184,
+        "reranker_score": -9.1186,
+        "excerpt": "parkinson's disease is a debilitating neurodegenerative disorder characterized by the gradual loss of dopaminergic neurons. we investigated the effect"
+      },
+      {
+        "chunk_id": 58383,
+        "question": "does children 's report of lifestyle counseling differ by bmi status?",
+        "category": "Prevention",
+        "distance": -17.6108,
+        "relevance_score": 0.587,
+        "reranker_score": -10.3541,
+        "excerpt": "this study examined whether children's report of receiving weight, nutrition, and physical activity counseling from their clinicians differs by their"
+      },
+      {
+        "chunk_id": 160514,
+        "question": "does tissue factor activate allosteric networks in factor viia through structural and dynamic changes?",
         "category": "General",
-        "distance": -16.2582,
-        "relevance_score": 0.5419,
-        "reranker_score": -5.8102,
-        "excerpt": "Low socioeconomic status is associated with increased cardiovascular disease risk. We hypothesized that psychobiological pathways, specifically slow r"
-      },
-      {
-        "chunk_id": 7911,
-        "question": "Androgen deprivation therapy and morbid obesity: do they share cardiovascular risk through metabolic syndrome?",
-        "category": "Prevention",
-        "distance": -13.4719,
-        "relevance_score": 0.4491,
-        "reranker_score": -7.4699,
-        "excerpt": "Although the use of androgen deprivation therapy (ADT) has resulted in improved survival in men with advanced prostate cancer, the resulting hypogonad"
-      },
-      {
-        "chunk_id": 4229,
-        "question": "Does supplemental vitamin C increase cardiovascular disease risk in women with diabetes?",
-        "category": "Medication",
-        "distance": -11.4592,
-        "relevance_score": 0.382,
-        "reranker_score": -7.8168,
-        "excerpt": "Vitamin C acts as a potent antioxidant; however, it can also be a prooxidant and glycate protein under certain circumstances in vitro. These observati"
-      },
-      {
-        "chunk_id": 2533,
-        "question": "Can healthy lifestyle modify risk factors for dementia?",
-        "category": "Prevention",
-        "distance": -11.193,
-        "relevance_score": 0.3731,
-        "reranker_score": -8.1407,
-        "excerpt": "Currently there are no effective treatments available for dementia. Attention has turned to defining preventive strategies and identifying modifying e"
-      },
-      {
-        "chunk_id": 8902,
-        "question": "Can cardiovascular risk factors and lifestyle explain the educational inequalities in mortality from ischaemic heart disease and from other heart diseases?",
-        "category": "Prevention",
-        "distance": -14.6326,
-        "relevance_score": 0.4878,
-        "reranker_score": -8.9146,
-        "excerpt": "Investigate the degree to which smoking, physical activity, marital status, BMI, blood pressure, and cholesterol explain the association between educa"
-      },
-      {
-        "chunk_id": 5286,
-        "question": "Is chronic kidney disease associated with a high ankle brachial index in adults at high cardiovascular risk?",
-        "category": "Prevention",
-        "distance": -12.3077,
-        "relevance_score": 0.4103,
-        "reranker_score": -9.3442,
-        "excerpt": "The study enrolled hospital-based patients at high CVD risk and measured kidney function and ABI. The glomerular filtration rate (GFR) was estimated u"
-      },
-      {
-        "chunk_id": 1284,
-        "question": "Does the MTHFR C677T gene polymorphism indicate cardiovascular disease risk in type 2 diabetes mellitus patients?",
-        "category": "Diagnosis",
-        "distance": -12.0242,
-        "relevance_score": 0.4008,
-        "reranker_score": -10.1212,
-        "excerpt": "Diabetes mellitus is a major risk factor for cardiovascular disease (CVD). We investigated the relationship among biochemical and cardiac risk paramet"
-      },
-      {
-        "chunk_id": 3632,
-        "question": "Governing the conduct of conduct: are restraints inevitable?",
-        "category": "Treatment",
-        "distance": -12.9054,
-        "relevance_score": 0.4302,
-        "reranker_score": -11.2155,
-        "excerpt": "The purpose of this article is to provide an interpretation of how restraint use is maintained and legitimized despite negative reports on its efficac"
+        "distance": -15.5426,
+        "relevance_score": 0.5181,
+        "reranker_score": -11.0806,
+        "excerpt": "tissue factor (tf) promotes colocalization of enzyme (factor viia) and substrate (fx or fix), and stabilizes the active conformation of fviia. details"
       }
     ],
-    "latency_ms": 3510.39
+    "latency_ms": 3548.47
   },
   {
     "query_num": 6,
     "question": "What is the role of the immune system in fighting infections?",
-    "answer_raw": "Nematosomes comprise part of the innate immune system in fighting infections.",
+    "answer_raw": "Nonparenchymal inflammatory cells in the liver are involved in the progression of apap hepatotoxicity.",
     "disclaimer_present": true,
     "top_k": 10,
     "sources": [
       {
-        "chunk_id": 7098,
-        "question": "Does prolonged cycling of moderate intensity affect immune cell function?",
-        "category": "Prevention",
-        "distance": -24.8537,
-        "relevance_score": 0.8285,
-        "reranker_score": -6.9569,
-        "excerpt": "Prolonged exercise may induce temporary immunosuppression with a presumed increased susceptibility for infection. However, there are only few data on"
+        "chunk_id": 156565,
+        "question": "do probiotics inhibit immune fluctuation in the intestinal mucous layer in rats?",
+        "category": "Treatment",
+        "distance": -32.0253,
+        "relevance_score": 1.0,
+        "reranker_score": -3.0856,
+        "excerpt": "innate lymphocytes play a key role in maintaining the immune bowel barrier, which provides resistance to infection. however, the effects of probiotics"
       },
       {
-        "chunk_id": 483,
-        "question": "Do common genetic variants in endotoxin signaling pathway contribute to predisposition to alcoholic liver cirrhosis?",
-        "category": "Medication",
-        "distance": -24.1828,
-        "relevance_score": 0.8061,
-        "reranker_score": -7.9844,
-        "excerpt": "Tumor necrosis factor-alpha (TNF-alpha) and interleukin-1beta (IL-1beta), produced by endotoxin-activated Kupffer cells, play a key role in the pathog"
-      },
-      {
-        "chunk_id": 1916,
-        "question": "Do novel genes drive morphological novelty?",
+        "chunk_id": 15428,
+        "question": "do biliary apotopes and anti-mitochondrial antibodies activate innate immune responses in primary biliary cirrhosis?",
         "category": "General",
-        "distance": -24.4888,
-        "relevance_score": 0.8163,
-        "reranker_score": -8.4558,
-        "excerpt": "The evolution of novel genes is thought to be a critical component of morphological innovation but few studies have explicitly examined the contributi"
+        "distance": -32.7478,
+        "relevance_score": 1.0,
+        "reranker_score": -4.8309,
+        "excerpt": "our understanding of primary biliary cirrhosis (pbc) has been significantly enhanced by the rigorous dissection of the multilineage t and b cell respo"
       },
       {
-        "chunk_id": 7091,
-        "question": "Improvement of chronic idiopathic urticaria with L-thyroxine: a new TSH role in immune response?",
-        "category": "Treatment",
-        "distance": -25.5236,
-        "relevance_score": 0.8508,
-        "reranker_score": -8.4636,
-        "excerpt": "The association between chronic idiopathic urticaria (CIU) and autoimmune thyroiditis (AT) is known, as well as major prevalence of antithyroid antibo"
-      },
-      {
-        "chunk_id": 6750,
-        "question": "Does alpha-1-proteinase inhibitor play a protective role in coronary atherosclerosis?",
+        "chunk_id": 5934,
+        "question": "does innate immune system play a critical role in determining the progression and severity of acetaminophen hepatotoxicity?",
         "category": "Medication",
-        "distance": -24.3884,
-        "relevance_score": 0.8129,
-        "reranker_score": -8.543,
-        "excerpt": "alpha-1-proteinase inhibitor (alpha-1-PI) might appear to be actively involved in atherogenesis as an important regulator protecting elastic tissue fr"
+        "distance": -31.1669,
+        "relevance_score": 1.0,
+        "reranker_score": -5.6089,
+        "excerpt": "inflammatory mediators released by nonparenchymal inflammatory cells in the liver have been implicated in the progression of acetaminophen (apap) hepa"
       },
       {
-        "chunk_id": 4873,
-        "question": "Functional and phenotypical impairment of polymorphonuclear cells in atopic dermatitis: an additional cause for the known susceptibility to infections?",
+        "chunk_id": 9989,
+        "question": "is neurohormonal modulation of the innate immune system proinflammatory in the prehypertensive spontaneously hypertensive rat , a genetic model of essential hypertension?",
         "category": "Medication",
-        "distance": -26.8824,
-        "relevance_score": 0.8961,
-        "reranker_score": -8.7516,
-        "excerpt": "Atopic dermatitis (AD) patients present an high susceptibility to infections. The phagocytic activity of polymorphonuclear granulocytes (PMNs) is medi"
+        "distance": -35.0988,
+        "relevance_score": 1.0,
+        "reranker_score": -6.068,
+        "excerpt": "inflammation and autonomic dysfunction contribute to the pathophysiology of hypertension. cholinergic stimulation suppresses innate immune responses."
       },
       {
-        "chunk_id": 8748,
-        "question": "Lymphocyte subpopulations and cytokines in nasal polyps: is there a local immune system in the nasal polyp?",
+        "chunk_id": 61512,
+        "question": "does promoter analysis suggest the implication of nfkappab/c-rel transcription factors in biliary atresia?",
+        "category": "General",
+        "distance": -31.1524,
+        "relevance_score": 1.0,
+        "reranker_score": -6.6783,
+        "excerpt": "microarray studies used to describe altered gene expression patterns in tissues are a promising new way to provide insight into the pathomechanism of"
+      },
+      {
+        "chunk_id": 9751,
+        "question": "do neutrophils of centenarians show function levels similar to those of young adults?",
+        "category": "General",
+        "distance": -31.6257,
+        "relevance_score": 1.0,
+        "reranker_score": -7.6079,
+        "excerpt": "to analyze several functions and antioxidant parameters of peripheral blood neutrophils from healthy centenarians (men and women) and compare them wit"
+      },
+      {
+        "chunk_id": 55590,
+        "question": "does two-way calf to dam major histocompatibility class i compatibility increase risk for retained placenta in cattle?",
+        "category": "General",
+        "distance": -32.1805,
+        "relevance_score": 1.0,
+        "reranker_score": -9.5173,
+        "excerpt": "in cattle, retained placenta (rp) is suggested to arise from failure of immune-mediated rejection of the fetal membranes by the maternal immune system"
+      },
+      {
+        "chunk_id": 120271,
+        "question": "is ata homozigosity in the il-10 gene promoter a risk factor for schizophrenia in spanish females : a case control study?",
+        "category": "Prevention",
+        "distance": -31.4476,
+        "relevance_score": 1.0,
+        "reranker_score": -9.78,
+        "excerpt": "three il-10 gene promoter single nucleotide polymorphisms -1082g a, -819c t and -592c a and the haplotypes they define in caucasians, gcc, acc, ata, a"
+      },
+      {
+        "chunk_id": 104979,
+        "question": "does the pregnant mouse uterus exhibit a functional kisspeptin/kiss1r signaling system on the day of embryo implantation?",
         "category": "Medication",
-        "distance": -27.0747,
-        "relevance_score": 0.9025,
-        "reranker_score": -10.1112,
-        "excerpt": "The pathogenesis of chronic hyperplastic rhinosinusitis with massive nasal polyposis is still not entirely known. The present study evaluates the lymp"
+        "distance": -32.3098,
+        "relevance_score": 1.0,
+        "reranker_score": -10.6182,
+        "excerpt": "expression of kisspeptin (protein) and kiss1r (mrna) was recently documented in the mouse uterus on d4 of pregnancy (the day of embryo implantation) s"
       },
       {
-        "chunk_id": 7954,
-        "question": "Is spleen circulation impaired in systemic sclerosis and what is the role of liver fibrosis?",
-        "category": "Diagnosis",
-        "distance": -24.5147,
-        "relevance_score": 0.8172,
-        "reranker_score": -11.0673,
-        "excerpt": "In a cross-sectional fashion, 17 patients with SSc were compared with 18 patients suffering from hepatitis C virus (HCV)-related liver cirrhosis, grad"
-      },
-      {
-        "chunk_id": 4902,
-        "question": "Is the in vivo dosimetry with the OneDosePlusTM system able to detect intra-fraction motion?",
-        "category": "Treatment",
-        "distance": -23.9489,
-        "relevance_score": 0.7983,
-        "reranker_score": -11.0926,
-        "excerpt": "The OneDosePlusTM system, based on MOSFET solid-state radiation detectors and a handheld dosimetry reader, has been used to evaluate intra-fraction mo"
-      },
-      {
-        "chunk_id": 7652,
-        "question": "Donation rates: what matters?",
-        "category": "Treatment",
-        "distance": -25.5312,
-        "relevance_score": 0.851,
-        "reranker_score": -11.1262,
-        "excerpt": "The increase in the number of donors is the main objective of all transplantation organizations around the world. Further understanding of the factors"
+        "chunk_id": 26013,
+        "question": "does spermine induce maturation of the immature intestinal immune system in neonatal mice?",
+        "category": "Prevention",
+        "distance": -31.197,
+        "relevance_score": 1.0,
+        "reranker_score": -10.6581,
+        "excerpt": "in mice, immunological adaptation of the gut to microbial and nutritional antigens occurs at weaning in parallel with biochemical and morphological ma"
       }
     ],
-    "latency_ms": 2853.12
+    "latency_ms": 3071.27
   },
   {
     "query_num": 7,
     "question": "Is laparoscopic surgery better than open surgery for prostatectomy?",
-    "answer_raw": "Laparoscopic radical prostatectomy does not provide significant advantages in terms of perioperative morbidity compared with the traditional retropubic approach.",
+    "answer_raw": "Laparoscopic colorectal resections are safe and feasible in high-risk patients with significant comorbidities.",
     "disclaimer_present": true,
     "top_k": 10,
     "sources": [
       {
-        "chunk_id": 3995,
-        "question": "Is previous experience in laparoscopic necessary to perform robotic radical prostatectomy?",
+        "chunk_id": 54470,
+        "question": "does laparoscopic surgery improve blood glucose homeostasis and insulin resistance following distal gastrectomy for cancer?",
         "category": "Treatment",
-        "distance": -18.4598,
-        "relevance_score": 0.6153,
-        "reranker_score": 5.5115,
-        "excerpt": "To assess comparative results of robot-assisted radical laparoscopic prostatectomy (RARP) performed by surgeons without any experience in laparoscopic"
+        "distance": -30.0807,
+        "relevance_score": 1.0,
+        "reranker_score": 4.3021,
+        "excerpt": "prevention of blood glucose elevation and insulin resistance could be more pronounced in patients undergoing laparoscopic rather than open gastrectomy"
       },
       {
-        "chunk_id": 2690,
-        "question": "Does prior abdominal surgery influence outcomes or complications of robotic-assisted laparoscopic radical prostatectomy?",
+        "chunk_id": 55860,
+        "question": "is laparoscopic colectomy for cancer inferior to open surgery based on 5-year data from the cost study group trial?",
         "category": "Treatment",
-        "distance": -20.0072,
-        "relevance_score": 0.6669,
-        "reranker_score": 2.1659,
-        "excerpt": "To determine whether robotic-assisted laparoscopic radical prostatectomy (RALP) in patients with prior abdominal surgery is associated with increased"
+        "distance": -30.1267,
+        "relevance_score": 1.0,
+        "reranker_score": 4.1677,
+        "excerpt": "oncologic concerns from high wound recurrence rates prompted a multi-institutional randomized trial to test the hypothesis that disease-free and overa"
       },
       {
-        "chunk_id": 2,
-        "question": "Is laparoscopic radical prostatectomy better than traditional retropubic radical prostatectomy?",
+        "chunk_id": 49260,
+        "question": "does laparoscopic surgery improve postoperative outcomes in high-risk patients with colorectal cancer?",
         "category": "Treatment",
-        "distance": -21.6402,
-        "relevance_score": 0.7213,
-        "reranker_score": 1.0746,
-        "excerpt": "To compare morbidity in two groups of patients who underwent retropubic or laparoscopic radical prostatectomy in the same period. The clinical and pat"
+        "distance": -31.539,
+        "relevance_score": 1.0,
+        "reranker_score": 3.6393,
+        "excerpt": "patients with significant comorbidities often are denied laparoscopic colorectal resections, because they are thought to be too \"high-risk.\" this stud"
       },
       {
-        "chunk_id": 6014,
-        "question": "Is age a risk factor for laparoscopic colorectal surgery?",
+        "chunk_id": 106644,
+        "question": "is postoperative cell mediated immune response better preserved after laparoscopic vs open colorectal resection in humans?",
         "category": "Treatment",
-        "distance": -17.6974,
-        "relevance_score": 0.5899,
-        "reranker_score": 0.75,
-        "excerpt": "The aims of this study were to evaluate the results of laparoscopic colorectal surgery in elderly patients and compare them with the results of open p"
+        "distance": -27.9121,
+        "relevance_score": 0.9304,
+        "reranker_score": 3.548,
+        "excerpt": "animal studies have documented significantly better preserved postoperative cell-mediated immune function, as measured by serial delayed-type hypersen"
       },
       {
-        "chunk_id": 119,
-        "question": "Access to the hypertrophic pylorus: does it make a difference to the patient?",
+        "chunk_id": 19670,
+        "question": "is laparoscopic surgery associated with less tumour growth stimulation than conventional surgery : an experimental study?",
         "category": "Treatment",
-        "distance": -20.1496,
-        "relevance_score": 0.6717,
-        "reranker_score": 0.3476,
-        "excerpt": "The aim of the study was to evaluate the effects of different access methods for the treatment of pyloric stenosis (PS). Since 2001, we have operated"
+        "distance": -29.3805,
+        "relevance_score": 0.9793,
+        "reranker_score": 2.8859,
+        "excerpt": "the role of laparoscopic surgery for malignant disease is controversial. to evaluate differences in tumour growth after conventional and laparoscopic"
       },
       {
-        "chunk_id": 5856,
-        "question": "Can community surgeons perform laparoscopic colorectal surgery with outcomes similar to tertiary care centres?",
+        "chunk_id": 68386,
+        "question": "is laparoscopic surgery more advantageous than laparotomic surgery for treatment of hypersplenism with gallstones?",
         "category": "Treatment",
-        "distance": -20.2395,
-        "relevance_score": 0.6746,
-        "reranker_score": -0.056,
-        "excerpt": "The use of the laparoscopic approach in colorectal surgery (LCS) is the subject of active debate. Studies demonstrating its safety and feasibility in"
+        "distance": -28.9216,
+        "relevance_score": 0.9641,
+        "reranker_score": 2.2872,
+        "excerpt": "the aim of this study was to compare laparoscopic vs. laparotomic surgery for the treatment of hypersplenism with gallstones. forty patients were trea"
       },
       {
-        "chunk_id": 8030,
-        "question": "Can we pursue minimal invasive surgery in the setting of converted laparoscopic cholecystectomy?",
+        "chunk_id": 77874,
+        "question": "is laparoscopic approach for inflammatory bowel disease a real alternative to open surgery : an experience with 574 consecutive patients?",
         "category": "Treatment",
-        "distance": -17.356,
-        "relevance_score": 0.5785,
-        "reranker_score": -1.1467,
-        "excerpt": "Between 2003 and 2010, 1054 LC were performed at a single institution. Seventy-two LC were converted to open laparotomy (6.83%). Reasons for conversio"
+        "distance": -28.898,
+        "relevance_score": 0.9633,
+        "reranker_score": 2.0933,
+        "excerpt": "this study aimed to report a 14-year experience of laparoscopic approach for inflammatory bowel disease (ibd), including complicated and recurrent cas"
       },
       {
-        "chunk_id": 4616,
-        "question": "Cholecystectomy-induced gastroesophageal reflux: is it reduced by the laparoscopic approach?",
+        "chunk_id": 128535,
+        "question": "does laparoscopic colorectal surgery produce better outcomes for high risk cancer patients compared to open surgery?",
         "category": "Treatment",
-        "distance": -17.706,
-        "relevance_score": 0.5902,
-        "reranker_score": -2.3492,
-        "excerpt": "The incidence of gastroesophageal reflux and esophagitis increases significantly following cholecystectomy. Laparoscopic technique minimizes the metab"
+        "distance": -29.8798,
+        "relevance_score": 0.996,
+        "reranker_score": 1.6647,
+        "excerpt": "the excellent outcomes reported for laparoscopic colorectal surgery in selected patients could also be potentially advantageous for high risk patients"
       },
       {
-        "chunk_id": 4179,
-        "question": "Is Laparoscopic Bariatric Surgery a Safe Option in Extremely High-Risk Morbidly Obese Patients?",
+        "chunk_id": 167165,
+        "question": "is laparoscopic surgery useful for preventing recurrence of small bowel obstruction after surgery for postoperative small bowel obstruction?",
         "category": "Treatment",
-        "distance": -19.0368,
-        "relevance_score": 0.6346,
-        "reranker_score": -2.4521,
-        "excerpt": "Age, superobesity, and cardiopulmonary comorbidities define patients as high risk for bariatric surgery. We evaluated the outcomes following bariatric"
+        "distance": -29.1711,
+        "relevance_score": 0.9724,
+        "reranker_score": 1.1254,
+        "excerpt": "risk factors for recurrence postoperative small bowel obstruction in patients who have postoperative abdominal surgery remain unclear. the study group"
       },
       {
-        "chunk_id": 1613,
-        "question": "Is laparoscopic colorectal cancer surgery associated with an increased risk in obese patients?",
+        "chunk_id": 45959,
+        "question": "are obesity and morbid obesity associated with a greater conversion rate to open surgery for standard but not hand assisted laparoscopic radical nephrectomy?",
         "category": "Treatment",
-        "distance": -21.2591,
-        "relevance_score": 0.7086,
-        "reranker_score": -3.2451,
-        "excerpt": "The impact of obesity on surgical outcomes after laparoscopic colorectal cancer resection in Chinese patients is still unclear. We retrospectively rev"
+        "distance": -27.211,
+        "relevance_score": 0.907,
+        "reranker_score": 1.0589,
+        "excerpt": "we noted that the impact of obesity on renal laparoscopy may vary with the specific surgical approach. patients who underwent standard and hand assist"
       }
     ],
-    "latency_ms": 2404.24
+    "latency_ms": 2685.26
   },
   {
     "query_num": 8,
     "question": "Can bacterial gastroenteritis lead to irritable bowel syndrome?",
-    "answer_raw": "Irritable bowel syndrome (IBS) may develop after bacterial gastroenteritis.",
+    "answer_raw": "Salmonella-induced gastroenteritis is a risk factor for irritable bowel syndrome and functional dyspepsia throughout adulthood.",
     "disclaimer_present": true,
     "top_k": 10,
     "sources": [
       {
-        "chunk_id": 6504,
-        "question": "Chlamydia trachomatis infection: is it relevant in irritable bowel syndrome?",
-        "category": "Treatment",
-        "distance": -21.8414,
-        "relevance_score": 0.728,
-        "reranker_score": 4.8088,
-        "excerpt": "Irritable bowel syndrome can present with gynaecological symptoms similar to those of chronic pelvic inflammatory disease, which is commonly caused by"
-      },
-      {
-        "chunk_id": 3,
-        "question": "Does bacterial gastroenteritis predispose people to functional gastrointestinal disorders?",
-        "category": "Medication",
-        "distance": -20.5256,
-        "relevance_score": 0.6842,
-        "reranker_score": 4.2314,
-        "excerpt": "Irritable bowel syndrome (IBS) might develop after gastroenteritis. Most previous studies of this relationship have been uncontrolled, and little is k"
-      },
-      {
-        "chunk_id": 6053,
-        "question": "Is childhood abuse or neglect associated with symptom reports and physiological measures in women with irritable bowel syndrome?",
-        "category": "Symptoms",
-        "distance": -20.3917,
-        "relevance_score": 0.6797,
-        "reranker_score": -3.6834,
-        "excerpt": "Early childhood traumatic experiences (e.g., abuse or neglect) may contribute to sleep disturbances as well as to other indicators of arousal in patie"
-      },
-      {
-        "chunk_id": 32,
-        "question": "Does depression influence symptom severity in irritable bowel syndrome?",
-        "category": "Symptoms",
-        "distance": -20.9634,
-        "relevance_score": 0.6988,
-        "reranker_score": -3.9049,
-        "excerpt": "Irritable bowel syndrome (IBS) is frequently associated with mood disorder. However, it is typically difficult to distinguish between disturbed mood a"
-      },
-      {
-        "chunk_id": 1826,
-        "question": "Does routine abdominal ultrasound enhance diagnostic accuracy in irritable bowel syndrome?",
-        "category": "Diagnosis",
-        "distance": -22.2041,
-        "relevance_score": 0.7401,
-        "reranker_score": -4.0786,
-        "excerpt": "The current recommendation that irritable bowel syndrome (IBS) should be diagnosed positively using minimum investigation raises the possibility that"
-      },
-      {
-        "chunk_id": 1759,
-        "question": "Do Effects on Bowel Patterns Imposed by Solifenacin Always Have Negative Impacts on Treating Patients with Overactive Bladder (OAB)?",
-        "category": "Treatment",
-        "distance": -14.7052,
-        "relevance_score": 0.4902,
-        "reranker_score": -4.8834,
-        "excerpt": "To investigate whether solifenacin intervention leads to any changes in bowel symptoms, and the types of impacts imposed on bowel symptoms in patients"
-      },
-      {
-        "chunk_id": 1940,
-        "question": "Is jejunostomy output nutrient or waste in short bowel syndrome?",
+        "chunk_id": 86492,
+        "question": "is an outbreak of acute bacterial gastroenteritis associated with an increased incidence of irritable bowel syndrome in children?",
         "category": "Prevention",
-        "distance": -14.1703,
-        "relevance_score": 0.4723,
-        "reranker_score": -9.2557,
-        "excerpt": "Certain patients who undergo proximal jejunum resection are unable to undergo primary anastomosis and require exteriorization of the proximal jejunum."
+        "distance": -35.1843,
+        "relevance_score": 1.0,
+        "reranker_score": 5.0055,
+        "excerpt": "acute bacterial gastroenteritis is associated with subsequent post-infectious irritable bowel syndrome (pi-ibs) in adults. less is known about this re"
       },
       {
-        "chunk_id": 6909,
-        "question": "Does the colon play a role in intestinal adaptation in infants with short bowel syndrome?",
+        "chunk_id": 3155,
+        "question": "is small intestinal bacterial overgrowth associated with intestinal inflammation in the irritable bowel syndrome?",
+        "category": "Symptoms",
+        "distance": -32.2584,
+        "relevance_score": 1.0,
+        "reranker_score": 4.8676,
+        "excerpt": "small intestinal bacterial overgrowth is encountered in bowel disorders, including irritable bowel symptoms. low degrees of inflammation have been rec"
+      },
+      {
+        "chunk_id": 191878,
+        "question": "is salmonella gastroenteritis during childhood a risk factor for irritable bowel syndrome in adulthood?",
+        "category": "Prevention",
+        "distance": -27.7484,
+        "relevance_score": 0.9249,
+        "reranker_score": 4.8418,
+        "excerpt": "acute infectious gastroenteritis increases the risk for irritable bowel syndrome (ibs) and functional dyspepsia (fd). children are particularly vulner"
+      },
+      {
+        "chunk_id": 80962,
+        "question": "does eradication of small intestinal bacterial overgrowth reduce symptoms of irritable bowel syndrome?",
+        "category": "Symptoms",
+        "distance": -34.6958,
+        "relevance_score": 1.0,
+        "reranker_score": 4.7169,
+        "excerpt": "irritable bowel syndrome is the most common gastrointestinal diagnosis. the symptoms of irritable bowel syndrome are similar to those of small intesti"
+      },
+      {
+        "chunk_id": 201467,
+        "question": "does factor analysis demonstrate a symptom cluster related to methane and non-methane production in irritable bowel syndrome?",
+        "category": "Symptoms",
+        "distance": -25.6834,
+        "relevance_score": 0.8561,
+        "reranker_score": -2.8684,
+        "excerpt": "irritable bowel syndrome (ibs) is a chronic disorder often subdivided into constipation-predominant and diarrhea-predominant forms. earlier studies ha"
+      },
+      {
+        "chunk_id": 14263,
+        "question": "are abdominal symptoms related to anorectal function in the irritable bowel syndrome?",
+        "category": "Symptoms",
+        "distance": -26.4978,
+        "relevance_score": 0.8833,
+        "reranker_score": -3.342,
+        "excerpt": "the pathophysiologic significance of altered intestinal motility and perception in irritable bowel syndrome (ibs) is unclear, as a consistent associat"
+      },
+      {
+        "chunk_id": 18256,
+        "question": "does otilonium bromide enhance sensory thresholds of volume and pressure in patients with irritable bowel syndrome?",
         "category": "Treatment",
-        "distance": -14.3959,
-        "relevance_score": 0.4799,
-        "reranker_score": -9.9073,
-        "excerpt": "We sought to examine in a multiple variable model the impact of residual colonic length on time to intestinal adaptation in a cohort of infants with s"
+        "distance": -24.7817,
+        "relevance_score": 0.8261,
+        "reranker_score": -5.2033,
+        "excerpt": "visceral hyperalgesia has been suggested to play a role in the development of symptoms presented by irritable bowel syndrome patients. otilonium bromi"
       },
       {
-        "chunk_id": 1893,
-        "question": "Is there any potential or additive effect of anemia on hepatorenal syndrome?",
+        "chunk_id": 95835,
+        "question": "is fecal calprotectin a useful marker to diagnose ulcerative colitis from irritable bowel syndrome?",
         "category": "Diagnosis",
-        "distance": -14.3183,
-        "relevance_score": 0.4773,
-        "reranker_score": -10.0945,
-        "excerpt": "Hepatorenal syndrome (HRS) is a severe complication of advanced cirrhosis and is characterized by renal dysfunction and poor survival rates. Although"
+        "distance": -25.3822,
+        "relevance_score": 0.8461,
+        "reranker_score": -5.4475,
+        "excerpt": "this study was aimed to evaluate the predictive value of fecal calprotectin in patients with ulcerative colitis from patients with irritable bowel syn"
       },
       {
-        "chunk_id": 8228,
-        "question": "Bacterial adherence to surgical sutures: can antibacterial-coated sutures reduce the risk of microbial contamination?",
-        "category": "Treatment",
-        "distance": -12.4582,
-        "relevance_score": 0.4153,
-        "reranker_score": -10.8452,
-        "excerpt": "Surgical site infections are associated with severe morbidity and mortality. The role of surgical sutures in the etiology of surgical site infection h"
+        "chunk_id": 106679,
+        "question": "does gut-focused hypnotherapy normalize disordered rectal sensitivity in patients with irritable bowel syndrome?",
+        "category": "Diagnosis",
+        "distance": -26.6327,
+        "relevance_score": 0.8878,
+        "reranker_score": -6.1497,
+        "excerpt": "we have previously shown that hypnotherapy alters rectal sensitivity in some patients with irritable bowel syndrome. however, this previous study used"
+      },
+      {
+        "chunk_id": 135198,
+        "question": "does simultaneous fecal microbial and metabolite profiling enable accurate classification of pediatric irritable bowel syndrome?",
+        "category": "Diagnosis",
+        "distance": -26.9647,
+        "relevance_score": 0.8988,
+        "reranker_score": -10.6582,
+        "excerpt": "we previously showed that stool samples of pre-adolescent and adolescent us children diagnosed with diarrhea-predominant ibs (ibs-d) had different com"
       }
     ],
-    "latency_ms": 3668.75
+    "latency_ms": 9455.77
   },
   {
     "query_num": 9,
     "question": "Does naturopathy effectively treat menopausal symptoms?",
-    "answer_raw": "Naturopathy appears to be an effective alternative for relief of specific menopausal symptoms compared to conventional therapy in the clinical setting.",
+    "answer_raw": "Research Conclusion 3: menopausal symptoms and estrogen therapy (et)-induced symptom relief affect cognition in early menopause.",
     "disclaimer_present": true,
     "top_k": 10,
     "sources": [
       {
-        "chunk_id": 0,
-        "question": "Is naturopathy as effective as conventional therapy for treatment of menopausal symptoms?",
-        "category": "Treatment",
-        "distance": -33.2084,
-        "relevance_score": 1.0,
-        "reranker_score": 9.2511,
-        "excerpt": "Although the use of alternative medicine in the United States is increasing, no published studies have documented the effectiveness of naturopathy for"
-      },
-      {
-        "chunk_id": 5834,
-        "question": "The impact of extroversion or menopause status on depressive symptoms among climacteric women in Taiwan: neuroticism as moderator or mediator?",
+        "chunk_id": 171852,
+        "question": "does laser acupuncture improve menopausal symptoms?",
         "category": "Symptoms",
-        "distance": -10.2511,
-        "relevance_score": 0.3417,
-        "reranker_score": -4.1614,
-        "excerpt": "The study was designed to test whether neuroticism moderated the effect of extroversion and mediated the impact of menopause status on depressive symp"
+        "distance": -20.4071,
+        "relevance_score": 0.6802,
+        "reranker_score": -0.8652,
+        "excerpt": "acupuncture is commonly used to treat menopausal symptoms and other gynecological conditions. laser acupuncture, more accurately named \"laser acupoint"
       },
       {
-        "chunk_id": 8171,
-        "question": "Does there exist one specific \"view of man\" in naturopathy / complementary medicine?",
+        "chunk_id": 105035,
+        "question": "do an update on drugs for the treatment of menopausal symptoms?",
         "category": "Treatment",
-        "distance": -12.4829,
-        "relevance_score": 0.4161,
-        "reranker_score": -5.4638,
-        "excerpt": "Practitioners and users of naturopathic therapies claim that one of the assumptions underlying their work is a holistic \"view of man\". Does there exis"
+        "distance": -17.097,
+        "relevance_score": 0.5699,
+        "reranker_score": -1.4007,
+        "excerpt": "vasomotor symptoms (vms) and the genitourinary syndrome of menopause (gsm) are recognized as the most frequent and bothersome symptoms associated with"
       },
       {
-        "chunk_id": 1366,
-        "question": "Does sex matter?",
+        "chunk_id": 133148,
+        "question": "do hot flashes and estrogen therapy influence cognition in early menopausal women?",
+        "category": "Treatment",
+        "distance": -14.0871,
+        "relevance_score": 0.4696,
+        "reranker_score": -1.793,
+        "excerpt": "to examine how menopausal symptoms and estrogen therapy (et)-induced symptom relief affect cognition in early menopause. there were two components. pa"
+      },
+      {
+        "chunk_id": 95575,
+        "question": "does clinical study on spanishneedles leave in treatment of middle and severe xerophthalmia of menopausal females ?",
+        "category": "Treatment",
+        "distance": -16.7264,
+        "relevance_score": 0.5575,
+        "reranker_score": -2.2484,
+        "excerpt": "to investigate the clinical effect of spanishneedles leaves on middle and severe xerophthalmia of menopausal females. this study was a prospective ran"
+      },
+      {
+        "chunk_id": 95983,
+        "question": "does black cohosh improve objective sleep in postmenopausal women with sleep disturbance?",
+        "category": "Treatment",
+        "distance": -14.1508,
+        "relevance_score": 0.4717,
+        "reranker_score": -3.1557,
+        "excerpt": "sleep problems are prominent after menopause. the aim of our study was to look into the effect of black cohosh on both objective and subjective sleep"
+      },
+      {
+        "chunk_id": 127646,
+        "question": "is objective cognitive performance related to subjective memory complaints in midlife women with moderate to severe vasomotor symptoms?",
+        "category": "Symptoms",
+        "distance": -14.325,
+        "relevance_score": 0.4775,
+        "reranker_score": -5.3001,
+        "excerpt": "memory complaints increase as women transition from the premenopausal stage to the postmenopausal stage. we explored the extent to which subjective me"
+      },
+      {
+        "chunk_id": 77712,
+        "question": "are periodic limb movements associated with vasomotor symptoms?",
+        "category": "Symptoms",
+        "distance": -14.5893,
+        "relevance_score": 0.4863,
+        "reranker_score": -5.6507,
+        "excerpt": "periodic limb movements (plms) are characterized by involuntary movements of the lower extremity during sleep. the etiology of plm has been suggested"
+      },
+      {
+        "chunk_id": 68773,
+        "question": "does menopausal status predict oncotype dx recurrence score?",
         "category": "Medication",
-        "distance": -8.4155,
-        "relevance_score": 0.2805,
-        "reranker_score": -7.8618,
-        "excerpt": "Sex is associated with disparate risk of venous thromboembolism (VTE) in nontrauma patients, with increased risk seen during pregnancy and in women on"
+        "distance": -13.4362,
+        "relevance_score": 0.4479,
+        "reranker_score": -6.8967,
+        "excerpt": "adjuvant treatment for early stage, estrogen receptor (er) positive invasive breast cancer has been based on prognosticators such as menopausal status"
       },
       {
-        "chunk_id": 7679,
-        "question": "Sweating attacks: key symptom in menopausal transition only for women?",
+        "chunk_id": 188105,
+        "question": "does oropharyngeal exercise to reduce symptoms of osa after at?",
         "category": "Symptoms",
-        "distance": -8.305,
-        "relevance_score": 0.2768,
-        "reranker_score": -8.8616,
-        "excerpt": "Aging men are not as much aware of the fact as women that they, too, undergo some kind of menopausal transition and they notice the symptoms rarely. T"
+        "distance": -13.6592,
+        "relevance_score": 0.4553,
+        "reranker_score": -7.6286,
+        "excerpt": "this study evaluated the efficacy of oropharyngeal exercises in children with symptoms of obstructive sleep apnea syndrome (osa) after adenotonsillect"
       },
       {
-        "chunk_id": 8092,
-        "question": "Does conventional posterior vault remodeling alter endocranial morphology in patients with true lambdoid synostosis?",
+        "chunk_id": 152215,
+        "question": "do vets prevail online intervention reduces ptsd and depression in veterans with mild-to-moderate symptoms?",
         "category": "Treatment",
-        "distance": -7.8339,
-        "relevance_score": 0.2611,
-        "reranker_score": -9.4914,
-        "excerpt": "True lambdoid synostosis (TLS) produces a consistent morphology that includes occipital flattening, an ipsilateral occipitomastoid prominence, and a m"
-      },
-      {
-        "chunk_id": 8309,
-        "question": "Is incontinence associated with menopause?",
-        "category": "Treatment",
-        "distance": -9.5185,
-        "relevance_score": 0.3173,
-        "reranker_score": -9.9109,
-        "excerpt": "To estimate (1) the prevalence of urinary incontinence in a population-based sample of Australian women aged 45-55 and to identify the factors associa"
-      },
-      {
-        "chunk_id": 4931,
-        "question": "Can a trained non-physician provider perform transrectal ultrasound-guided prostatic biopsies as effectively as an experienced urologist?",
-        "category": "Diagnosis",
-        "distance": -8.0318,
-        "relevance_score": 0.2677,
-        "reranker_score": -10.1105,
-        "excerpt": "WHAT'S KNOWN ON THE SUBJECT? AND WHAT DOES THE STUDY ADD?: PSA testing has resulted in a large number of patients being referred to urologists for inv"
-      },
-      {
-        "chunk_id": 8031,
-        "question": "Gluten-free diet: a new strategy for management of painful endometriosis related symptoms?",
-        "category": "Treatment",
-        "distance": -7.9799,
-        "relevance_score": 0.266,
-        "reranker_score": -10.6214,
-        "excerpt": "Two hundred seven patients with severe painful endometriosis-related symptoms entered the study. At enrolment time, the baseline values of painful sym"
-      },
-      {
-        "chunk_id": 6922,
-        "question": "Does tryptophan degradation along the kynurenine pathway mediate the association between pro-inflammatory immune activity and depressive symptoms?",
-        "category": "Symptoms",
-        "distance": -8.5297,
-        "relevance_score": 0.2843,
-        "reranker_score": -10.9353,
-        "excerpt": "Several studies have suggested that induced tryptophan (TRP) degradation through the kynurenine (KYN) pathway by the enzyme indoleamine 2,3-dioxygenas"
+        "distance": -14.5882,
+        "relevance_score": 0.4863,
+        "reranker_score": -10.5988,
+        "excerpt": "despite heightened rates of depression and posttraumatic stress disorder (ptsd) among in iraq/afghanistan veterans, the majority of distressed veteran"
       }
     ],
-    "latency_ms": 2387.19
+    "latency_ms": 3022.94
   },
   {
     "query_num": 10,
     "question": "Is urgent colonoscopy needed for acute diverticular bleeding?",
-    "answer_raw": "Urgent colonoscopy for acute diverticular bleeding does not seem advantageous.",
+    "answer_raw": "Urgent versus non-urgent double balloon endoscopy in patients with overt obscure gastrointestinal bleeding.",
     "disclaimer_present": true,
     "top_k": 10,
     "sources": [
       {
-        "chunk_id": 4,
-        "question": "Is early colonoscopy after admission for acute diverticular bleeding needed?",
+        "chunk_id": 85080,
+        "question": "does timing of upper endoscopy influence outcomes in patients with acute nonvariceal upper gi bleeding?",
         "category": "Symptoms",
-        "distance": -33.0684,
-        "relevance_score": 1.0,
-        "reranker_score": 8.867,
-        "excerpt": "Urgent colonoscopy has been proposed for the diagnosis and management of acute colonic diverticular bleeding. Identification of active bleeding and no"
+        "distance": -24.0258,
+        "relevance_score": 0.8009,
+        "reranker_score": 4.6429,
+        "excerpt": "current guidelines advise that upper endoscopy be performed within 24 hours of presentation in patients with acute nonvariceal upper gastrointestinal"
       },
       {
-        "chunk_id": 4665,
-        "question": "Is hospital admission urgent in stroke?",
-        "category": "Medication",
-        "distance": -21.2292,
-        "relevance_score": 0.7076,
-        "reranker_score": -1.5978,
-        "excerpt": "To review the evidence that strokes need urgent hospital admission. The need for urgent hospitalization varies with stroke type. Immediate hospital ad"
-      },
-      {
-        "chunk_id": 2348,
-        "question": "Day and night surgery: is there any influence in the patient postoperative period of urgent colorectal intervention?",
+        "chunk_id": 55492,
+        "question": "is colonoscopy with clipping useful in the diagnosis and treatment of diverticular bleeding?",
         "category": "Treatment",
-        "distance": -13.4702,
-        "relevance_score": 0.449,
-        "reranker_score": -4.5687,
-        "excerpt": "Medical activity performed outside regular work hours may increase risk for patients and professionals. There is few data with respect to urgent color"
+        "distance": -28.6941,
+        "relevance_score": 0.9565,
+        "reranker_score": 3.3997,
+        "excerpt": "diverticular bleeding is the most common cause of acute severe lower gastrointestinal bleeding (lgib) in western countries. diagnostic and therapeutic"
       },
       {
-        "chunk_id": 5388,
-        "question": "Incidental colorectal computed tomography abnormalities: would you send every patient for a colonoscopy?",
-        "category": "General",
-        "distance": -12.8201,
-        "relevance_score": 0.4273,
-        "reranker_score": -5.3562,
-        "excerpt": "The clinical significance of colorectal wall thickening (CRWT) in patients undergoing abdominal computed tomography (CT) has not yet been definitively"
-      },
-      {
-        "chunk_id": 6609,
-        "question": "Is the decline in the surgical treatment for diverticulitis associated with an increase in complicated diverticulitis?",
-        "category": "Treatment",
-        "distance": -12.3026,
-        "relevance_score": 0.4101,
-        "reranker_score": -7.0422,
-        "excerpt": "Indications for operative intervention in the treatment of diverticulitis have become unclear. We hypothesized that surgical treatment for diverticuli"
-      },
-      {
-        "chunk_id": 6477,
-        "question": "Are altered pharmacokinetics of non-steroidal anti-inflammatory drugs (NSAIDs) a risk factor for gastrointestinal bleeding?",
-        "category": "Medication",
-        "distance": -14.4008,
-        "relevance_score": 0.48,
-        "reranker_score": -7.1755,
-        "excerpt": "We hypothesised that pharmacokinetic factors might go some way to explaining the risk of major gastrointestinal haemorrhage with non-steroidal anti-in"
-      },
-      {
-        "chunk_id": 4807,
-        "question": "Is routine second-look endoscopy effective after endoscopic hemostasis in acute peptic ulcer bleeding?",
+        "chunk_id": 73824,
+        "question": "does urgent double balloon endoscopy provide higher yields than non-urgent double balloon endoscopy in overt obscure gastrointestinal bleeding?",
         "category": "Symptoms",
-        "distance": -12.7777,
-        "relevance_score": 0.4259,
-        "reranker_score": -7.2831,
-        "excerpt": "Routine second-look endoscopy in modern-era peptic ulcer bleeding (PUB) remains controversial. To assess the effectiveness of routine second-look endo"
+        "distance": -20.1832,
+        "relevance_score": 0.6728,
+        "reranker_score": 0.9928,
+        "excerpt": "in overt obscure gastrointestinal bleeding (ov), double balloon endoscopy (dbe) is recommended as one of the most important investigations as it can p"
       },
       {
-        "chunk_id": 2561,
-        "question": "Urgent aortic valve replacement in octogenarians: does an 'urgent' status increase morbidity and mortality?",
-        "category": "Prevention",
-        "distance": -12.0292,
-        "relevance_score": 0.401,
-        "reranker_score": -8.7817,
-        "excerpt": "The study aim was to investigate the influence of 'urgent' status on short and long-term mortality and morbidity in a consecutive series of octogenari"
+        "chunk_id": 14773,
+        "question": "is urgent endoscopy associated with lower mortality in high-risk but not low-risk nonvariceal upper gastrointestinal bleeding?",
+        "category": "Symptoms",
+        "distance": -18.198,
+        "relevance_score": 0.6066,
+        "reranker_score": 0.5875,
+        "excerpt": "the role of urgent endoscopy in high-risk nonvariceal upper gastrointestinal bleeding (nvugib) is unclear. the aim of this study was to determine whet"
       },
       {
-        "chunk_id": 6595,
-        "question": "The high yield of 1-year colonoscopy after resection: is it the handoff?",
+        "chunk_id": 27523,
+        "question": "do age and distal colonic findings determine the yield of advanced proximal neoplasia in chinese patients with rectal bleeding?",
+        "category": "Symptoms",
+        "distance": -16.2969,
+        "relevance_score": 0.5432,
+        "reranker_score": -4.7964,
+        "excerpt": "few data were available on the optimal diagnostic strategy for chinese patients with hematochezia. we aimed to evaluate the impact of age and distal c"
+      },
+      {
+        "chunk_id": 5415,
+        "question": "does urgent laparoscopic cholecystectomy in the management of acute cholecystitis : timing influence conversion rate?",
         "category": "Treatment",
-        "distance": -14.2257,
-        "relevance_score": 0.4742,
-        "reranker_score": -9.3199,
-        "excerpt": "This study aimed to determine the diagnostic yield of colonoscopy 1 year after colorectal cancer (CRC) resection based on whether the index colonoscop"
+        "distance": -17.424,
+        "relevance_score": 0.5808,
+        "reranker_score": -4.8913,
+        "excerpt": "the optimal treatment of acute cholecystitis is urgent laparoscopic cholecystectomy. most reports suggest that a delay of 72 or 96 h from onset of sym"
       },
       {
-        "chunk_id": 4362,
-        "question": "Is surveillance colonoscopy necessary for patients with sporadic gastric hyperplastic polyps?",
-        "category": "Prevention",
-        "distance": -12.9208,
-        "relevance_score": 0.4307,
-        "reranker_score": -10.071,
-        "excerpt": "Gastric polyps, such as adenomas and hyperplastic polyps, can be found in various colonic polyposis syndromes. Unlike in sporadic gastric adenomas, in"
+        "chunk_id": 83090,
+        "question": "is urgent capsule endoscopy useful in severe obscure-overt gastrointestinal bleeding?",
+        "category": "Treatment",
+        "distance": -18.2337,
+        "relevance_score": 0.6078,
+        "reranker_score": -5.5407,
+        "excerpt": "with capsule endoscopy (ce) it is possible to examine the entire small bowel. the present study assessed the diagnostic yield of ce in severe obscure-"
+      },
+      {
+        "chunk_id": 100739,
+        "question": "is colonoscopy the first choice for early postoperative rectal anastomotic bleeding?",
+        "category": "Treatment",
+        "distance": -16.3861,
+        "relevance_score": 0.5462,
+        "reranker_score": -5.6148,
+        "excerpt": "anastomotic bleeding is rare but is one of the dangerous complications, with associated morbidity and mortality, at the early stage of rectal cancer s"
+      },
+      {
+        "chunk_id": 192970,
+        "question": "does use of aspirin or nonsteroidal anti-inflammatory drugs increase risk for diverticulitis and diverticular bleeding?",
+        "category": "Medication",
+        "distance": -23.3145,
+        "relevance_score": 0.7771,
+        "reranker_score": -5.86,
+        "excerpt": "nonsteroidal anti-inflammatory drugs (nsaids), including aspirin, have been implicated in diverticular complications. we examined the influence of asp"
+      },
+      {
+        "chunk_id": 15031,
+        "question": "does use of a variable-stiffness colonoscope allow completion of colonoscopy after failure with the standard adult colonoscope?",
+        "category": "Treatment",
+        "distance": -16.1869,
+        "relevance_score": 0.5396,
+        "reranker_score": -7.6958,
+        "excerpt": "experts fail to reach the cecum in 2 - 10 of colonoscopies. the purpose of this case series was to evaluate the efficacy of a small-caliber, variable-"
       }
     ],
-    "latency_ms": 1974.69
+    "latency_ms": 2766.79
   }
 ]

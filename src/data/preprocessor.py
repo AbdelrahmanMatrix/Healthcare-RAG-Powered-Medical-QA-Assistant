@@ -77,7 +77,7 @@ def extract_context(context_data) -> str:
     Handles three formats:
     - List of strings (qiaojin/PubMedQA from datasets lib) — joins with space
     - Dict string ``{"contexts": [...], ...}`` (qiaojin/PubMedQA reloaded from CSV) — parses dict
-    - Pre-formatted string with 'context:' prefix (legacy llamafactory/PubMedQA) — strips prefix
+    - Pre-formatted string with 'context:' prefix (legacy format) — strips prefix
     """
     # Handle list of strings (qiaojin/PubMedQA from datasets library)
     if isinstance(context_data, list):
@@ -96,7 +96,7 @@ def extract_context(context_data) -> str:
         except (ValueError, SyntaxError, MemoryError):
             pass
 
-    # Handle pre-formatted string (legacy llamafactory/PubMedQA)
+    # Handle pre-formatted string (legacy format)
     match = re.search(r'context:\s*(.*)', text, re.IGNORECASE | re.DOTALL)
     if match:
         return match.group(1).strip()
@@ -108,7 +108,7 @@ def extract_question(question_data: str) -> str:
     
     Handles both:
     - Already clean question (qiaojin/PubMedQA) — strips only
-    - Pre-formatted with 'Question:' prefix (legacy llamafactory/PubMedQA)
+    - Pre-formatted with 'Question:' prefix (legacy format)
     """
     text = str(question_data).strip()
     match = re.search(r'Question:\s*(.*)', text, re.IGNORECASE | re.DOTALL)
@@ -142,12 +142,12 @@ def run_preprocessing_pipeline(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     log['raw_rows'] = len(df)
 
     # ── Step 1: Validate schema ──────────────────────────────────────────
-    # Support both old (llamafactory) and new (qiaojin) schemas
+    # Support both old column schema and current qiaojin/PubMedQA schema
     old_required = {'instruction', 'input', 'output'}
     new_required = {'question', 'context', 'long_answer'}
     
     if old_required.issubset(set(df.columns)):
-        # Legacy llamafactory/PubMedQA schema
+        # Legacy schema (instruction/input/output columns)
         df = df.copy()
         df['question'] = df['input'].apply(extract_question)
         df['context'] = df['instruction'].apply(extract_context)

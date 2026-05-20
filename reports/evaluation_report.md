@@ -1,6 +1,6 @@
 # RAG Evaluation Report
 **Healthcare RAG-Powered Medical Q&A Assistant**
-**Generated:** 2026-05-19 12:13:32
+**Generated:** 2026-05-20 11:18:58
 
 ---
 
@@ -18,10 +18,10 @@
 
 | Metric | RAG | Plain LLM | Improvement | KPI | Status |
 |---|---|---|---|---|---|
-| BLEU | 0.0184 | 0.0007 | +2528.6% | ≥ 20% | ✅ |
-| ROUGE-L | 0.1729 | 0.0276 | +526.4% | ≥ 0.38 | ⚠️ See note |
-| BERTScore F1 | 0.7857 | 0.6227 | +26.2% | Primary metric | ✅ |
-| Faithfulness | 12.5% | — | — | ≥ 75% | ⚠️ |
+| BLEU | 0.0115 | 0.0387 | -70.3% | ≥ 20% | ⚠️ |
+| ROUGE-L | 0.1345 | 0.2365 | -43.1% | ≥ 0.38 | ⚠️ See note |
+| BERTScore F1 | 0.7672 | 0.8044 | -4.6% | Primary metric | ✅ |
+| Faithfulness | 3.0% | — | — | ≥ 75% | ⚠️ |
 | Hallucination | 10.0% | — | — | ≤ 15% | ✅ |
 
 ## Note on ROUGE-L Target
@@ -34,10 +34,10 @@ The project KPI of ROUGE-L ≥ 0.38 could not be achieved for two reasons:
 2. **Dataset constraint:** Previous setup had 97.95% of data in FAISS with no clean holdout.
    This version uses a 1,000-row holdout excluded from FAISS (resolved in NB05).
 
-**Supplementary metric:** BERTScore F1 = 0.7857 confirms semantic alignment
+**Supplementary metric:** BERTScore F1 = 0.7672 confirms semantic alignment
 between generated and reference answers.
 
-**RAG vs baseline:** ROUGE-L improvement of 526.4% over plain LLM confirms
+**RAG vs baseline:** ROUGE-L improvement of -43.1% over plain LLM confirms
 retrieval is contributing meaningfully.
 
 ---

@@ -67,13 +67,13 @@ FastAPI (api/main.py)
     ▼
 api/routes/query.py  →  run_pipeline (src/pipeline.py)
     │
-    ├─▶ DistilBERT Classifier (src/classification/classifier.py)
+    ├─▶ BioBERT Classifier (src/classification/classifier.py)
     │       └─ Downloads weights from HuggingFace Hub on first request
-    │          (huggingface.co/AbdooMatrix/distilbert-medical-classifier)
+    │          (huggingface.co/AbdooMatrix/biobert-medical-classifier)
     │
     ├─▶ FAISS Vector Store (src/rag/vectorstore.py)
     │       └─ data/embeddings/faiss_index/pubmedqa_index_flatl2.faiss
-    │          (10,000 vectors, all-MiniLM-L6-v2 embeddings)
+    │          (~211K vectors, S-PubMedBert-MS-MARCO embeddings)
     │
     ├─▶ BM25 Retriever (src/rag/bm25_retriever.py)  [hybrid retrieval]
     │
@@ -104,7 +104,7 @@ Azure App Service (Free Tier F1, Linux)
 |---|---|---|
 | `WEBSITE_PORT` | `8000` | Port FastAPI listens on |
 | `PYTHONUNBUFFERED` | `1` | Real-time stdout logs in Azure |
-| `HF_TOKEN` | `hf_xxx...` | Downloads DistilBERT classifier weights from HuggingFace |
+| `HF_TOKEN` | `hf_xxx...` | Downloads BioBERT classifier weights from HuggingFace |
 | `GROQ_API_KEY` | `gsk_xxx...` | LLM generation via Groq API (llama-3.1-8b-instant) |
 | `DEPLOY_ENV` | `Azure App Service F1` | Shown in Streamlit dashboard |
 | `DEPLOY_DATE` | `May 2026` | Shown in Streamlit dashboard |

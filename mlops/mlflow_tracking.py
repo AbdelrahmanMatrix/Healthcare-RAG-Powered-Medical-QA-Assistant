@@ -24,20 +24,20 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 # 5+ variations required by M4 KPI 1
 EXPERIMENT_CONFIGS = [
     # (name, top_k, inject_k, max_context_words, embedding_model)
-    {"name": "baseline_topk5", "top_k": 5, "inject_k": 3, "max_context_words": 200,
+    {"name": "pubmedbert_topk10_inject3", "top_k": 10, "inject_k": 3, "max_context_words": 200,
+     "embedding_model": "pritamdeka/S-PubMedBert-MS-MARCO"},
+    {"name": "pubmedbert_topk5_inject3", "top_k": 5, "inject_k": 3, "max_context_words": 200,
+     "embedding_model": "pritamdeka/S-PubMedBert-MS-MARCO"},
+    {"name": "pubmedbert_topk10_inject5", "top_k": 10, "inject_k": 5, "max_context_words": 300,
+     "embedding_model": "pritamdeka/S-PubMedBert-MS-MARCO"},
+    {"name": "baseline_miniLM_topk5", "top_k": 5, "inject_k": 3, "max_context_words": 200,
      "embedding_model": "sentence-transformers/all-MiniLM-L6-v2"},
-    {"name": "topk3_tighter", "top_k": 3, "inject_k": 3, "max_context_words": 200,
-     "embedding_model": "sentence-transformers/all-MiniLM-L6-v2"},
-    {"name": "topk5_more_context", "top_k": 5, "inject_k": 5, "max_context_words": 300,
-     "embedding_model": "sentence-transformers/all-MiniLM-L6-v2"},
-    {"name": "topk7_wide", "top_k": 7, "inject_k": 3, "max_context_words": 200,
-     "embedding_model": "sentence-transformers/all-MiniLM-L6-v2"},
-    {"name": "inject5_wide_context", "top_k": 7, "inject_k": 5, "max_context_words": 350,
+    {"name": "baseline_miniLM_topk10", "top_k": 10, "inject_k": 3, "max_context_words": 200,
      "embedding_model": "sentence-transformers/all-MiniLM-L6-v2"},
 ]
 
 EVAL_REPORT_PATH = PROJECT_ROOT / "reports" / "rag_evaluation_results.csv"
-CLASSIFIER_PATH = PROJECT_ROOT / "models" / "classifier" / "distilbert_classifier"
+CLASSIFIER_PATH = PROJECT_ROOT / "models" / "classifier" / "biobert_classifier"
 
 
 def _load_eval_metrics() -> dict:
@@ -161,7 +161,7 @@ def run_experiment(config: dict, base_metrics: dict, clf_metrics: dict) -> str:
             with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as tmp:
                 tmp.write(f"RAG experiment: {config['name']}\n")
                 tmp.write("Classifier weights not available locally.\n")
-                tmp.write("Download from HuggingFace: AbdoMatrix/distilbert-medical-classifier\n")
+                tmp.write("Download from HuggingFace: AbdooMatrix/biobert-medical-classifier\n")
                 tmp_path = tmp.name
             mlflow.log_artifact(tmp_path, artifact_path="model")
             os.unlink(tmp_path)
@@ -212,7 +212,7 @@ def register_best_model(run_ids: list[str], experiment_name: str) -> None:
 
     # Tag the best run as production
     client.set_tag(best_run_id, "stage", "production")
-    client.set_tag(best_run_id, "model_type", "distilbert-medical-classifier")
+    client.set_tag(best_run_id, "model_type", "biobert-medical-classifier")
 
     # Write model_selection.md
     selection_path = PROJECT_ROOT / "reports" / "model_selection.md"

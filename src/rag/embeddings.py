@@ -1,6 +1,6 @@
 """
 Embedding utilities for the RAG pipeline.
-Upgraded from all-MiniLM-L6-v2 (general-purpose) to
+Domain-specific biomedical embedding model (upgraded from all-MiniLM-L6-v2); now:
 pritamdeka/S-PubMedBert-MS-MARCO (biomedical domain).
 """
 import numpy as np

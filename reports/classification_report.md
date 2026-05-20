@@ -14,24 +14,24 @@
 ## Test Set Results
               precision    recall  f1-score   support
 
-   Diagnosis       0.87      0.86      0.86       184
-     General       0.88      0.90      0.89       135
-  Medication       0.86      0.89      0.87       149
-  Prevention       0.79      0.90      0.84       115
-    Symptoms       0.82      0.83      0.83        54
-   Treatment       0.93      0.88      0.90       363
+   Diagnosis       0.90      0.91      0.91      3192
+     General       0.80      0.97      0.88      2825
+  Medication       0.96      0.88      0.92      7154
+  Prevention       0.92      0.91      0.91      2218
+    Symptoms       0.93      0.89      0.91       872
+   Treatment       0.91      0.91      0.91      4858
 
-    accuracy                           0.88      1000
-   macro avg       0.86      0.87      0.87      1000
-weighted avg       0.88      0.88      0.88      1000
+    accuracy                           0.91     21119
+   macro avg       0.90      0.91      0.91     21119
+weighted avg       0.91      0.91      0.91     21119
 
 
 ## Key Metrics
 | Metric | Value |
 |---|---|
-| Macro F1 | 0.8660 |
-| Weighted F1 | 0.8786 |
-| Accuracy | 0.8780 |
+| Macro F1 | 0.9066 |
+| Weighted F1 | 0.9094 |
+| Accuracy | 0.9088 |
 | KPI (Macro F1 ≥ 0.78) | ✅ MET |
 
 ## Label Mapping

@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     HF_CLASSIFIER_REPO: str = "AbdoMatrix/biobert-medical-classifier"
 
     # ── Embedding model ────────────────────────────────────────────────────
-    # Upgraded from all-MiniLM-L6-v2 (general-purpose) to PubMed-domain model.
+    # PubMed-domain biomedical embedding model (superior to general-purpose all-MiniLM-L6-v2).
     EMBEDDING_MODEL: str = "pritamdeka/S-PubMedBert-MS-MARCO"
 
     # ── LLM ───────────────────────────────────────────────────────────────
