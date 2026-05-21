@@ -13,12 +13,11 @@ Run:
 
 import json
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 import streamlit as st
 
 # ── Page config ──────────────────────────────────────────────────────────────
@@ -32,8 +31,9 @@ st.set_page_config(
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 # Load deployment config from environment (set in .env)
-DEPLOY_ENV  = os.getenv("DEPLOY_ENV", "local")
+DEPLOY_ENV = os.getenv("DEPLOY_ENV", "local")
 DEPLOY_DATE = os.getenv("DEPLOY_DATE", "—")
+
 
 # ── Helpers to load real data ─────────────────────────────────────────────────
 

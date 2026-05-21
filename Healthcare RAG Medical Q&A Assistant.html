@@ -336,7 +336,7 @@
         <span class="badge">🎓 eyouth × DEPI</span>
         <span class="badge">🧠 Machine Learning</span>
         <span class="badge">☁️ Azure Deployed</span>
-        <span class="badge">📊 10,000 Medical Q&As</span>
+        <span class="badge">📊 211,000 Medical Q&As</span>
     </div>
 </div>
 
@@ -372,7 +372,7 @@
 
         <table>
             <tr><th>What It Does</th><th>Why It Matters</th></tr>
-            <tr><td>Reads 10,000 real medical Q&As from PubMed</td><td>Uses trusted, peer-reviewed medical knowledge</td></tr>
+            <tr><td>Reads 211,000 real medical Q&As from PubMed</td><td>Uses trusted, peer-reviewed medical knowledge</td></tr>
             <tr><td>Understands your question</td><td>Figures out if you're asking about symptoms, treatment, medication, etc.</td></tr>
             <tr><td>Finds the most relevant medical evidence</td><td>Like a doctor looking up the right textbook page</td></tr>
             <tr><td>Generates a clear answer</td><td>Summarises complex medical text into a readable response</td></tr>
@@ -398,7 +398,7 @@
                         ▼
             ┌───────────────────────┐
             │   🏷️ CLASSIFIER       │  "This is a Symptoms question"
-            │   (DistilBERT model)  │
+            │   (BioBERT model)     │
             └───────────┬───────────┘
                         │
                         ▼
@@ -435,7 +435,7 @@
     <div class="section" id="s3">
         <h2><span class="num">03</span> The Dataset — Where Medical Knowledge Comes From</h2>
 
-        <p>Every AI system needs data to learn from. Ours uses <strong>PubMedQA</strong> — a dataset of 10,000 real medical questions and answers derived from PubMed, the world's largest database of biomedical research.</p>
+        <p>Every AI system needs data to learn from. Ours uses <strong>PubMedQA</strong> — a dataset of 211,000 real medical questions and answers derived from PubMed (pqa_artificial subset), the world's largest database of biomedical research.</p>
 
         <h3>What's In Each Row?</h3>
 
@@ -465,7 +465,7 @@
 
         <div class="analogy">
             <div class="label">📚 Analogy</div>
-            <p>Think of the dataset as a <strong>medical encyclopedia with 10,000 entries</strong>. Each entry has a question someone asked, the research paper that answers it, and a short conclusion. Our AI learns to search this encyclopedia and summarise answers.</p>
+            <p>Think of the dataset as a <strong>medical encyclopedia with 211,000 entries</strong>. Each entry has a question someone asked, the research paper that answers it, and a short conclusion. Our AI learns to search this encyclopedia and summarise answers.</p>
         </div>
 
         <h3>The 6 Medical Categories</h3>
@@ -501,7 +501,7 @@
         </table>
 
         <div class="flow">
-            <span class="step">Raw Data (10,000 rows)</span>
+            <span class="step">Raw Data (211,000 rows)</span>
             <span class="arrow">→</span>
             <span class="step">Strip HTML</span>
             <span class="arrow">→</span>
@@ -511,7 +511,7 @@
             <span class="arrow">→</span>
             <span class="step">Deduplicate</span>
             <span class="arrow">→</span>
-            <span class="step">Clean Data (~9,990 rows)</span>
+            <span class="step">Clean Data (~210,500 rows)</span>
         </div>
 
         <div class="analogy">
@@ -521,7 +521,7 @@
 
         <div class="highlight blue">
             <div class="title">🔧 Technical Detail</div>
-            <p>This step is handled by <code>src/data/preprocessor.py</code> and Notebook 02. The cleaning function processes all 10,000 rows and logs exactly how many rows were removed at each step — for reproducibility and transparency.</p>
+            <p>This step is handled by <code>src/data/preprocessor.py</code> and Notebook 02. The cleaning function processes all 211,000 rows and logs exactly how many rows were removed at each step — for reproducibility and transparency.</p>
         </div>
     </div>
     <!-- ═══════════════════ SECTION 5 ═══════════════════ -->
@@ -572,16 +572,16 @@
                     ▼
         ┌─────────────────────┐
         │  Embedding Model    │
-        │  (all-MiniLM-L6-v2) │
+        │  (S-PubMedBert-MS-MARCO) │
         └─────────┬───────────┘
                     │
                     ▼
     [0.23, -0.41, 0.87, 0.12, ..., -0.33]
-    ← ─ ─ ─ ─  384 numbers  ─ ─ ─ ─ →
+    ← ─ ─ ─ ─  768 numbers  ─ ─ ─ ─ →
             </code></pre>
         </div>
 
-        <p>Each piece of text becomes a list of <strong>384 numbers</strong>. The magic is that:</p>
+        <p>Each piece of text becomes a list of <strong>768 numbers</strong>. The magic is that:</p>
 
         <table>
             <tr><th>Text A</th><th>Text B</th><th>Numbers Are...</th></tr>
@@ -591,14 +591,14 @@
 
         <div class="analogy">
             <div class="label">📍 Analogy</div>
-            <p>Think of it like GPS coordinates. Every city has coordinates (latitude, longitude). Cities that are <em>near each other</em> have <em>similar coordinates</em>. Embeddings are like GPS coordinates for meaning — sentences with similar meaning have similar coordinates in a 384-dimensional space.</p>
+            <p>Think of it like GPS coordinates. Every city has coordinates (latitude, longitude). Cities that are <em>near each other</em> have <em>similar coordinates</em>. Embeddings are like GPS coordinates for meaning — sentences with similar meaning have similar coordinates in a 768-dimensional space.</p>
         </div>
 
-        <p>We convert all 10,000 medical Q&A pairs into embeddings. Each one becomes a 384-number vector. Now we can mathematically measure how "similar" any two pieces of medical text are.</p>
+        <p>We convert all 211,000 medical Q&A pairs into embeddings. Each one becomes a 768-number vector. Now we can mathematically measure how "similar" any two pieces of medical text are.</p>
 
         <div class="highlight blue">
             <div class="title">🔧 Technical Detail</div>
-            <p>We use the model <code>sentence-transformers/all-MiniLM-L6-v2</code>. It's small (80MB), fast, and specifically trained to produce good embeddings. Each text chunk combines question + context + answer for maximum signal.</p>
+            <p>We use the model <code>pritamdeka/S-PubMedBert-MS-MARCO</code> — a PubMedBERT model fine-tuned on biomedical text. It captures medical terminology significantly better than general-purpose models. Each text chunk combines question + context + answer into a 768-dimensional vector for maximum signal. We also add a <strong>CrossEncoder reranker</strong> that re-scores the FAISS results to pick the most relevant passages.</p>
         </div>
     </div>
 
@@ -617,12 +617,12 @@
     Your question: "What causes high blood pressure?"
                             │
                             ▼
-                   Convert to 384 numbers
+                   Convert to 768 numbers
                             │
                             ▼
             ┌──────────────────────────────┐
             │     FAISS Index              │
-            │     (10,000 vectors stored)  │
+            │     (211,000 vectors stored) │
             │                              │
             │  🔍 Find 5 closest vectors   │
             │     using L2 distance        │
@@ -637,7 +637,7 @@
 
         <div class="analogy">
             <div class="label">🗺️ Analogy</div>
-            <p>Imagine you're at a party and you want to find people with similar interests. FAISS is like an app that instantly tells you "these 5 people in the room are most similar to you" — but instead of hobbies, it matches medical topics, and instead of a room, it searches 10,000 entries in under 1 millisecond.</p>
+            <p>Imagine you're at a party and you want to find people with similar interests. FAISS is like an app that instantly tells you "these 5 people in the room are most similar to you" — but instead of hobbies, it matches medical topics, and instead of a room, it searches 211,000 entries in under 1 millisecond.</p>
         </div>
 
         <div class="highlight green">
@@ -652,7 +652,7 @@
 
         <p>We've found the relevant medical passages. Now we need something to <strong>read them and write a clear answer</strong>. That's the job of the Language Model (LLM).</p>
 
-        <p>We use <strong>Google's flan-t5-base</strong> — a model trained to follow instructions and generate text. Think of it as the "writer" in our system.</p>
+        <p>We use <strong>a large language model via the Groq API</strong> (meta-llama/llama-4-scout-17b) — a fast, cloud-based model trained to follow instructions and generate text. If Groq is unavailable, the system falls back to <strong>Google's flan-t5-base</strong> which runs locally on your computer. Think of the LLM as the "writer" in our system.</p>
 
         <h3>What Happens Inside</h3>
 
@@ -674,8 +674,13 @@
     │ Question: What are symptoms of diabetes?    │
     └────────────────────────────────────────────┘
                         │
+                        │
                         ▼
-                  flan-t5-base
+              ┌───────────────────┐
+              │  Groq API (cloud) │
+              │ ─or─ fallback ─   │
+              │flan-t5-base (local)│
+              └───────────────────┘
                         │
                         ▼
     OUTPUT:
@@ -685,19 +690,19 @@
             </code></pre>
         </div>
 
-        <h3>Why flan-t5-base?</h3>
+        <h3>Why These Models?</h3>
 
         <table>
             <tr><th>Reason</th><th>Explanation</th></tr>
-            <tr><td>Free</td><td>No API key, no costs, no rate limits</td></tr>
-            <tr><td>Local</td><td>Runs on your computer — works offline, no data sent to cloud</td></tr>
-            <tr><td>Instruction-tuned</td><td>Specifically trained to follow prompts like "answer this question"</td></tr>
-            <tr><td>Reproducible</td><td>Anyone can download and run it — same results every time</td></tr>
+            <tr><td>Groq API (primary)</td><td>Cloud-based LLaMA 4 Scout (17B params) — fast, high-quality, requires GROQ_API_KEY</td></tr>
+            <tr><td>flan-t5-base (fallback)</td><td>Free, local, no API key needed — runs offline on your computer</td></tr>
+            <tr><td>Instruction-tuned</td><td>Both models are trained to follow prompts like "answer this question based on the evidence"</td></tr>
+            <tr><td>Reproducible</td><td>Same inputs produce consistent outputs — important for medical applications</td></tr>
         </table>
 
         <div class="highlight orange">
             <div class="title">⚠️ Important Limitation</div>
-            <p>flan-t5-base is a small model (250M parameters). It won't write essays or handle complex reasoning like GPT-4. But for our task — summarising medical passages into short answers — it works well. Think of it as a specialist, not a generalist.</p>
+            <p>The Groq LLaMA model is significantly more capable than a small local model. When Groq is unavailable, flan-t5-base (250M parameters) handles the task adequately — summarising medical passages into short answers. Both models are instructed to stay grounded in the retrieved evidence and never make up facts.</p>
         </div>
     </div>
     <!-- ═══════════════════ SECTION 9 ═══════════════════ -->
@@ -763,7 +768,7 @@
         <div class="diagram">
             <pre><code>
     WITHOUT Classifier:
-    "Side effects of aspirin?" → Search ALL 10,000 entries
+    "Side effects of aspirin?" → Search ALL 211,000 entries
                                   (might return surgery results)
 
     WITH Classifier:
@@ -773,13 +778,13 @@
             </code></pre>
         </div>
 
-        <h3>The DistilBERT Model</h3>
+        <h3>The BioBERT Model</h3>
 
-        <p>We use <strong>DistilBERT</strong> — a smaller, faster version of Google's BERT model. We "fine-tune" it on our 10,000 labelled questions so it learns to classify medical queries.</p>
+        <p>We use <strong>BioBERT</strong> — a version of Google's BERT model that was pre-trained on PubMed medical abstracts and PMC full-text articles. This gives it much better understanding of medical terminology than a general-purpose model. We "fine-tune" it on our 211,000 labelled questions so it learns to classify medical queries into the 6 categories.</p>
 
         <table>
             <tr><th>Term</th><th>What It Means</th></tr>
-            <tr><td>DistilBERT</td><td>A pre-trained language model that already understands English — like a medical student who already knows grammar</td></tr>
+            <tr><td>BioBERT</td><td>A BERT model pre-trained on PubMed medical abstracts — like a medical student who already understands medical terminology</td></tr>
             <tr><td>Fine-tuning</td><td>Teaching it our specific task (6 medical categories) — like that student specialising in medical triage</td></tr>
             <tr><td>80/10/10 split</td><td>80% of data for training, 10% for validation (tuning), 10% for final testing</td></tr>
             <tr><td>Macro F1 ≥ 78%</td><td>Our accuracy target — the model must correctly classify at least 78% of questions across all categories equally</td></tr>
@@ -803,7 +808,7 @@
      │
      │  ① CLASSIFY
      ▼
-    DistilBERT says: "Medication" (confidence: 94%)
+    BioBERT says: "Medication" (confidence: 94%)
      │
      │  ② SEARCH (category-boosted)
      ▼
@@ -830,7 +835,7 @@
 
         <h3>Why Category Routing Matters</h3>
 
-        <p>Without routing, FAISS searches ALL 10,000 entries equally. With routing:</p>
+        <p>Without routing, FAISS searches ALL 211,000 entries equally. With routing:</p>
 
         <table>
             <tr><th>Step</th><th>What Happens</th><th>Benefit</th></tr>
@@ -1026,10 +1031,11 @@
             <tr><td><strong>LLM (Large Language Model)</strong></td><td>An AI trained on massive amounts of text that can read, understand, and generate human language</td></tr>
             <tr><td><strong>RAG (Retrieval-Augmented Generation)</strong></td><td>A technique where the AI searches for relevant information first, then generates an answer based on what it found — reducing hallucination</td></tr>
             <tr><td><strong>Embedding</strong></td><td>Converting text into a list of numbers that capture its meaning — similar texts get similar numbers</td></tr>
-            <tr><td><strong>Vector</strong></td><td>A list of numbers — in our case, 384 numbers representing the meaning of a piece of text</td></tr>
+            <tr><td><strong>Vector</strong></td><td>A list of numbers — in our case, 768 numbers representing the meaning of a piece of text</td></tr>
             <tr><td><strong>FAISS</strong></td><td>Facebook AI Similarity Search — a tool that can find the most similar vectors out of millions in milliseconds</td></tr>
             <tr><td><strong>Fine-tuning</strong></td><td>Taking a pre-trained AI model and teaching it a specific new task with your own data</td></tr>
-            <tr><td><strong>DistilBERT</strong></td><td>A smaller, faster version of Google's BERT model — understands English text and can classify it</td></tr>
+            <tr><td><strong>BioBERT</strong></td><td>A BERT model pre-trained on PubMed medical abstracts and PMC articles — excels at understanding medical terminology</td></tr>
+            <tr><td><strong>DistilBERT</strong></td><td>A smaller, faster version of Google's BERT model — used as a fallback classifier if BioBERT loading fails</td></tr>
             <tr><td><strong>flan-t5</strong></td><td>Google's instruction-following language model — reads a prompt and generates a response</td></tr>
             <tr><td><strong>Hallucination</strong></td><td>When an AI generates information that sounds real but is actually made up — a major risk in healthcare</td></tr>
             <tr><td><strong>BLEU Score</strong></td><td>A metric that measures how closely generated text matches a reference text — originally from translation research</td></tr>
@@ -1056,7 +1062,7 @@
         </p>
         <p style="margin-top: 8px; font-size: 0.85em;">
             <a href="https://github.com/AbdooMatrix/Healthcare-RAG-Powered-Medical-QA-Assistant" style="color: var(--primary); text-decoration: none;">GitHub</a> ·
-            <a href="https://huggingface.co/AbdoMatrix/distilbert-medical-classifier" style="color: var(--primary); text-decoration: none;">HuggingFace Model</a>
+            <a href="https://huggingface.co/AbdooMatrix/biobert-medical-classifier" style="color: var(--primary); text-decoration: none;">HuggingFace Model</a>
         </p>
     </div>
 

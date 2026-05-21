@@ -20,8 +20,8 @@ test-api:      ## Run API tests only (fast, no models needed)
 run:           ## Start FastAPI with hot-reload
 	uvicorn api.main:app --reload --host 0.0.0.0 --port $(API_PORT)
 
-lint:          ## Run flake8 style check
-	flake8 src/ api/ scripts/ mlops/ --max-line-length 120 --exclude __pycache__
+lint:          ## Run flake8 style check (matches CI scope)
+	flake8 src/ api/ config/ scripts/ mlops/ tests/ dashboard/ --max-line-length 120 --exclude __pycache__
 
 docker-build:  ## Build Docker image
 	docker build -f docker/Dockerfile -t $(APP_NAME):latest .
