@@ -10,12 +10,12 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 class Settings(BaseSettings):
     # Paths (relative to repo root)
-    FAISS_INDEX_PATH: str  = "data/embeddings/faiss_index/pubmedqa_index_flatl2.faiss"
-    CHUNKS_PKL_PATH: str   = "data/embeddings/faiss_index/chunk_mapping.pkl"
+    FAISS_INDEX_PATH: str = "data/embeddings/faiss_index/pubmedqa_index_flatl2.faiss"
+    CHUNKS_PKL_PATH: str = "data/embeddings/faiss_index/chunk_mapping.pkl"
     EVAL_HOLDOUT_PATH: str = "data/processed/eval_holdout.csv"
 
     # Classifier — upgraded from DistilBERT → BioBERT
-    CLASSIFIER_PATH: str    = "models/classifier/biobert_classifier"
+    CLASSIFIER_PATH: str = "models/classifier/biobert_classifier"
     HF_CLASSIFIER_REPO: str = "AbdoMatrix/biobert-medical-classifier"
 
     # ── Embedding model ────────────────────────────────────────────────────
@@ -23,26 +23,26 @@ class Settings(BaseSettings):
     EMBEDDING_MODEL: str = "pritamdeka/S-PubMedBert-MS-MARCO"
 
     # ── LLM ───────────────────────────────────────────────────────────────
-    LLM_MODEL: str    = "meta-llama/llama-4-scout-17b-16e-instruct"
+    LLM_MODEL: str = "meta-llama/llama-4-scout-17b-16e-instruct"
     LLM_BASE_URL: str = "https://api.groq.com/openai/v1"
 
     # ── Reranker ──────────────────────────────────────────────────────────
-    USE_RERANKER: bool  = True
+    USE_RERANKER: bool = True
     RERANKER_MODEL: str = "cross-encoder/ms-marco-MiniLM-L-12-v2"
 
     # ── Pipeline behaviour ─────────────────────────────────────────────────
-    TOP_K: int    = 20
+    TOP_K: int = 20
     INJECT_K: int = 5
     MAX_TOKENS: int = 512
     BM25_THRESHOLD: float = 5.0
 
     # ── API ───────────────────────────────────────────────────────────────
     CORS_ORIGINS: list = ["*"]
-    API_KEY: str       = ""
-    GROQ_API_KEY: str  = ""
+    API_KEY: str = ""
+    GROQ_API_KEY: str = ""
 
     # ── Deployment ────────────────────────────────────────────────────────
-    DEPLOY_ENV: str  = "local"
+    DEPLOY_ENV: str = "local"
     DEPLOY_DATE: str = ""
 
     disclaimer: str = (

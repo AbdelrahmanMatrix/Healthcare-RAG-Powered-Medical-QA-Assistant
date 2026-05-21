@@ -23,9 +23,9 @@ import os
 from pathlib import Path
 
 # ── Config ────────────────────────────────────────────────────────────────────
-PROJECT_ROOT       = Path(__file__).resolve().parent.parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 DEFAULT_LOCAL_PATH = PROJECT_ROOT / "models" / "classifier" / "biobert_classifier"
-HF_REPO_ID         = "AbdooMatrix/biobert-medical-classifier"
+HF_REPO_ID = "AbdooMatrix/biobert-medical-classifier"
 
 # Fallback to DistilBERT repo if BioBERT weights not yet uploaded
 HF_REPO_ID_FALLBACK = "AbdooMatrix/distilbert-medical-classifier"
@@ -65,11 +65,11 @@ class MedicalClassifier:
 
         try:
             self.tokenizer = AutoTokenizer.from_pretrained(source)
-            self.model     = AutoModelForSequenceClassification.from_pretrained(source)
+            self.model = AutoModelForSequenceClassification.from_pretrained(source)
         except Exception:
             print(f"⚠️  BioBERT repo not found, falling back to: {HF_REPO_ID_FALLBACK}")
             self.tokenizer = AutoTokenizer.from_pretrained(HF_REPO_ID_FALLBACK)
-            self.model     = AutoModelForSequenceClassification.from_pretrained(HF_REPO_ID_FALLBACK)
+            self.model = AutoModelForSequenceClassification.from_pretrained(HF_REPO_ID_FALLBACK)
 
         self.model.to(self.device)
         self.model.eval()
@@ -110,11 +110,11 @@ class MedicalClassifier:
         with torch.no_grad():
             outputs = self.model(**inputs)
 
-        probs   = torch.softmax(outputs.logits, dim=1)[0]
+        probs = torch.softmax(outputs.logits, dim=1)[0]
         pred_id = torch.argmax(probs).item()
 
         return {
-            "category":   self.id2label[pred_id],
+            "category": self.id2label[pred_id],
             "confidence": float(probs[pred_id]),
             "all_scores": {
                 self.id2label[i]: float(probs[i])

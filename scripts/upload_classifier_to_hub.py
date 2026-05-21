@@ -10,12 +10,12 @@ from pathlib import Path
 from huggingface_hub import HfApi, create_repo
 
 # Updated: BioBERT classifier repo
-HF_REPO_ID  = "AbdoMatrix/biobert-medical-classifier"
-LOCAL_PATH  = Path("models/classifier/biobert_classifier")
+HF_REPO_ID = "AbdoMatrix/biobert-medical-classifier"
+LOCAL_PATH = Path("models/classifier/biobert_classifier")
 
 # Fallback: if you trained DistilBERT and haven't retrained with BioBERT yet
 DISTILBERT_LOCAL_PATH = Path("models/classifier/distilbert_classifier")
-DISTILBERT_HF_REPO    = "AbdoMatrix/distilbert-medical-classifier"
+DISTILBERT_HF_REPO = "AbdoMatrix/distilbert-medical-classifier"
 
 
 def upload_model(local_path: Path, hf_repo_id: str):

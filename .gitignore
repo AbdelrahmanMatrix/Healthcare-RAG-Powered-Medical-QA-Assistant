@@ -24,7 +24,7 @@ ENV/
 .env.*
 !.env.example
 
-# ─── Model Weights (ALL classifiers - SAFE FOR RAG PROJECTS) ─────────────────
+# ─── Model Weights (ALL classifiers) ─────────────────────────────────────────
 models/classifier/**/
 !models/classifier/**/config.json
 !models/classifier/**/tokenizer_config.json
@@ -62,6 +62,7 @@ data/embeddings/faiss_index/
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+nul
 
 # ─── Logs & Temp Files ────────────────────────────────────────────────────────
 *.log
@@ -86,7 +87,3 @@ htmlcov/
 .cache/
 huggingface/
 **/.cache/
-/data
-data/processed/pubmedqa_labelled.csv
-data/processed/pubmedqa_labelled.csv
-/data/processed

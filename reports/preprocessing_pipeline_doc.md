@@ -17,8 +17,8 @@ This document describes the complete end-to-end M1 pipeline:
 |------|----------------------------------|--------------------------------------------------|-----------|
 | 1    | 01_data_loading.ipynb            | `data/raw/pubmedqa_raw.csv`                      | 211,269 rows loaded (qiaojin/PubMedQA pqa_artificial) |
 | 2    | 02_preprocessing.ipynb           | `data/processed/pubmedqa_cleaned.csv`            | Cleaned + normalised |
-| 3    | 8-Category_Labeling.ipynb        | `data/processed/pubmedqa_cleaned_Labeled.csv`    | 6 categories added |
-| 4    | 03_eda.ipynb                     | `reports/eda_report.md`                          | Full EDA + visuals |
+| 3    | 03_category_labelling.ipynb     | `data/processed/pubmedqa_labelled.csv`           | 6 categories added |
+| 4    | 04_eda.ipynb                     | `reports/eda_report.md`                          | Full EDA + visuals |
 
 ## 3. Category Distribution (Final)
 - Symptoms: 3767 (~37.7%)
@@ -52,5 +52,5 @@ pip install -r requirements.txt
 # Run notebooks in order
 jupyter notebook notebooks/01_data_loading.ipynb
 jupyter notebook notebooks/02_preprocessing.ipynb
-jupyter notebook notebooks/8-Category_Labeling.ipynb
-jupyter notebook notebooks/03_eda.ipynb
+jupyter notebook notebooks/03_category_labelling.ipynb
+jupyter notebook notebooks/04_eda.ipynb

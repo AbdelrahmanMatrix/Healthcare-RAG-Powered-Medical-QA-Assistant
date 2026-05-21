@@ -1,221 +1,141 @@
 """
-Text cleaning & normalisation pipeline for PubMedQA dataset (qiaojin/PubMedQA).
+Text preprocessing utilities for the Healthcare RAG pipeline.
 
-The raw dataset has these columns:
-- pubid: int32
-- question: string (already clean)
-- context: list of strings (PubMed abstract snippets)
-- long_answer: string (detailed answer)
-- final_decision: string (yes/no/maybe)
+Transforms raw PubMedQA data into cleaned, normalised text ready for
+embedding generation and category labelling.
 
-Steps applied (in order):
-1. Validate schema (expect question, context, long_answer)
-2. Extract clean columns (join context list, use question/long_answer directly)
-3. Clean text (HTML, special chars, whitespace, lowercase)
-4. Remove rows with missing question or answer
-5. Remove non-English rows (langdetect)
-6. Remove exact duplicate rows
-
-Usage:
-    from src.data.preprocessor import run_preprocessing_pipeline
-    df_clean, log = run_preprocessing_pipeline(df_raw)
+Public API:
+    clean_text(text)        → str  (lowercase, remove HTML, collapse spaces)
+    extract_question(text)  → str  (extract question from PubMedQA format)
+    extract_context(text)   → str  (extract context from PubMedQA format)
 """
 
-import ast
 import re
-import pandas as pd
-from langdetect import detect, LangDetectException
+import ast
+
+# ── Patterns ──────────────────────────────────────────────────────────────────
+_HTML_TAG_RE = re.compile(r"<[^>]+>")
+_MULTISPACE_RE = re.compile(r"\s+")
+_NON_ASCII_RE = re.compile(r"[^\x00-\x7F]+")
+
+# PubMedQA context comes as a dict-string with a "contexts" key (list of sentences)
+_CONTEXTS_PATTERN = re.compile(r"['\"]contexts['\"]\s*:\s*\[([^\]]+)\]", re.DOTALL)
 
 
-# ── Individual cleaning functions ────────────────────────────────────────────
-
-def strip_html(text: str) -> str:
-    """Remove HTML tags."""
-    return re.sub(r'<[^>]+>', '', str(text))
-
-
-def remove_special_chars(text: str) -> str:
-    """Remove characters that aren't alphanumeric, spaces, or basic punctuation."""
-    return re.sub(r'[^a-zA-Z0-9\s.,;:?!\-\'\"()/]', '', str(text))
-
-
-def collapse_whitespace(text: str) -> str:
-    """Replace multiple spaces/newlines with a single space."""
-    return re.sub(r'\s+', ' ', str(text))
-
-
-def clean_text(text: str) -> str:
+def clean_text(text: str, remove_non_ascii: bool = False) -> str:
     """
-    Full cleaning pipeline for a single text string.
-    Order matters: HTML → special chars → whitespace → lowercase → strip.
+    Normalise text for embedding generation.
+
+    Steps:
+      1. Lowercase
+      2. Strip HTML tags
+      3. Collapse multiple spaces / newlines into single space
+      4. Strip leading/trailing whitespace
+      5. Optionally remove non-ASCII characters
+
+    Args:
+        text: Raw input string.
+        remove_non_ascii: If True, strips characters outside ASCII range
+                          (useful for keyword-based methods like BM25).
+
+    Returns:
+        Cleaned, normalised string.
     """
-    text = strip_html(text)
-    text = remove_special_chars(text)
-    text = collapse_whitespace(text)
+    if not text or not isinstance(text, str):
+        return ""
+
     text = text.lower()
+    text = _HTML_TAG_RE.sub(" ", text)
+    text = _MULTISPACE_RE.sub(" ", text).strip()
+
+    if remove_non_ascii:
+        text = _NON_ASCII_RE.sub("", text).strip()
+
+    return text
+
+
+def extract_question(text: str) -> str:
+    """
+    Extract a question from a raw PubMedQA record.
+
+    Handles:
+      - Plain question strings
+      - "Question: ..." prefixed formats (from CSV re-exports)
+      - Dict-string formats that embed question fields
+
+    Args:
+        text: Raw text that may contain a question.
+
+    Returns:
+        Cleaned question string, or empty string if no question found.
+    """
+    if not text or not isinstance(text, str):
+        return ""
+
     text = text.strip()
-    return text
 
+    # Direct question — already clean
+    if text.startswith("Question:"):
+        return text[len("Question:"):].strip()
 
-def is_english(text: str) -> bool:
-    """
-    Detect if text is English using langdetect.
-    Returns True if English or if detection fails (keep the row by default).
-    """
+    # Try to parse as a dict-string (some PubMedQA exports)
     try:
-        return detect(str(text)) == 'en'
-    except LangDetectException:
-        return True  # keep row if detection fails (e.g. too short)
+        parsed = ast.literal_eval(text)
+        if isinstance(parsed, dict):
+            for key in ("question", "Question"):
+                if key in parsed and parsed[key]:
+                    return str(parsed[key]).strip()
+    except (ValueError, SyntaxError, MemoryError):
+        pass
 
-
-# ── Column extraction helpers ────────────────────────────────────────────────
-
-def extract_context(context_data) -> str:
-    """
-    Extract context text from raw context data.
-    
-    Handles three formats:
-    - List of strings (qiaojin/PubMedQA from datasets lib) — joins with space
-    - Dict string ``{"contexts": [...], ...}`` (qiaojin/PubMedQA reloaded from CSV) — parses dict
-    - Pre-formatted string with 'context:' prefix (legacy format) — strips prefix
-    """
-    # Handle list of strings (qiaojin/PubMedQA from datasets library)
-    if isinstance(context_data, list):
-        return ' '.join(str(c).strip() for c in context_data if c)
-
-    text = str(context_data).strip()
-
-    # Handle dict string (CSV re-load — pandas reads dicts as strings)
-    if text.startswith('{'):
-        try:
-            parsed = ast.literal_eval(text)
-            if isinstance(parsed, dict) and 'contexts' in parsed:
-                contexts = parsed['contexts']
-                if isinstance(contexts, list):
-                    return ' '.join(str(c).strip() for c in contexts if c)
-        except (ValueError, SyntaxError, MemoryError):
-            pass
-
-    # Handle pre-formatted string (legacy format)
-    match = re.search(r'context:\s*(.*)', text, re.IGNORECASE | re.DOTALL)
-    if match:
-        return match.group(1).strip()
+    # Fallback: return as-is
     return text
 
 
-def extract_question(question_data: str) -> str:
-    """Extract question text from raw question data.
-    
-    Handles both:
-    - Already clean question (qiaojin/PubMedQA) — strips only
-    - Pre-formatted with 'Question:' prefix (legacy format)
+def extract_context(text: str) -> str:
     """
-    text = str(question_data).strip()
-    match = re.search(r'Question:\s*(.*)', text, re.IGNORECASE | re.DOTALL)
-    if match:
-        return match.group(1).strip()
+    Extract context text from a raw PubMedQA record.
+
+    PubMedQA stores contexts as a dictionary string:
+        {'contexts': ['sentence 1.', 'sentence 2.'], 'labels': [...], 'meshes': [...]}
+
+    This function:
+      1. Parses the dict-string
+      2. Extracts and joins the 'contexts' list
+      3. Strips label/mesh metadata (does not leak into retrieval)
+
+    Args:
+        text: Raw context field from PubMedQA (usually a dict-string).
+
+    Returns:
+        Cleaned, joined context string, or the original text if parsing fails.
+    """
+    if not text or not isinstance(text, str):
+        return ""
+
+    text = text.strip()
+
+    # Try to parse as dict-string
+    try:
+        parsed = ast.literal_eval(text)
+        if isinstance(parsed, dict):
+            contexts = parsed.get("contexts", [])
+            if contexts and isinstance(contexts, list):
+                return " ".join(str(c).strip() for c in contexts if c)
+    except (ValueError, SyntaxError, MemoryError):
+        pass
+
+    # Regex fallback: extract from 'contexts': [...]
+    m = _CONTEXTS_PATTERN.search(text)
+    if m:
+        raw_list = m.group(1)
+        # Split on commas at the top level (crude but effective for PubMedQA)
+        parts = re.findall(r"['\"]([^'\"]+)['\"]", raw_list)
+        if parts:
+            return " ".join(p.strip() for p in parts)
+
+    # Plain text fallback
+    if text.startswith("context:"):
+        return text[len("context:"):].strip()
+
     return text
-
-
-# ── Main pipeline ────────────────────────────────────────────────────────────
-
-def run_preprocessing_pipeline(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
-    """
-    Run the full preprocessing pipeline on the raw DataFrame.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Raw DataFrame with columns from qiaojin/PubMedQA:
-        - question: str (already clean)
-        - context: list of strings (PubMed abstracts)
-        - long_answer: str (detailed answer)
-        - final_decision: str (yes/no/maybe)
-
-    Returns
-    -------
-    tuple[pd.DataFrame, dict]
-        - Cleaned DataFrame with columns: question, context, answer
-        - Log dictionary with before/after counts for each step
-    """
-    log = {}
-    log['raw_rows'] = len(df)
-
-    # ── Step 1: Validate schema ──────────────────────────────────────────
-    # Support both old column schema and current qiaojin/PubMedQA schema
-    old_required = {'instruction', 'input', 'output'}
-    new_required = {'question', 'context', 'long_answer'}
-    
-    if old_required.issubset(set(df.columns)):
-        # Legacy schema (instruction/input/output columns)
-        df = df.copy()
-        df['question'] = df['input'].apply(extract_question)
-        df['context'] = df['instruction'].apply(extract_context)
-        df['answer'] = df['output'].astype(str).str.strip()
-    elif new_required.issubset(set(df.columns)):
-        # New qiaojin/PubMedQA schema
-        df = df.copy()
-        df['question'] = df['question'].apply(extract_question)
-        df['context'] = df['context'].apply(extract_context)
-        df['answer'] = df['long_answer'].astype(str).str.strip()
-    else:
-        missing_old = old_required - set(df.columns)
-        missing_new = new_required - set(df.columns)
-        raise ValueError(
-            f"Unrecognized schema. Missing old columns: {missing_old}, "
-            f"Missing new columns: {missing_new}"
-        )
-
-    # Keep only the 3 standard columns
-    df = df[['question', 'context', 'answer']]
-    log['after_extraction'] = len(df)
-
-    # ── Step 3: Clean text (HTML, special chars, whitespace, lowercase) ──
-    for col in ['question', 'context', 'answer']:
-        df[col] = df[col].apply(clean_text)
-    log['after_cleaning'] = len(df)
-
-    # ── Step 4: Remove missing values ────────────────────────────────────
-    before = len(df)
-    df = df.dropna(subset=['question', 'answer'])
-    df = df[(df['question'].str.len() > 0) & (df['answer'].str.len() > 0)]
-    log['removed_missing'] = before - len(df)
-    log['after_missing'] = len(df)
-
-    # ── Step 5: Remove non-English rows ──────────────────────────────────
-    before = len(df)
-    english_mask = df.apply(
-        lambda row: is_english(row['question'] + ' ' + row['answer']),
-        axis=1
-    )
-    df = df[english_mask]
-    log['removed_non_english'] = before - len(df)
-    log['after_english_filter'] = len(df)
-
-    # ── Step 6: Remove exact duplicates ──────────────────────────────────
-    before = len(df)
-    df = df.drop_duplicates()
-    log['removed_duplicates'] = before - len(df)
-    log['after_duplicates'] = len(df)
-
-    # ── Final ────────────────────────────────────────────────────────────
-    df = df.reset_index(drop=True)
-    log['final_rows'] = len(df)
-
-    return df, log
-
-
-def print_pipeline_log(log: dict) -> None:
-    """Pretty-print the preprocessing pipeline log."""
-    print('\n📊 Preprocessing Pipeline Log')
-    print('─' * 50)
-    print(f'  Raw rows:              {log["raw_rows"]:,}')
-    print(f'  After extraction:      {log["after_extraction"]:,}')
-    print(f'  After text cleaning:   {log["after_cleaning"]:,}')
-    print(f'  Removed missing:       {log["removed_missing"]:,}')
-    print(f'  After missing filter:  {log["after_missing"]:,}')
-    print(f'  Removed non-English:   {log["removed_non_english"]:,}')
-    print(f'  After English filter:  {log["after_english_filter"]:,}')
-    print(f'  Removed duplicates:    {log["removed_duplicates"]:,}')
-    print(f'  Final clean rows:      {log["final_rows"]:,}')
-    print('─' * 50)

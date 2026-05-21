@@ -22,11 +22,11 @@ from rouge_score import rouge_scorer
 def compute_bleu(predictions: list, references: list) -> float:
     """Average BLEU score across all pairs (smoothed)."""
     smoother = SmoothingFunction().method1
-    scores   = []
+    scores = []
 
     for pred, ref in zip(predictions, references):
         pred_tokens = pred.lower().split()
-        ref_tokens  = ref.lower().split()
+        ref_tokens = ref.lower().split()
 
         if not pred_tokens or not ref_tokens:
             scores.append(0.0)
@@ -182,13 +182,13 @@ def compute_improvement(baseline: float, improved: float) -> float:
 
 def evaluate_pair(predictions: list, references: list, label: str = "Model") -> dict:
     """Run BLEU + ROUGE-L and return results dict."""
-    bleu  = compute_bleu(predictions, references)
+    bleu = compute_bleu(predictions, references)
     rouge = compute_rouge(predictions, references)
 
     return {
-        "label":     label,
-        "bleu":      round(bleu, 4),
-        "rouge_l":   round(rouge, 4),
+        "label": label,
+        "bleu": round(bleu, 4),
+        "rouge_l": round(rouge, 4),
         "n_samples": len(predictions),
     }
 
@@ -208,24 +208,24 @@ def evaluate_full(
         contexts    : retrieved chunks per query (for faithfulness)
         label       : model name for logging
     """
-    print(f"  Computing BLEU & ROUGE-L...")
-    bleu  = compute_bleu(predictions, references)
+    print("  Computing BLEU & ROUGE-L...")
+    bleu = compute_bleu(predictions, references)
     rouge = compute_rouge(predictions, references)
 
-    print(f"  Computing BERTScore (primary metric)...")
-    bert  = compute_bertscore(predictions, references)
+    print("  Computing BERTScore (primary metric)...")
+    bert = compute_bertscore(predictions, references)
 
     faith = None
     if contexts is not None:
-        print(f"  Computing Faithfulness...")
+        print("  Computing Faithfulness...")
         faith = compute_faithfulness(predictions, contexts)
 
     result = {
-        "label":        label,
-        "bleu":         round(bleu, 4),
-        "rouge_l":      round(rouge, 4),
+        "label": label,
+        "bleu": round(bleu, 4),
+        "rouge_l": round(rouge, 4),
         "bertscore_f1": round(bert, 4),
-        "n_samples":    len(predictions),
+        "n_samples": len(predictions),
     }
     if faith is not None:
         result["faithfulness"] = round(faith, 4)

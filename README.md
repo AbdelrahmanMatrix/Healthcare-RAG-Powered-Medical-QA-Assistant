@@ -261,9 +261,7 @@ MIT License
 
 ---
 
-## 3. What the Experience Looks Like Now
-
-### For your teammate / mentor:
+## 💻 Quick Reproduce
 
 ```bash
 git clone https://github.com/AbdooMatrix/Healthcare-RAG-Powered-Medical-QA-Assistant.git
@@ -273,30 +271,16 @@ pip install -e .
 python download.py
 ```
 
-Output:
+Expected output:
 ```
-================================================================
-🏥 Healthcare RAG — Data Setup
-================================================================
-
-📂 Found 0/6 files locally.
-   ❌ data/raw/pubmedqa_raw.csv
-   ❌ data/processed/pubmedqa_cleaned.csv
-   ❌ data/processed/pubmedqa_labelled.csv
-   ❌ data/embeddings/faiss_index/pubmedqa_index_flatl2.faiss
-   ❌ data/embeddings/faiss_index/chunk_mapping.pkl
-
-📥 Downloading 6 missing files...
-
+📥 Downloading 5 missing files...
   ✅ Downloaded: data/raw/pubmedqa_raw.csv (15.2 MB)
   ✅ Downloaded: data/processed/pubmedqa_cleaned.csv (12.1 MB)
   ✅ Downloaded: data/processed/pubmedqa_labelled.csv (12.3 MB)
   ✅ Downloaded: data/embeddings/faiss_index/pubmedqa_index_flatl2.faiss (14.7 MB)
   ✅ Downloaded: data/embeddings/faiss_index/chunk_mapping.pkl (11.8 MB)
-
 🎉 Setup complete! You can now run any notebook.
 ```
 
-Then they open any notebook and it just works. The classifier auto-downloads from HuggingFace on first use.
-
-Let me know once you've pushed everything and I'll help with M3 (Azure Deployment) or anything else.
+The BioBERT classifier auto-downloads from HuggingFace on first inference.
+Open any notebook (e.g. `notebooks/10_end_to_end_test.ipynb`) and run all cells.

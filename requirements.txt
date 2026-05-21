@@ -60,6 +60,8 @@ requests==2.31.0
 
 # ─── LLM Client ────────────────────────────────────────────
 openai>=1.35.3,<3.0.0
+# Groq — optional LLM provider (uses OpenAI-compatible API under the hood)
+groq>=0.12.0,<2.0.0
 
 # ─── MLOps & Cloud ─────────────────────────────────────────
 mlflow==2.13.2

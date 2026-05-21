@@ -8,7 +8,7 @@ ACR_NAME  := healthcareragacr
 install:       ## Install all dependencies
 	pip install --upgrade pip && pip install -r requirements.txt && pip install -e .
 
-download-classifier: ## Download DistilBERT classifier weights from HuggingFace
+download-classifier: ## Download BioBERT classifier weights from HuggingFace
 	python scripts/download_classifier.py
 
 test:          ## Run all pytest tests

@@ -59,9 +59,9 @@ User Query
 ### 2d. Language Model
 | Item | Value |
 |---|---|
-| Model | `llama-3.1-8b-instant` via Groq API (fallback: `google/flan-t5-base`) |
+| Model | `meta-llama/llama-4-scout-17b-16e-instruct` via Groq API (fallback: `google/flan-t5-base`) |
 | Type | Text-to-text generation |
-| Max tokens | 256 |
+| Max tokens | 512 |
 | Rationale | Groq API provides high-quality generation. flan-t5-base used as offline fallback for reproducibility without API keys. |
 
 ## 3. Evaluation Methodology

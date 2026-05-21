@@ -11,14 +11,15 @@ import os
 import sys
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from dotenv import load_dotenv
-load_dotenv()
-
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-LOCAL_PATH = PROJECT_ROOT / "models" / "classifier" / "distilbert_classifier"
+LOCAL_PATH = PROJECT_ROOT / "models" / "classifier" / "biobert_classifier"
 HF_REPO = "AbdooMatrix/biobert-medical-classifier"
+
+load_dotenv()
 
 WEIGHT_EXTENSIONS = (".bin", ".safetensors")
 

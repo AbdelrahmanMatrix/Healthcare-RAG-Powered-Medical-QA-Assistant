@@ -33,7 +33,10 @@ def test_extract_context_finds_text():
 
 def test_extract_context_dict_string():
     """Handle dict string format from CSV re-load of qiaojin/PubMedQA."""
-    text = "{'contexts': ['Patient has diabetes.', 'Blood sugar is high.'], 'labels': ['BACKGROUND'], 'meshes': ['Diabetes']}"
+    text = (
+        "{'contexts': ['Patient has diabetes.', 'Blood sugar is high.'],"
+        " 'labels': ['BACKGROUND'], 'meshes': ['Diabetes']}"
+    )
     result = extract_context(text)
     assert "diabetes" in result
     assert "blood sugar" in result.lower()

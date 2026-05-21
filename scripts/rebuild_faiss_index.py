@@ -11,28 +11,28 @@ import pickle
 import time
 from pathlib import Path
 
-# ── Anchor to project root ───────────────────────────────────────────────
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-os.chdir(PROJECT_ROOT)
-sys.path.insert(0, str(PROJECT_ROOT))
-
 import faiss
 import numpy as np
 import pandas as pd
 from sentence_transformers import SentenceTransformer
 
+# ── Anchor to project root ───────────────────────────────────────────────
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+os.chdir(PROJECT_ROOT)
+sys.path.insert(0, str(PROJECT_ROOT))
+
 print(f"Project root: {PROJECT_ROOT}")
 print("Imports successful\n")
 
 # ── Paths ─────────────────────────────────────────────────────────────────
-DATA_PATH     = PROJECT_ROOT / "data" / "processed" / "pubmedqa_labelled.csv"
-HOLDOUT_PATH  = PROJECT_ROOT / "data" / "processed" / "eval_holdout.csv"
-OUTPUT_DIR    = PROJECT_ROOT / "data" / "embeddings" / "faiss_index"
+DATA_PATH = PROJECT_ROOT / "data" / "processed" / "pubmedqa_labelled.csv"
+HOLDOUT_PATH = PROJECT_ROOT / "data" / "processed" / "eval_holdout.csv"
+OUTPUT_DIR = PROJECT_ROOT / "data" / "embeddings" / "faiss_index"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-INDEX_PATH    = OUTPUT_DIR / "pubmedqa_index_flatl2.faiss"
-MAPPING_CSV   = OUTPUT_DIR / "chunk_mapping.csv"
-MAPPING_PKL   = OUTPUT_DIR / "chunk_mapping.pkl"
+INDEX_PATH = OUTPUT_DIR / "pubmedqa_index_flatl2.faiss"
+MAPPING_CSV = OUTPUT_DIR / "chunk_mapping.csv"
+MAPPING_PKL = OUTPUT_DIR / "chunk_mapping.pkl"
 
 EVAL_HOLDOUT_SIZE = 1000
 
@@ -56,8 +56,8 @@ if missing:
 before = len(df)
 df = df.dropna(subset=["question", "context", "answer"]).copy()
 df["question"] = df["question"].astype(str).str.strip()
-df["context"]  = df["context"].astype(str).str.strip()
-df["answer"]   = df["answer"].astype(str).str.strip()
+df["context"] = df["context"].astype(str).str.strip()
+df["answer"] = df["answer"].astype(str).str.strip()
 df = df[(df["question"] != "") & (df["context"] != "") & (df["answer"] != "")]
 df = df.reset_index(drop=True)
 print(f"   Rows after cleaning: {len(df):,} (dropped {before - len(df)})")
@@ -67,7 +67,7 @@ print("\n" + "=" * 60)
 print("STEP 2: Reserve Holdout Set")
 print("=" * 60)
 
-df_eval  = df.tail(EVAL_HOLDOUT_SIZE).copy().reset_index(drop=True)
+df_eval = df.tail(EVAL_HOLDOUT_SIZE).copy().reset_index(drop=True)
 df_index = df.iloc[:-EVAL_HOLDOUT_SIZE].copy().reset_index(drop=True)
 
 print(f"   Indexed (FAISS): {len(df_index):,} rows")
@@ -104,7 +104,7 @@ emb_dim = model.get_sentence_embedding_dimension()
 print(f"   Model loaded. Embedding dimension: {emb_dim}")
 
 print(f"\n   Encoding {n_chunks:,} chunks (batch_size=64) ...")
-print(f"   This will take ~1-2 hours on CPU.")
+print("   This will take ~1-2 hours on CPU.")
 start_time = time.time()
 
 embeddings = model.encode(
@@ -118,7 +118,7 @@ embeddings = model.encode(
 encoding_time = time.time() - start_time
 embeddings = np.asarray(embeddings, dtype=np.float32)
 
-print(f"\n   Encoding complete!")
+print("\n   Encoding complete!")
 print(f"   Shape: {embeddings.shape}")
 print(f"   Dtype: {embeddings.dtype}")
 print(f"   Time: {encoding_time:.1f}s ({encoding_time/n_chunks*1000:.1f}ms per chunk)")
@@ -189,20 +189,20 @@ latencies = []
 
 for qi, query in enumerate(test_queries):
     start = time.perf_counter()
-    D, I = index.search(query_embeddings[qi:qi+1], k)
+    distances, indices = index.search(query_embeddings[qi:qi+1], k)
     elapsed_ms = (time.perf_counter() - start) * 1000
     latencies.append(elapsed_ms)
 
     print(f"\n  Query {qi+1}: {query}")
     print(f"  Latency: {elapsed_ms:.2f}ms")
     for rank in range(k):
-        idx = int(I[0, rank])
-        dist = float(D[0, rank])
+        idx = int(indices[0, rank])
+        dist = float(distances[0, rank])
         chunk = mapping_df.loc[idx, "text_chunk"]
         print(f"    Top {rank+1} | Chunk {idx} | L2={dist:.4f}")
         print(f"      {chunk[:200]}...")
 
-print(f"\n  LATENCY SUMMARY")
+print("\n  LATENCY SUMMARY")
 print(f"    Min:    {min(latencies):.2f}ms")
 print(f"    Max:    {max(latencies):.2f}ms")
 print(f"    Mean:   {np.mean(latencies):.2f}ms")
@@ -210,9 +210,9 @@ print(f"    Median: {np.median(latencies):.2f}ms")
 print(f"    Index:  {index.ntotal:,} vectors")
 
 if max(latencies) < 500:
-    print(f"\n  KPI MET: All queries < 500ms")
+    print("\n  KPI MET: All queries < 500ms")
 else:
-    print(f"\n  KPI NOT MET: Some queries exceeded 500ms")
+    print("\n  KPI NOT MET: Some queries exceeded 500ms")
 
 print("\n" + "=" * 60)
 print("DONE - FAISS index rebuilt at full scale!")

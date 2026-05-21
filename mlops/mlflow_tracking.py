@@ -12,8 +12,6 @@ Usage (from project root):
 This will run ≥ 5 experiment variations and register the best model.
 """
 
-import json
-import time
 import mlflow
 import mlflow.pyfunc
 from pathlib import Path
@@ -157,7 +155,8 @@ def run_experiment(config: dict, base_metrics: dict, clf_metrics: dict) -> str:
             mlflow.log_artifacts(str(CLASSIFIER_PATH), artifact_path="model")
         else:
             # Log a minimal artifact so the run URI is not empty
-            import tempfile, os
+            import tempfile
+            import os
             with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as tmp:
                 tmp.write(f"RAG experiment: {config['name']}\n")
                 tmp.write("Classifier weights not available locally.\n")
@@ -182,7 +181,7 @@ def register_best_model(run_ids: list[str], experiment_name: str) -> None:
     for rid in run_ids:
         run = client.get_run(rid)
         bleu = run.data.metrics.get("bleu_rag", -1.0)
-        lat  = run.data.metrics.get("avg_latency_ms", float("inf"))
+        lat = run.data.metrics.get("avg_latency_ms", float("inf"))
         if bleu > best_bleu or (bleu == best_bleu and lat < best_latency):
             best_bleu = bleu
             best_latency = lat
@@ -224,7 +223,7 @@ def register_best_model(run_ids: list[str], experiment_name: str) -> None:
         f"(latency: {best_latency:.0f}ms).\n\n"
         f"**Parameters:**\n"
         + "\n".join(f"- `{k}`: `{v}`" for k, v in run_obj.data.params.items())
-        + f"\n\n**Metrics:**\n"
+        + "\n\n**Metrics:**\n"
         + "\n".join(f"- `{k}`: `{v:.4f}`" for k, v in run_obj.data.metrics.items())
     )
     print(f"  📝 model_selection.md written → {selection_path}")

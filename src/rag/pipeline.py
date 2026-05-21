@@ -51,24 +51,24 @@ INSUFFICIENT_CONTEXT_MESSAGE = (
 
 # Upgraded: PubMedBERT fine-tuned on biomedical retrieval
 DEFAULT_EMBEDDING_MODEL = "pritamdeka/S-PubMedBert-MS-MARCO"
-DEFAULT_LLM_MODEL       = "google/flan-t5-base"
-DEFAULT_RERANKER_MODEL  = "cross-encoder/ms-marco-MiniLM-L-12-v2"
+DEFAULT_LLM_MODEL = "google/flan-t5-base"
+DEFAULT_RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-12-v2"
 
-DEFAULT_TOP_K             = 20    # retrieve more; reranker selects best
-DEFAULT_INJECT_K          = 5     # chunks actually fed to LLM after reranking
+DEFAULT_TOP_K = 20    # retrieve more; reranker selects best
+DEFAULT_INJECT_K = 5     # chunks actually fed to LLM after reranking
 DEFAULT_MAX_CONTEXT_WORDS = 200
-DEFAULT_MAX_NEW_TOKENS    = 256
-DEFAULT_MIN_ANSWER_WORDS  = 3
+DEFAULT_MAX_NEW_TOKENS = 256
+DEFAULT_MIN_ANSWER_WORDS = 3
 
-PROJECT_ROOT       = Path(__file__).resolve().parent.parent.parent
-FAISS_INDEX_PATH   = PROJECT_ROOT / "data" / "embeddings" / "faiss_index" / "pubmedqa_index_flatl2.faiss"
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+FAISS_INDEX_PATH = PROJECT_ROOT / "data" / "embeddings" / "faiss_index" / "pubmedqa_index_flatl2.faiss"
 CHUNK_MAPPING_PATH = PROJECT_ROOT / "data" / "embeddings" / "faiss_index" / "chunk_mapping.pkl"
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 _SOURCE_MARKER_RE = re.compile(r'\s*\[\s*sources?\s*\d+\s*\]\s*', re.IGNORECASE)
-_MULTISPACE_RE    = re.compile(r'\s+')
+_MULTISPACE_RE = re.compile(r'\s+')
 _LEADING_PUNCT_RE = re.compile(r'^[\W_]+')
 
 
@@ -113,29 +113,29 @@ class RAGPipeline:
 
     def __init__(
         self,
-        embedding_model: str    = DEFAULT_EMBEDDING_MODEL,
-        llm_model: str          = DEFAULT_LLM_MODEL,
-        reranker_model: str     = DEFAULT_RERANKER_MODEL,
-        use_reranker: bool      = True,
-        top_k: int              = DEFAULT_TOP_K,
-        inject_k: int           = DEFAULT_INJECT_K,
-        max_context_words: int  = DEFAULT_MAX_CONTEXT_WORDS,
-        max_new_tokens: int     = DEFAULT_MAX_NEW_TOKENS,
-        min_answer_words: int   = DEFAULT_MIN_ANSWER_WORDS,
-        faiss_index_path: str   = None,
+        embedding_model: str = DEFAULT_EMBEDDING_MODEL,
+        llm_model: str = DEFAULT_LLM_MODEL,
+        reranker_model: str = DEFAULT_RERANKER_MODEL,
+        use_reranker: bool = True,
+        top_k: int = DEFAULT_TOP_K,
+        inject_k: int = DEFAULT_INJECT_K,
+        max_context_words: int = DEFAULT_MAX_CONTEXT_WORDS,
+        max_new_tokens: int = DEFAULT_MAX_NEW_TOKENS,
+        min_answer_words: int = DEFAULT_MIN_ANSWER_WORDS,
+        faiss_index_path: str = None,
         chunk_mapping_path: str = None,
     ):
         import faiss
         import numpy as np
         from sentence_transformers import SentenceTransformer
-        self._np    = np
+        self._np = np
         self._faiss = faiss
 
-        self.top_k             = top_k
-        self.inject_k          = inject_k
+        self.top_k = top_k
+        self.inject_k = inject_k
         self.max_context_words = max_context_words
-        self.min_answer_words  = min_answer_words
-        self.max_new_tokens    = max_new_tokens
+        self.min_answer_words = min_answer_words
+        self.max_new_tokens = max_new_tokens
 
         # ── Embedding model (PubMedBERT) ──────────────────────────────
         print(f"Loading embedding model: {embedding_model}")
@@ -156,7 +156,7 @@ class RAGPipeline:
         # ── BM25 (optional) ───────────────────────────────────────────
         try:
             from src.rag.bm25_retriever import BM25Retriever
-            self.bm25      = BM25Retriever(self.mapping_df)
+            self.bm25 = BM25Retriever(self.mapping_df)
             self._use_bm25 = True
         except ImportError:
             self._use_bm25 = False
@@ -189,7 +189,7 @@ class RAGPipeline:
                 base_url="https://api.groq.com/openai/v1",
             )
             self._groq_model = llm_model
-            self._use_groq   = True
+            self._use_groq = True
             print("✅ Groq client ready")
         else:
             print("GROQ_API_KEY not set — falling back to local flan-t5-base")
@@ -218,13 +218,13 @@ class RAGPipeline:
     def _row_to_dict(self, idx: int, dist: float) -> dict:
         row = self.mapping_df.iloc[idx]
         return {
-            "chunk_id":   idx,
-            "question":   row["question"],
-            "context":    row["context"],
-            "answer":     row["answer"],
-            "category":   row.get("category", "Unknown"),
+            "chunk_id": idx,
+            "question": row["question"],
+            "context": row["context"],
+            "answer": row["answer"],
+            "category": row.get("category", "Unknown"),
             "text_chunk": row["text_chunk"],
-            "distance":   dist,
+            "distance": dist,
         }
 
     def _rerank(self, query: str, candidates: list) -> list:
@@ -295,9 +295,9 @@ class RAGPipeline:
             for r in range(search_k)
         ]
 
-        matched   = [c for c in candidates if c["category"] == category]
+        matched = [c for c in candidates if c["category"] == category]
         unmatched = [c for c in candidates if c["category"] != category]
-        pool      = (matched + unmatched)[:k]
+        pool = (matched + unmatched)[:k]
 
         return self._rerank(query, pool)
 
@@ -327,9 +327,11 @@ class RAGPipeline:
             "Rules:\n"
             "- Synthesize findings from ALL evidence into one clear sentence\n"
             "- If the evidence directly answers the question, state it plainly\n"
-            "- If the evidence does not perfectly match, still give the single most relevant finding — do NOT list what is missing\n"
+            "- If the evidence does not perfectly match, still give the single most relevant\n"
+            "  finding — do NOT list what is missing\n"
             "- Stay grounded in the evidence — do not add external knowledge\n"
-            "- Do NOT start with hedging phrases such as 'The evidence does not directly address' or 'The provided research conclusions'\n"
+            "- Do NOT start with hedging phrases such as 'The evidence does not directly\n"
+            "  address' or 'The provided research conclusions'\n"
             "- Do NOT reference study numbers in your answer — just give the answer\n"
             "- Use the same medical terminology as the evidence\n"
             "\n"
@@ -351,7 +353,7 @@ class RAGPipeline:
                 model=self._groq_model,
                 messages=[
                     {"role": "system", "content": _system},
-                    {"role": "user",   "content": prompt},
+                    {"role": "user", "content": prompt},
                 ],
                 max_tokens=self.max_new_tokens,
                 temperature=0.1,
@@ -400,7 +402,7 @@ class RAGPipeline:
 
             raw = self.tokenizer.decode(
                 outputs[0],
-                skip_special_tokens=True
+                skip_special_tokens=True,
             )
 
         cleaned = _clean_answer(raw)
@@ -423,28 +425,28 @@ class RAGPipeline:
             else:
                 relevance = max(0.0, 1.0 - raw_dist / 200.0)
             results.append({
-                "chunk_id":        r["chunk_id"],
-                "question":        r["question"],
-                "category":        r["category"],
-                "distance":        round(raw_dist, 4),
+                "chunk_id": r["chunk_id"],
+                "question": r["question"],
+                "category": r["category"],
+                "distance": round(raw_dist, 4),
                 "relevance_score": round(relevance, 4),
-                "reranker_score":  round(r.get("reranker_score", 0.0), 4),
-                "excerpt":         r.get("context", "")[:150].strip(),
+                "reranker_score": round(r.get("reranker_score", 0.0), 4),
+                "excerpt": r.get("context", "")[:150].strip(),
             })
         return results
 
     def answer(self, query: str, top_k: int = None) -> dict:
         """Full RAG pipeline: retrieve → rerank → generate → disclaimer."""
-        retrieved  = self.retrieve(query, top_k)
+        retrieved = self.retrieve(query, top_k)
         raw_answer = self.generate(query, retrieved)
 
         return {
-            "question":          query,
-            "answer":            raw_answer + DISCLAIMER,
-            "answer_raw":        raw_answer,
+            "question": query,
+            "answer": raw_answer + DISCLAIMER,
+            "answer_raw": raw_answer,
             "retrieved_sources": self._format_sources(retrieved),
             "disclaimer_present": True,
-            "top_k":             len(retrieved),
+            "top_k": len(retrieved),
         }
 
     def answer_with_routing(self, query: str, category: str = None, top_k: int = None) -> dict:
@@ -455,16 +457,16 @@ class RAGPipeline:
             retrieved = self.retrieve(query, top_k)
 
         raw_answer = self.generate(query, retrieved)
-        sources    = self._format_sources(retrieved)
+        sources = self._format_sources(retrieved)
 
         return {
-            "question":          query,
-            "category":          category or "Unknown",
-            "answer":            raw_answer + DISCLAIMER,
-            "answer_raw":        raw_answer,
+            "question": query,
+            "category": category or "Unknown",
+            "answer": raw_answer + DISCLAIMER,
+            "answer_raw": raw_answer,
             "retrieved_sources": sources,
             "disclaimer_present": True,
-            "top_k":             len(retrieved),
+            "top_k": len(retrieved),
             "category_matched_sources": sum(
                 1 for s in sources if s["category"] == category
             ),
@@ -474,7 +476,7 @@ class RAGPipeline:
 # ── Module-level convenience (cached singleton) ────────────────────────────────
 
 _pipeline_instance = None
-_pipeline_lock     = threading.Lock()
+_pipeline_lock = threading.Lock()
 
 
 def build_rag_pipeline(**kwargs) -> RAGPipeline:
@@ -486,13 +488,13 @@ def build_rag_pipeline(**kwargs) -> RAGPipeline:
                 try:
                     from config.settings import settings
                     defaults = {
-                        "llm_model":       settings.LLM_MODEL,
+                        "llm_model": settings.LLM_MODEL,
                         "embedding_model": settings.EMBEDDING_MODEL,
-                        "reranker_model":  settings.RERANKER_MODEL,
-                        "use_reranker":    settings.USE_RERANKER,
-                        "top_k":           settings.TOP_K,
-                        "inject_k":        settings.INJECT_K,
-                        "max_new_tokens":  settings.MAX_TOKENS,
+                        "reranker_model": settings.RERANKER_MODEL,
+                        "use_reranker": settings.USE_RERANKER,
+                        "top_k": settings.TOP_K,
+                        "inject_k": settings.INJECT_K,
+                        "max_new_tokens": settings.MAX_TOKENS,
                     }
                     defaults.update(kwargs)
                     kwargs = defaults
