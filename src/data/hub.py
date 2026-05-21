@@ -18,7 +18,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 # HuggingFace dataset repo where preprocessed data is hosted
-HF_DATASET_REPO = "AbdooMatrix/healthcare-rag-data"
+HF_DATASET_REPO = "AbdoMatrix/healthcare-rag-data"
 
 # Files to check/download: (relative_path_in_repo, local_path)
 REQUIRED_FILES = [

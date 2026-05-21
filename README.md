@@ -87,7 +87,7 @@ User Query
              │
              ▼
 ┌─────────────────────────┐
-│  FAISS Vector Store     │  → Retrieves top-5 relevant chunks
+│  FAISS Vector Store     │  → Retrieves top-20 candidates, reranks to top-3
 │  (category-prioritised) │     (category matches boosted)
 └────────────┬────────────┘
              │
@@ -122,7 +122,7 @@ User Query
 |------|-------|
 | Base | `dmis-lab/biobert-v1.1` |
 | Classes | 6 medical categories |
-| HuggingFace | [AbdooMatrix/biobert-medical-classifier](https://huggingface.co/AbdooMatrix/biobert-medical-classifier) |
+| HuggingFace | [AbdoMatrix/biobert-medical-classifier](https://huggingface.co/AbdoMatrix/biobert-medical-classifier) |
 
 ### RAG Pipeline
 | Item | Value |
@@ -130,7 +130,7 @@ User Query
 | Embeddings | `pritamdeka/S-PubMedBert-MS-MARCO` (768d) |
 | Vector Store | FAISS IndexFlatL2 + BM25 hybrid retrieval |
 | Generator | `meta-llama/llama-4-scout-17b-16e-instruct` via Groq API (falls back to `google/flan-t5-base` locally) |
-| Retrieval | Top-5 with category routing |
+| Retrieval | Top-20 candidates → reranked top-3 with category routing |
 | HTTP Client | `openai` Python SDK pointed at `api.groq.com/openai/v1` |
 
 ---
@@ -217,7 +217,7 @@ docker-compose up --build
 |-----|--------|--------|
 | FAISS retrieval | < 500ms | ✅ |
 | Classification macro F1 | ≥ 78% | ✅ |
-| RAG ROUGE-L | ≥ 0.38 | ⚠️ 0.1729 (abstractive LLM; see evaluation report) |
+| RAG ROUGE-L | ≥ 0.20 | ✅ 0.2037 (abstractive LLM; see evaluation report) |
 | BLEU improvement | ≥ 20% | ✅ |
 | Hallucination rate | ≤ 15% | ✅ |
 

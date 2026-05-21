@@ -160,7 +160,7 @@ def run_experiment(config: dict, base_metrics: dict, clf_metrics: dict) -> str:
             with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as tmp:
                 tmp.write(f"RAG experiment: {config['name']}\n")
                 tmp.write("Classifier weights not available locally.\n")
-                tmp.write("Download from HuggingFace: AbdooMatrix/biobert-medical-classifier\n")
+                tmp.write("Download from HuggingFace: AbdoMatrix/biobert-medical-classifier\n")
                 tmp_path = tmp.name
             mlflow.log_artifact(tmp_path, artifact_path="model")
             os.unlink(tmp_path)

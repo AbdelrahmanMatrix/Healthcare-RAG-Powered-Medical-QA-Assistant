@@ -48,7 +48,7 @@ def mock_rag():
             for idx, r in enumerate(retrieved)
         ]
 
-    rag._format_sources = _format_sources
+    rag.format_sources = _format_sources
     rag.retrieve.return_value = [
         {"chunk_id": 1, "question": "q1", "category": "General",
          "distance": 0.1, "relevance_score": 0.9, "excerpt": "e1"},
@@ -319,7 +319,7 @@ class TestRunPipelineEdgeCases:
         """When retrieval returns empty, generate still gets called with empty list."""
         mock_rag.retrieve.return_value = []
         # Override _format_sources to handle empty input
-        mock_rag._format_sources = lambda x: []
+        mock_rag.format_sources = lambda x: []
 
         from src.pipeline import run_pipeline
 

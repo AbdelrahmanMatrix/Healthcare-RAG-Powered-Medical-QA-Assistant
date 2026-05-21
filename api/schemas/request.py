@@ -8,8 +8,8 @@ class QueryRequest(BaseModel):
         json_schema_extra={"example": "What are the symptoms of type 2 diabetes?"}
     )
     top_k: Optional[int] = Field(
-        default=None, ge=1, le=20,
-        description="Override the default number of retrieved chunks (1–20).",
+        default=None, ge=1, le=30,
+        description="Override the default number of retrieved chunks (1–30).",
     )
     category: Optional[str] = Field(
         default=None,

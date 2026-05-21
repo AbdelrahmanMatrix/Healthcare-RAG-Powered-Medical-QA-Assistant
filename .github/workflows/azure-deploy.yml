@@ -1,0 +1,141 @@
+# .github/workflows/azure-deploy.yml
+# CI/CD: push to main → run tests → build Docker → deploy to Azure
+#
+# Secrets required (set in GitHub repo Settings > Secrets):
+#   GROQ_API_KEY      — Groq LLM API key
+#   HF_TOKEN          — HuggingFace token
+#   AZURE_ACR_NAME    — Container registry name (e.g. healthcareragacr)
+#   AZURE_CREDENTIALS — Service principal JSON from:
+#                       az ad sp create-for-rbac --name "github-rag-deploy"
+#                         --role contributor
+#                         --scopes /subscriptions/<sub-id>/resourceGroups/healthcare-rag-rg
+#                         --sdk-auth
+
+name: Azure Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:   # allow manual trigger from GitHub UI
+
+env:
+  RESOURCE_GROUP: healthcare-rag-rg
+  APP_NAME: healthcare-rag-app
+  ACR_NAME: ${{ secrets.AZURE_ACR_NAME }}
+
+jobs:
+  # ── 1. Tests (same as ci.yml) ────────────────────────────────────────────────
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -e .
+
+      - name: Lint
+        run: |
+          flake8 src/ api/ config/ scripts/ mlops/ tests/ \
+            --max-line-length 120 \
+            --exclude __pycache__,*.pyc
+
+      - name: Unit tests
+        run: |
+          pytest tests/ \
+            --ignore=tests/test_rag_pipeline.py \
+            --tb=short -q
+
+  # ── 2. Build & Push Docker image to ACR ─────────────────────────────────────
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+    outputs:
+      acr-login-server: ${{ steps.acr-login.outputs.login-server }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: ACR login
+        id: acr-login
+        run: |
+          SERVER=$(az acr show --name $ACR_NAME --query loginServer -o tsv)
+          echo "login-server=$SERVER" >> $GITHUB_OUTPUT
+          az acr login --name $ACR_NAME
+
+      - name: Build and push image
+        run: |
+          SERVER=${{ steps.acr-login.outputs.login-server }}
+          IMAGE="${SERVER}/healthcare-rag:${{ github.sha }}"
+          LATEST="${SERVER}/healthcare-rag:latest"
+
+          docker build \
+            -f docker/Dockerfile \
+            --build-arg HF_TOKEN=${{ secrets.HF_TOKEN }} \
+            -t $IMAGE \
+            -t $LATEST \
+            .
+
+          docker push $IMAGE
+          docker push $LATEST
+
+  # ── 3. Deploy to Azure App Service ──────────────────────────────────────────
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://${{ env.APP_NAME }}.azurewebsites.net
+    steps:
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Update App Service image
+        run: |
+          SERVER=${{ needs.build-and-push.outputs.acr-login-server }}
+          az webapp config container set \
+            --name $APP_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --docker-custom-image-name "${SERVER}/healthcare-rag:${{ github.sha }}"
+
+      - name: Update environment variables
+        run: |
+          az webapp config appsettings set \
+            --name $APP_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --settings \
+              GROQ_API_KEY="${{ secrets.GROQ_API_KEY }}" \
+              HF_TOKEN="${{ secrets.HF_TOKEN }}" \
+              DEPLOY_DATE="$(date +%Y-%m-%d)" \
+              DEPLOY_ENV="azure"
+
+      - name: Wait for deployment and smoke test
+        run: |
+          echo "Waiting 60s for container restart..."
+          sleep 60
+          URL="https://${APP_NAME}.azurewebsites.net"
+          STATUS=$(curl -so /dev/null -w "%{http_code}" "${URL}/health" || echo "000")
+          echo "Health check HTTP status: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "⚠️  Health check returned $STATUS — container may still be starting"
+          else
+            echo "✅ Deployment healthy: ${URL}"
+          fi

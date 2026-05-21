@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="healthcare-rag",
-    version="0.2.0",
+    version="1.2.0",
     description="Healthcare RAG-Powered Medical Q&A Assistant",
     packages=find_packages(exclude=["tests*", "notebooks*"]),
     python_requires=">=3.10",

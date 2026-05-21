@@ -52,7 +52,7 @@ def run_pipeline(question: str, top_k: int = None, category: str = None) -> dict
         retrieved = rag.retrieve(question, top_k)
 
     raw_answer = rag.generate(question, retrieved)
-    sources = rag._format_sources(retrieved)
+    sources = rag.format_sources(retrieved)
 
     return {
         "answer":         raw_answer,

@@ -25,10 +25,10 @@ from pathlib import Path
 # ── Config ────────────────────────────────────────────────────────────────────
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 DEFAULT_LOCAL_PATH = PROJECT_ROOT / "models" / "classifier" / "biobert_classifier"
-HF_REPO_ID = "AbdooMatrix/biobert-medical-classifier"
+HF_REPO_ID = "AbdoMatrix/biobert-medical-classifier"
 
 # Fallback to DistilBERT repo if BioBERT weights not yet uploaded
-HF_REPO_ID_FALLBACK = "AbdooMatrix/distilbert-medical-classifier"
+HF_REPO_ID_FALLBACK = "AbdoMatrix/distilbert-medical-classifier"
 
 
 class MedicalClassifier:

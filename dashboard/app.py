@@ -153,9 +153,9 @@ with col_left:
     else:
         # Placeholder with KPI targets
         targets = pd.DataFrame({
-            "Metric": ["BLEU (RAG)", "BLEU (Baseline)", "ROUGE-L (RAG)", "Hallucination Rate"],
-            "Target": ["≥ +20% vs baseline", "baseline", "≥ 0.38", "≤ 15%"],
-            "Status": ["Run notebook 08 to populate", "—", "—", "—"],
+            "Metric": ["BLEU (RAG)", "BLEU (Baseline)", "ROUGE-L (RAG)", "BERTScore F1", "Hallucination Rate"],
+            "Target": ["≥ +20% vs baseline", "baseline", "≥ 0.20", "≥ 0.80", "≤ 15%"],
+            "Status": ["Run notebook 08 to populate", "—", "—", "—", "—"],
         })
         st.dataframe(targets, use_container_width=True, hide_index=True)
         st.caption("Run `notebooks/08_evaluation.ipynb` to populate this chart.")

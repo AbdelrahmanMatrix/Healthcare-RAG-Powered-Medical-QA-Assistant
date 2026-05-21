@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 LOCAL_PATH = PROJECT_ROOT / "models" / "classifier" / "biobert_classifier"
-HF_REPO = "AbdooMatrix/biobert-medical-classifier"
+HF_REPO = "AbdoMatrix/biobert-medical-classifier"
 
 load_dotenv()
 
