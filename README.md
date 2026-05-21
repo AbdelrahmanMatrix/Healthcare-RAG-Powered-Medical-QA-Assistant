@@ -218,7 +218,7 @@ docker-compose up --build
 | FAISS retrieval | < 500ms | ✅ |
 | Classification macro F1 | ≥ 78% | ✅ |
 | RAG ROUGE-L | ≥ 0.20 | ✅ 0.2037 (abstractive LLM; see evaluation report) |
-| BLEU improvement | ≥ 20% | ✅ |
+| BLEU improvement | ≥ 20% | ⚠️ 6.2% (see evaluation report) |
 | Hallucination rate | ≤ 15% | ✅ |
 
 ---

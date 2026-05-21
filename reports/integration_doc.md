@@ -69,7 +69,7 @@ api/routes/query.py  →  run_pipeline (src/pipeline.py)
     │
     ├─▶ BioBERT Classifier (src/classification/classifier.py)
     │       └─ Downloads weights from HuggingFace Hub on first request
-    │          (huggingface.co/AbdooMatrix/biobert-medical-classifier)
+    │          (huggingface.co/AbdoMatrix/biobert-medical-classifier)
     │
     ├─▶ FAISS Vector Store (src/rag/vectorstore.py)
     │       └─ data/embeddings/faiss_index/pubmedqa_index_flatl2.faiss
@@ -78,7 +78,7 @@ api/routes/query.py  →  run_pipeline (src/pipeline.py)
     ├─▶ BM25 Retriever (src/rag/bm25_retriever.py)  [hybrid retrieval]
     │
     └─▶ LLM (Groq meta-llama/llama-4-scout-17b-16e-instruct via openai client)
-            └─ Generates answer from top-5 retrieved chunks
+            └─ Generates answer from top-3 reranked chunks (retrieved from top-20 FAISS candidates)
 
     │
     ▼

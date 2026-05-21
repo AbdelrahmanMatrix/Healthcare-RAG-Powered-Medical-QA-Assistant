@@ -20,13 +20,13 @@ This document describes the complete end-to-end M1 pipeline:
 | 3    | 03_category_labelling.ipynb     | `data/processed/pubmedqa_labelled.csv`           | 6 categories added |
 | 4    | 04_eda.ipynb                     | `reports/eda_report.md`                          | Full EDA + visuals |
 
-## 3. Category Distribution (Final)
-- Symptoms: 3767 (~37.7%)
-- Treatment: 2259 (~22.6%)
-- General: 2069 (~20.7%)
-- Medication: 1337 (~13.4%)
-- Diagnosis: 461 (~4.6%)
-- Prevention: 101 (~1.0%)
+## 3. Category Distribution (Final — full dataset)
+- Medication: 71,537 (~33.9%)
+- Treatment: 48,579 (~23.0%)
+- Diagnosis: 31,919 (~15.1%)
+- General: 28,251 (~13.4%)
+- Prevention: 22,180 (~10.5%)
+- Symptoms: 8,720 (~4.1%)
 
 **All 6 categories have ≥ 1% representation** → KPI passed.
 
