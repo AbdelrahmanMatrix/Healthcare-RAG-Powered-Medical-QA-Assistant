@@ -52,10 +52,10 @@ INSUFFICIENT_CONTEXT_MESSAGE = (
 # Upgraded: PubMedBERT fine-tuned on biomedical retrieval
 DEFAULT_EMBEDDING_MODEL = "pritamdeka/S-PubMedBert-MS-MARCO"
 DEFAULT_LLM_MODEL       = "google/flan-t5-base"
-DEFAULT_RERANKER_MODEL  = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+DEFAULT_RERANKER_MODEL  = "cross-encoder/ms-marco-MiniLM-L-12-v2"
 
-DEFAULT_TOP_K             = 10    # retrieve more; reranker selects best
-DEFAULT_INJECT_K          = 3     # chunks actually fed to LLM after reranking
+DEFAULT_TOP_K             = 20    # retrieve more; reranker selects best
+DEFAULT_INJECT_K          = 5     # chunks actually fed to LLM after reranking
 DEFAULT_MAX_CONTEXT_WORDS = 200
 DEFAULT_MAX_NEW_TOKENS    = 256
 DEFAULT_MIN_ANSWER_WORDS  = 3
@@ -108,7 +108,7 @@ class RAGPipeline:
       2. FAISS index — vector retrieval (top-10 candidates)
       3. BM25 keyword index (optional hybrid retrieval)
       4. CrossEncoder reranker — re-scores candidates, selects best inject_k
-      5. Groq LLM (llama-3.1-8b-instant) or flan-t5-base fallback
+      5. Groq LLM (configurable via settings.LLM_MODEL) or flan-t5-base fallback
     """
 
     def __init__(
@@ -307,36 +307,43 @@ class RAGPipeline:
         """
         Build the LLM prompt from the top inject_k reranked chunks.
 
-        Research Conclusion (answer field) placed first — LLM instructed
-        to stay close to the research language, keeping answers grounded.
+        V3 prompt — direct and concise, no hedging instructions.
+        The LLM is told to synthesise evidence into a short, direct answer
+        WITHOUT starting with hedging phrases or referencing chunk labels.
         """
         evidence_blocks = []
         for i, chunk in enumerate(chunks[: self.inject_k]):
             answer_text = chunk.get("answer", "").strip()
             ctx = _truncate_words(chunk["context"], self.max_context_words)
             evidence_blocks.append(
-                f"Research Conclusion {i + 1}: {answer_text}\n"
-                f"Supporting Context: {ctx}"
+                f"Study {i + 1} — Finding: {answer_text}\n"
+                f"Context: {ctx}"
             )
         evidence = "\n---\n".join(evidence_blocks)
 
         return (
-            "You are a medical research assistant. "
-            "Using ONLY the research conclusions below, write a concise, accurate answer "
-            "to the medical question. "
-            "Use the same medical terminology as the research conclusions. "
-            "Do not add any information not found in the evidence.\n\n"
-            f"Medical Evidence:\n{evidence}\n\n"
+            "Based on the medical research evidence below, "
+            "answer the question concisely.\n\n"
+            "Rules:\n"
+            "- Synthesize findings from ALL evidence into one clear sentence\n"
+            "- If the evidence directly answers the question, state it plainly\n"
+            "- If the evidence does not perfectly match, still give the single most relevant finding — do NOT list what is missing\n"
+            "- Stay grounded in the evidence — do not add external knowledge\n"
+            "- Do NOT start with hedging phrases such as 'The evidence does not directly address' or 'The provided research conclusions'\n"
+            "- Do NOT reference study numbers in your answer — just give the answer\n"
+            "- Use the same medical terminology as the evidence\n"
+            "\n"
+            "Medical Research Evidence:\n"
+            f"{evidence}\n\n"
             f"Question: {query}\n\n"
-            "Concise Answer (based strictly on the research conclusions above):"
+            "Answer:"
         )
 
     def _call_groq(self, prompt: str) -> str:
         _system = (
-            "You are a medical research assistant. Answer medical questions "
-            "by closely following the provided research conclusions. "
-            "Be concise, accurate, and use the same terminology as the evidence. "
-            "Never add information not present in the provided evidence."
+            "You are a medical research assistant. Synthesize research evidence into "
+            "concise, direct medical answers. Ground your answer in the evidence. "
+            "Do NOT start with hedging phrases. Be concise and direct."
         )
 
         def _do_call():
@@ -404,28 +411,6 @@ class RAGPipeline:
             return INSUFFICIENT_CONTEXT_MESSAGE
 
         return cleaned
-
-    def generate_extractive(self, query: str, retrieved_chunks: list) -> str:
-        """
-        Kept for backwards compatibility.
-        Returns answer fields directly without LLM paraphrasing.
-        NOTE: For evaluation use generate() — the extractive approach does not
-        outperform abstractive generation on ROUGE-L due to semantic mismatch
-        in the retrieval pool.
-        """
-        if not retrieved_chunks:
-            return INSUFFICIENT_CONTEXT_MESSAGE
-
-        answers = []
-        for chunk in retrieved_chunks[: self.inject_k]:
-            ans = chunk.get("answer", "").strip()
-            if ans and len(ans.split()) >= self.min_answer_words:
-                answers.append(ans)
-
-        if not answers:
-            return INSUFFICIENT_CONTEXT_MESSAGE
-
-        return _clean_answer(" ".join(answers[:2]))
 
     # ── Public answer methods ─────────────────────────────────────────────────
 

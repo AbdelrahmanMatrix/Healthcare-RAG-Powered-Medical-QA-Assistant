@@ -23,16 +23,16 @@ class Settings(BaseSettings):
     EMBEDDING_MODEL: str = "pritamdeka/S-PubMedBert-MS-MARCO"
 
     # ── LLM ───────────────────────────────────────────────────────────────
-    LLM_MODEL: str    = "llama-3.1-8b-instant"
+    LLM_MODEL: str    = "meta-llama/llama-4-scout-17b-16e-instruct"
     LLM_BASE_URL: str = "https://api.groq.com/openai/v1"
 
     # ── Reranker ──────────────────────────────────────────────────────────
     USE_RERANKER: bool  = True
-    RERANKER_MODEL: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    RERANKER_MODEL: str = "cross-encoder/ms-marco-MiniLM-L-12-v2"
 
     # ── Pipeline behaviour ─────────────────────────────────────────────────
-    TOP_K: int    = 10
-    INJECT_K: int = 3
+    TOP_K: int    = 20
+    INJECT_K: int = 5
     MAX_TOKENS: int = 512
     BM25_THRESHOLD: float = 5.0
 

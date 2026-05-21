@@ -127,7 +127,7 @@ def run_experiment(config: dict, base_metrics: dict, clf_metrics: dict) -> str:
             "inject_k": config["inject_k"],
             "max_context_words": config["max_context_words"],
             "embedding_model": config["embedding_model"],
-            "llm_model": "google/flan-t5-base (or Groq llama-3.1-8b-instant)",
+            "llm_model": "meta-llama/llama-4-scout-17b-16e-instruct (via Groq)",
         })
 
         # Log FAISS index size (if index exists)

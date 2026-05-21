@@ -77,7 +77,7 @@ api/routes/query.py  →  run_pipeline (src/pipeline.py)
     │
     ├─▶ BM25 Retriever (src/rag/bm25_retriever.py)  [hybrid retrieval]
     │
-    └─▶ LLM (Groq llama-3.1-8b-instant via openai client)
+    └─▶ LLM (Groq meta-llama/llama-4-scout-17b-16e-instruct via openai client)
             └─ Generates answer from top-5 retrieved chunks
 
     │
@@ -105,7 +105,7 @@ Azure App Service (Free Tier F1, Linux)
 | `WEBSITE_PORT` | `8000` | Port FastAPI listens on |
 | `PYTHONUNBUFFERED` | `1` | Real-time stdout logs in Azure |
 | `HF_TOKEN` | `hf_xxx...` | Downloads BioBERT classifier weights from HuggingFace |
-| `GROQ_API_KEY` | `gsk_xxx...` | LLM generation via Groq API (llama-3.1-8b-instant) |
+| `GROQ_API_KEY` | `gsk_xxx...` | LLM generation via Groq API (meta-llama/llama-4-scout-17b-16e-instruct) |
 | `DEPLOY_ENV` | `Azure App Service F1` | Shown in Streamlit dashboard |
 | `DEPLOY_DATE` | `May 2026` | Shown in Streamlit dashboard |
 

@@ -7,7 +7,7 @@
 **Parameters:**
 - `embedding_model`: `pritamdeka/S-PubMedBert-MS-MARCO`
 - `inject_k`: `3`
-- `llm_model`: `google/flan-t5-base (or Groq llama-3.1-8b-instant)`
+- `llm_model`: `google/flan-t5-base (or Groq meta-llama/llama-4-scout-17b-16e-instruct)`
 - `max_context_words`: `200`
 - `top_k`: `3`
 

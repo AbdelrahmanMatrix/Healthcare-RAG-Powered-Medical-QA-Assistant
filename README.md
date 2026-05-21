@@ -35,7 +35,7 @@ That's it. Run any notebook now.
 │   ├── 03_category_labelling.ipynb      # Assign 6 medical categories
 │   ├── 04_eda.ipynb                     # Exploratory data analysis
 │   ├── 05_embeddings_vectorstore.ipynb  # Build FAISS vector index
-│   ├── 06_rag_pipeline.ipynb            # RAG pipeline (flan-t5-base)
+│   ├── 06_rag_pipeline.ipynb            # RAG pipeline (Groq LLM)
 │   ├── 07_classification_model.ipynb    # Fine-tune BioBERT classifier
 │   ├── 08_evaluation.ipynb              # BLEU, ROUGE-L, hallucination
 │   ├── 09_integrated_pipeline.ipynb     # Classifier + RAG integration
@@ -48,7 +48,7 @@ That's it. Run any notebook now.
 │   │   ├── loader.py                    # Data loading utilities
 │   │   └── hub.py                       # HuggingFace data sync
 │   ├── rag/
-│   │   ├── pipeline.py                  # RAG pipeline (FAISS + flan-t5)
+│   │   ├── pipeline.py                  # RAG pipeline (FAISS + Groq LLM)
 │   │   ├── embeddings.py                # Embedding utilities
 │   │   └── vectorstore.py               # FAISS index utilities
 │   ├── classification/
@@ -93,7 +93,7 @@ User Query
              │
              ▼
 ┌─────────────────────────┐
-│  flan-t5-base LLM       │  → Generates answer from context
+│  LLM (Groq)             │  → Generates answer from context
 └────────────┬────────────┘
              │
              ▼
@@ -129,7 +129,7 @@ User Query
 |------|-------|
 | Embeddings | `pritamdeka/S-PubMedBert-MS-MARCO` (768d) |
 | Vector Store | FAISS IndexFlatL2 + BM25 hybrid retrieval |
-| Generator | `llama-3.1-8b-instant` via Groq API (falls back to `google/flan-t5-base` locally) |
+| Generator | `meta-llama/llama-4-scout-17b-16e-instruct` via Groq API (falls back to `google/flan-t5-base` locally) |
 | Retrieval | Top-5 with category routing |
 | HTTP Client | `openai` Python SDK pointed at `api.groq.com/openai/v1` |
 
