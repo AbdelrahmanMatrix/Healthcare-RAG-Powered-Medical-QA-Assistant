@@ -33,17 +33,26 @@ jobs:
           flake8 src/ api/ config/ --max-line-length 120 \
             --exclude __pycache__,*.pyc
 
-      - name: Unit tests — API (no models needed, fully mocked)
+      - name: Unit tests — API & preprocessing
         run: |
-          pytest tests/test_api.py -v --tb=short
+          pytest tests/test_api.py tests/test_preprocessing.py -v --tb=short
 
-      - name: Unit tests — Preprocessing (no models needed)
+      - name: Unit tests — Data modules & metrics
         run: |
-          pytest tests/test_preprocessing.py -v --tb=short
+          pytest tests/test_data_modules.py tests/test_metrics.py -v --tb=short
+
+      - name: Unit tests — Pipeline orchestration
+        run: |
+          pytest tests/test_pipeline.py -v --tb=short
+
+      - name: Unit tests — RAG modules (fully mocked)
+        run: |
+          pytest tests/test_rag_modules.py -v --tb=short
 
       - name: Coverage gate (unit tests only)
         run: |
-          pytest tests/test_api.py tests/test_preprocessing.py \
+          pytest tests/ \
+            --ignore=tests/test_rag_pipeline.py \
             --cov=src --cov=api \
             --cov-report=term-missing \
             --cov-fail-under=50
