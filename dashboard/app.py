@@ -245,7 +245,7 @@ col4a, col4b, col4c, col4d = st.columns(4)
 
 raw_rows = len(raw) if raw is not None else "N/A"
 clean_rows = len(cleaned) if cleaned is not None else "N/A"
-if raw is not None and cleaned is not None:
+if raw is not None and cleaned is not None and len(raw) > 0:
     removed = len(raw) - len(cleaned)
     pct_kept = round(100 * len(cleaned) / len(raw), 1)
 else:
