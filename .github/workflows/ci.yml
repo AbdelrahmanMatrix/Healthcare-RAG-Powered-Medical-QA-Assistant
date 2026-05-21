@@ -30,7 +30,7 @@ jobs:
 
       - name: Lint (flake8)
         run: |
-          flake8 src/ api/ config/ --max-line-length 120 \
+          flake8 src/ api/ config/ scripts/ mlops/ tests/ --max-line-length 120 \
             --exclude __pycache__,*.pyc
 
       - name: Unit tests — API & preprocessing
