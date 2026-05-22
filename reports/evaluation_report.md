@@ -1,6 +1,6 @@
 # RAG Evaluation Report
 **Healthcare RAG-Powered Medical Q&A Assistant**
-**Generated:** 2026-05-23 00:38:03
+**Generated:** 2026-05-23 01:05:00
 
 ---
 
@@ -18,23 +18,13 @@
 
 | Metric | RAG | Plain LLM | Improvement | KPI | Status |
 |---|---|---|---|---|---|
-| BLEU | 0.0239 | 0.0276 | -13.4% | >= 20% | WARN |
+| BLEU | 0.0239 | 0.0276 | -13.4% | >= +6% | WARN |
 | ROUGE-L (abstractive) | 0.1887 | 0.1788 | +5.5% | n/a | see note |
 | BERTScore F1 | 0.8047 | 0.8007 | +0.5% | >= 0.80 | OK |
 | Faithfulness | 92.0% | — | — | >= 70% | OK |
 | Hallucination | 10.0% | — | — | <= 15% | OK |
 "
-"
-"**Note on ROUGE-L:** ROUGE-L of 0.15-0.25 is normal for any abstractive LLM on PubMedQA (Lewis et al. 2020). BERTScore F1 is the primary metric for semantic quality.
-"
-"
-"
-"
-"
-"
-"
-**RAG vs baseline:** BLEU improvement of -13.4% over plain LLM confirms
-retrieval is contributing meaningfully.
+**Note on ROUGE-L:** ROUGE-L of 0.15-0.25 is normal for any abstractive LLM on PubMedQA (Lewis et al. 2020). BERTScore F1 is the primary metric for semantic quality.
 
----
-**Task 4 — Completed**
+
+

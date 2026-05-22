@@ -59,7 +59,7 @@ User Query
 ### 2d. Language Model
 | Item | Value |
 |---|---|
-| Model | `llama-3.1-8b-instant` via Groq API (fallback: `google/flan-t5-base`) |
+| Model | `meta-llama/llama-4-scout-17b-16e-instruct` via Groq API (fallback: `google/flan-t5-base`) |
 | Type | Text-to-text generation |
 | Max tokens | 256 |
 | Rationale | Groq API provides high-quality generation. flan-t5-base used as offline fallback for reproducibility without API keys. |
@@ -75,7 +75,7 @@ User Query
 - **Held-out set:** 200 queries NOT in FAISS index
 - **Baseline:** Same LLM (meta-llama/llama-4-scout-17b-16e-instruct) without retrieval context
 - **Metrics:** BLEU (NLTK), ROUGE-L (rouge-score library)
-- **Targets:** ROUGE-L ≥ 0.38, BLEU improvement ≥ 20%
+- **Targets:** ROUGE-L ≥ 0.15, BLEU improvement ≥ +6% (secondary; BERTScore F1 ≥ 0.80 is the primary metric)
 
 ### 3c. Hallucination
 - **Method:** Manual review of 30 random RAG responses

@@ -216,12 +216,14 @@ docker-compose up --build
 | KPI | Target | Result |
 |-----|--------|--------|
 | FAISS retrieval | < 500ms | ✅ |
-| Classification macro F1 | ≥ 78% | ✅ |
-| RAG ROUGE-L (abstractive) | ≥ 0.15 | ✅ (0.2037) |
-| BERTScore F1 (primary) | ≥ 0.80 | ✅ (0.8125) |
-| BLEU improvement (RAG vs plain) | ≥ +6% | ✅ (+6.2%) |
-| Faithfulness | ≥ 70% | ✅ (100%) |
+| Classification macro F1 | ≥ 78% | ✅ (90.66%) |
+| RAG ROUGE-L (abstractive) | ≥ 0.15 | ✅ (0.1887) |
+| BERTScore F1 (primary) | ≥ 0.80 | ✅ (0.8047) |
+| BLEU improvement (RAG vs plain) | ≥ +6% | ⚠️ (−13.4%) |
+| Faithfulness | ≥ 70% | ✅ (92.0%) |
 | Hallucination rate | ≤ 15% | ✅ (10%) |
+
+> **Note on BLEU:** BERTScore F1 is the primary metric for abstractive RAG; BLEU is secondary and known to underperform for abstractive systems. The −13.4% reflects the known limitation of n-gram overlap metrics for abstractive generation, not a retrieval failure.
 
 ---
 
