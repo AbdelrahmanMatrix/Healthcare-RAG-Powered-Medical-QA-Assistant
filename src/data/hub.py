@@ -1,15 +1,20 @@
 """
-HuggingFace Hub data download utilities.
+HuggingFace Hub data download/upload utilities.
 
 Downloads pre-computed data files (raw CSV, cleaned CSV, labelled CSV,
 FAISS index, chunk mapping) from the HuggingFace dataset repo so that
 users can skip straight to running notebooks without running all
 preprocessing steps locally.
 
+Also provides upload utilities so that processed files (cleaned CSV,
+labelled CSV, FAISS index, chunk mapping, eval holdout) can be pushed
+back to the HuggingFace dataset repo from notebooks.
+
 Public API:
     check_data_exists()          → dict[path, bool]
     download_file(remote_path)   → bool
     download_all_data()          → dict {downloaded, skipped, failed}
+    upload_file(local_path, remote_path) → bool
 """
 
 import os
@@ -29,9 +34,13 @@ REQUIRED_FILES = [
     ("data/processed/pubmedqa_labelled.csv",
      PROJECT_ROOT / "data" / "processed" / "pubmedqa_labelled.csv"),
     ("data/embeddings/faiss_index/pubmedqa_index_flatl2.faiss",
-     PROJECT_ROOT / "data" / "embeddings" / "faiss_index" / "pubmedqa_index_flatl2.faiss"),
+     PROJECT_ROOT
+     / "data" / "embeddings" / "faiss_index" / "pubmedqa_index_flatl2.faiss"),
     ("data/embeddings/faiss_index/chunk_mapping.pkl",
-     PROJECT_ROOT / "data" / "embeddings" / "faiss_index" / "chunk_mapping.pkl"),
+     PROJECT_ROOT
+     / "data" / "embeddings" / "faiss_index" / "chunk_mapping.pkl"),
+    ("data/processed/eval_holdout.csv",
+     PROJECT_ROOT / "data" / "processed" / "eval_holdout.csv"),
 ]
 
 
@@ -67,7 +76,8 @@ def download_file(remote_path: str, local_path: Path) -> bool:
     try:
         from huggingface_hub import hf_hub_download
     except ImportError:
-        print("  ⚠️  huggingface-hub not installed. Run: pip install huggingface-hub")
+        print("  ⚠️  huggingface-hub not installed."
+              " Run: pip install huggingface-hub")
         return False
 
     hf_token = os.getenv("HF_TOKEN", None)
@@ -83,11 +93,14 @@ def download_file(remote_path: str, local_path: Path) -> bool:
         )
         if local_path.exists():
             size_mb = local_path.stat().st_size / (1024 * 1024)
-            print(f"  ✅ Downloaded: {local_path.relative_to(PROJECT_ROOT)} ({size_mb:.1f} MB)")
+            rel = local_path.relative_to(PROJECT_ROOT)
+            print(f"  ✅ Downloaded:"
+                  f" {rel} ({size_mb:.1f} MB)")
             return True
         return False
     except Exception as e:
-        print(f"  ❌ Failed: {remote_path} — {e}")
+        print(f"  ❌ Failed:"
+              f" {remote_path} — {e}")
         return False
 
 
@@ -106,7 +119,8 @@ def download_all_data() -> dict:
 
     for remote_path, local_path in REQUIRED_FILES:
         if status[str(local_path)]:
-            print(f"  ⏭️  Skipped (exists): {local_path.relative_to(PROJECT_ROOT)}")
+            print(f"  ⏭️  Skipped (exists):"
+                  f" {local_path.relative_to(PROJECT_ROOT)}")
             skipped += 1
             continue
 
@@ -121,3 +135,54 @@ def download_all_data() -> dict:
         "skipped": skipped,
         "failed": failed,
     }
+
+
+def upload_file(local_path: str, remote_path: str) -> bool:
+    """
+    Upload a single file to the HuggingFace dataset repo.
+
+    Requires the HF_TOKEN environment variable to be set, or an active
+    ``huggingface-cli login`` session.
+
+    Args:
+        local_path: Path to the local file, relative to the project root.
+        remote_path: Destination path within the HF dataset repo.
+
+    Returns:
+        True if upload succeeded, False otherwise.
+    """
+    try:
+        from huggingface_hub import HfApi
+    except ImportError:
+        print("  ⚠️  huggingface-hub not installed."
+              " Run: pip install huggingface-hub")
+        return False
+
+    hf_token = os.getenv("HF_TOKEN", None)
+    if not hf_token:
+        print("  ⚠️  HF_TOKEN not set — will use cached"
+              " `huggingface-cli login` token if available.")
+        print("     For reliable uploads, set HF_TOKEN"
+              " in your .env file or run:")
+
+    full_local = PROJECT_ROOT / local_path
+    if not full_local.exists():
+        print(f"  ❌ Local file not found: {local_path}")
+        return False
+
+    try:
+        size_mb = full_local.stat().st_size / (1024 * 1024)
+        print(f"  📤 Uploading: {local_path} ({size_mb:.1f} MB)"
+              f" → {HF_DATASET_REPO}/{remote_path}")
+        HfApi().upload_file(
+            path_or_fileobj=str(full_local),
+            path_in_repo=remote_path,
+            repo_id=HF_DATASET_REPO,
+            repo_type="dataset",
+            token=hf_token,
+        )
+        print(f"  ✅ Uploaded: {remote_path}")
+        return True
+    except Exception as e:
+        print(f"  ❌ Upload failed: {remote_path} — {e}")
+        return False

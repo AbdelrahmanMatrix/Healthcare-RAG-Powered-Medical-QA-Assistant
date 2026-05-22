@@ -1,7 +1,12 @@
 """
 Rebuild FAISS index at full scale (~210k vectors).
 
-This replicates Notebook 05 cells 1-7 as a standalone script.
+Improvements over v1:
+  - Deduplicates the dataset by question (removes ~78 duplicate rows)
+  - Stratified train/holdout split preserving category proportions
+  - FAISS built from training set only (true generalization eval)
+  - Holdout saved to eval_holdout.csv for downstream evaluation
+
 Run from project root:  python scripts/rebuild_faiss_index.py
 """
 
@@ -15,6 +20,7 @@ import faiss
 import numpy as np
 import pandas as pd
 from sentence_transformers import SentenceTransformer
+from sklearn.model_selection import train_test_split
 
 # ── Anchor to project root ───────────────────────────────────────────────
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -34,7 +40,8 @@ INDEX_PATH = OUTPUT_DIR / "pubmedqa_index_flatl2.faiss"
 MAPPING_CSV = OUTPUT_DIR / "chunk_mapping.csv"
 MAPPING_PKL = OUTPUT_DIR / "chunk_mapping.pkl"
 
-EVAL_HOLDOUT_SIZE = 1000
+EVAL_HOLDOUT_SIZE = 2000
+RANDOM_SEED = 42
 
 # ── 1. Load Data ──────────────────────────────────────────────────────────
 print("=" * 60)
@@ -62,45 +69,71 @@ df = df[(df["question"] != "") & (df["context"] != "") & (df["answer"] != "")]
 df = df.reset_index(drop=True)
 print(f"   Rows after cleaning: {len(df):,} (dropped {before - len(df)})")
 
-# ── 2. Holdout Split ──────────────────────────────────────────────────────
+# ── 2. Deduplicate ────────────────────────────────────────────────────────
 print("\n" + "=" * 60)
-print("STEP 2: Reserve Holdout Set")
+print("STEP 2: Deduplicate by Question")
 print("=" * 60)
 
-df_eval = df.tail(EVAL_HOLDOUT_SIZE).copy().reset_index(drop=True)
-df_index = df.iloc[:-EVAL_HOLDOUT_SIZE].copy().reset_index(drop=True)
+before_dedup = len(df)
+df = df.drop_duplicates(subset=["question"], keep="first").copy().reset_index(drop=True)
+dupes_removed = before_dedup - len(df)
+print(f"   Rows before dedup: {before_dedup:,}")
+print(f"   Duplicates removed: {dupes_removed}")
+print(f"   Rows after dedup: {len(df):,}")
+print("   Category distribution:")
+for cat, count in df["category"].value_counts().items():
+    print(f"     {cat}: {count:,} ({count/len(df)*100:.1f}%)")
 
-print(f"   Indexed (FAISS): {len(df_index):,} rows")
-print(f"   Held-out (eval): {len(df_eval):,} rows")
+# ── 3. Stratified Train/Holdout Split ─────────────────────────────────────
+print("\n" + "=" * 60)
+print(f"STEP 3: Stratified Holdout Split (n={EVAL_HOLDOUT_SIZE})")
+print("=" * 60)
+
+df_train, df_eval = train_test_split(
+    df,
+    test_size=EVAL_HOLDOUT_SIZE,
+    stratify=df["category"],
+    random_state=RANDOM_SEED,
+)
+df_train = df_train.reset_index(drop=True)
+df_eval = df_eval.reset_index(drop=True)
+
+print(f"   Training set:  {len(df_train):,} rows")
+print(f"   Holdout set:   {len(df_eval):,} rows")
+print()
+
+print("   Holdout category distribution:")
+for cat, count in df_eval["category"].value_counts().items():
+    print(f"     {cat}: {count:,} ({count/len(df_eval)*100:.1f}%)")
 
 df_eval.to_csv(HOLDOUT_PATH, index=False)
-print(f"   Holdout saved: {HOLDOUT_PATH}")
+print(f"\n   Holdout saved: {HOLDOUT_PATH}")
 
-# ── 3. Build Text Chunks ──────────────────────────────────────────────────
+# ── 4. Build Text Chunks ──────────────────────────────────────────────────
 print("\n" + "=" * 60)
-print("STEP 3: Build Text Chunks")
+print("STEP 4: Build Text Chunks")
 print("=" * 60)
 
-df_index["text_chunk"] = (
-    "Question: " + df_index["question"] + "\n"
-    + "Context: " + df_index["context"] + "\n"
-    + "Answer: " + df_index["answer"]
+df_train["text_chunk"] = (
+    "Question: " + df_train["question"] + "\n"
+    + "Context: " + df_train["context"] + "\n"
+    + "Answer: " + df_train["answer"]
 )
 
-text_chunks = df_index["text_chunk"].tolist()
+text_chunks = df_train["text_chunk"].tolist()
 n_chunks = len(text_chunks)
 print(f"   Built {n_chunks:,} text chunks")
 print(f"   Sample:\n{text_chunks[0][:300]}")
 
-# ── 4. Load Model & Generate Embeddings ──────────────────────────────────
+# ── 5. Load Model & Generate Embeddings ──────────────────────────────────
 print("\n" + "=" * 60)
-print("STEP 4: Load Model & Generate Embeddings")
+print("STEP 5: Load Model & Generate Embeddings")
 print("=" * 60)
 
 model_name = "pritamdeka/S-PubMedBert-MS-MARCO"
 print(f"   Loading model: {model_name} ...")
 model = SentenceTransformer(model_name)
-emb_dim = model.get_sentence_embedding_dimension()
+emb_dim = model.get_embedding_dimension()
 print(f"   Model loaded. Embedding dimension: {emb_dim}")
 
 print(f"\n   Encoding {n_chunks:,} chunks (batch_size=64) ...")
@@ -123,9 +156,9 @@ print(f"   Shape: {embeddings.shape}")
 print(f"   Dtype: {embeddings.dtype}")
 print(f"   Time: {encoding_time:.1f}s ({encoding_time/n_chunks*1000:.1f}ms per chunk)")
 
-# ── 5. Build FAISS Index ──────────────────────────────────────────────────
+# ── 6. Build FAISS Index ──────────────────────────────────────────────────
 print("\n" + "=" * 60)
-print("STEP 5: Build FAISS Index")
+print("STEP 6: Build FAISS Index")
 print("=" * 60)
 
 d = embeddings.shape[1]
@@ -135,16 +168,16 @@ index.add(embeddings)
 print(f"   Dimension: {d}")
 print(f"   Total vectors: {index.ntotal:,}")
 
-# ── 6. Save Everything ────────────────────────────────────────────────────
+# ── 7. Save Everything ────────────────────────────────────────────────────
 print("\n" + "=" * 60)
-print("STEP 6: Save Index & Chunk Mapping")
+print("STEP 7: Save Index & Chunk Mapping")
 print("=" * 60)
 
 # Save FAISS index
 faiss.write_index(index, str(INDEX_PATH))
 
 # Save mapping table
-mapping_df = df_index[["question", "context", "answer", "category", "text_chunk"]].copy()
+mapping_df = df_train[["question", "context", "answer", "category", "text_chunk"]].copy()
 mapping_df.insert(0, "chunk_id", np.arange(len(mapping_df), dtype=np.int32))
 
 mapping_df.to_csv(MAPPING_CSV, index=False)
@@ -159,13 +192,13 @@ print(f"   Mapping CSV:  {MAPPING_CSV}")
 print(f"   Mapping PKL:  {MAPPING_PKL}")
 
 # Final sanity check
-assert index.ntotal == len(mapping_df) == len(df_index), \
-    f"Mismatch: index={index.ntotal}, mapping={len(mapping_df)}, df_index={len(df_index)}"
+assert index.ntotal == len(mapping_df) == len(df_train), \
+    f"Mismatch: index={index.ntotal}, mapping={len(mapping_df)}, df_train={len(df_train)}"
 print(f"\n   Sanity check PASSED: {index.ntotal:,} vectors == {len(mapping_df):,} mapping rows")
 
-# ── 7. Quick Sanity Check (5 queries) ─────────────────────────────────────
+# ── 8. Quick Sanity Check (5 queries) ─────────────────────────────────────
 print("\n" + "=" * 60)
-print("STEP 7: Sanity-Check Retrieval (Top-3) + Latency")
+print("STEP 8: Sanity-Check Retrieval (Top-3) + Latency")
 print("=" * 60)
 
 test_queries = [

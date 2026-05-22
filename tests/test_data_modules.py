@@ -561,3 +561,140 @@ class TestEvaluatePairExtended:
         result = evaluate_pair(["abc"], ["xyz"])
         assert result["bleu"] == 0.0
         assert result["rouge_l"] == 0.0
+
+
+# ==============================================================================
+# ── hub.py — upload_file ─────────────────────────────────────────────────────
+# ==============================================================================
+
+class TestHubUploadFile:
+    """Tests for hub.upload_file()."""
+
+    def test_huggingface_hub_not_installed(self):
+        """When huggingface-hub is not importable, returns False."""
+        from src.data.hub import upload_file
+
+        real_import = __builtins__["__import__"]
+
+        def mock_import(name, *args, **kwargs):
+            if name == "huggingface_hub":
+                raise ImportError("mock: not installed")
+            return real_import(name, *args, **kwargs)
+
+        with patch("builtins.__import__", side_effect=mock_import):
+            result = upload_file("test/file.csv", "remote/file.csv")
+            assert result is False
+
+    def test_local_file_not_found(self, tmp_path):
+        """When the local file does not exist, returns False."""
+        test_root = tmp_path / "project"
+        test_root.mkdir()
+
+        from src.data.hub import upload_file
+
+        with patch("src.data.hub.PROJECT_ROOT", test_root):
+            result = upload_file("nonexistent/file.csv", "remote/file.csv")
+            assert result is False
+
+    def test_upload_success(self, tmp_path):
+        """Successful upload with HF_TOKEN returns True and calls HfApi correctly."""
+        from src.data.hub import upload_file
+
+        test_root = tmp_path / "project"
+        test_root.mkdir()
+
+        local_file = test_root / "data" / "test.csv"
+        local_file.parent.mkdir(parents=True, exist_ok=True)
+        local_file.write_text("dummy upload content")
+
+        mock_api_instance = MagicMock()
+        mock_api_class = MagicMock(return_value=mock_api_instance)
+
+        real_import = __builtins__["__import__"]
+
+        def mock_import(name, *args, **kwargs):
+            if name == "huggingface_hub":
+                mock_mod = MagicMock()
+                mock_mod.HfApi = mock_api_class
+                return mock_mod
+            return real_import(name, *args, **kwargs)
+
+        with patch("builtins.__import__", side_effect=mock_import):
+            with patch("src.data.hub.PROJECT_ROOT", test_root):
+                with patch("src.data.hub.os.getenv", return_value="hf_fake_token"):
+                    result = upload_file("data/test.csv", "remote/test.csv")
+                    assert result is True
+                    mock_api_instance.upload_file.assert_called_once_with(
+                        path_or_fileobj=str(local_file),
+                        path_in_repo="remote/test.csv",
+                        repo_id="AbdoMatrix/healthcare-rag-data",
+                        repo_type="dataset",
+                        token="hf_fake_token",
+                    )
+
+    def test_upload_success_without_token(self, tmp_path):
+        """Upload succeeds without HF_TOKEN (falls back to cached CLI login)."""
+        from src.data.hub import upload_file
+
+        test_root = tmp_path / "project"
+        test_root.mkdir()
+
+        local_file = test_root / "data" / "test.csv"
+        local_file.parent.mkdir(parents=True, exist_ok=True)
+        local_file.write_text("dummy content")
+
+        mock_api_instance = MagicMock()
+        mock_api_class = MagicMock(return_value=mock_api_instance)
+
+        real_import = __builtins__["__import__"]
+
+        def mock_import(name, *args, **kwargs):
+            if name == "huggingface_hub":
+                mock_mod = MagicMock()
+                mock_mod.HfApi = mock_api_class
+                return mock_mod
+            return real_import(name, *args, **kwargs)
+
+        with patch("builtins.__import__", side_effect=mock_import):
+            with patch("src.data.hub.PROJECT_ROOT", test_root):
+                with patch("src.data.hub.os.getenv", return_value=None):
+                    result = upload_file("data/test.csv", "remote/test.csv")
+                    assert result is True
+                    # Token should be passed as None when not set in env
+                    mock_api_instance.upload_file.assert_called_once_with(
+                        path_or_fileobj=str(local_file),
+                        path_in_repo="remote/test.csv",
+                        repo_id="AbdoMatrix/healthcare-rag-data",
+                        repo_type="dataset",
+                        token=None,
+                    )
+
+    def test_upload_failure(self, tmp_path):
+        """When HfApi().upload_file() raises an exception, returns False."""
+        from src.data.hub import upload_file
+
+        test_root = tmp_path / "project"
+        test_root.mkdir()
+
+        local_file = test_root / "data" / "test.csv"
+        local_file.parent.mkdir(parents=True, exist_ok=True)
+        local_file.write_text("dummy content")
+
+        mock_api_instance = MagicMock()
+        mock_api_instance.upload_file.side_effect = Exception("Upload failed: network error")
+        mock_api_class = MagicMock(return_value=mock_api_instance)
+
+        real_import = __builtins__["__import__"]
+
+        def mock_import(name, *args, **kwargs):
+            if name == "huggingface_hub":
+                mock_mod = MagicMock()
+                mock_mod.HfApi = mock_api_class
+                return mock_mod
+            return real_import(name, *args, **kwargs)
+
+        with patch("builtins.__import__", side_effect=mock_import):
+            with patch("src.data.hub.PROJECT_ROOT", test_root):
+                with patch("src.data.hub.os.getenv", return_value="hf_fake_token"):
+                    result = upload_file("data/test.csv", "remote/test.csv")
+                    assert result is False

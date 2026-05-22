@@ -36,8 +36,8 @@ class Settings(BaseSettings):
 
     # ── Pipeline behaviour ─────────────────────────────────────────────────────
     TOP_K: int = 20      # FAISS retrieval candidates
-    INJECT_K: int = 3    # chunks fed to LLM after reranking (v3: reduced 5→3)
-    MAX_TOKENS: int = 256
+    INJECT_K: int = 5    # chunks fed to LLM after reranking
+    MAX_TOKENS: int = 256    # max new tokens for LLM generation
     BM25_THRESHOLD: float = 5.0
 
     # ── API ───────────────────────────────────────────────────────────────────

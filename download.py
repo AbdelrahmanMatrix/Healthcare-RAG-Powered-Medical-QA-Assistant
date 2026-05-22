@@ -11,9 +11,15 @@ from HuggingFace so you can run any notebook immediately.
 import sys
 import os
 
+# Fix stdout encoding so emoji don't crash on Windows cp1252 terminals
+try:
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+except (AttributeError, ValueError):
+    pass
+
 sys.path.insert(0, os.path.dirname(__file__))
 
-from src.data.hub import download_all_data, check_data_exists
+from src.data.hub import download_all_data, check_data_exists  # noqa: E402
 
 
 def main():

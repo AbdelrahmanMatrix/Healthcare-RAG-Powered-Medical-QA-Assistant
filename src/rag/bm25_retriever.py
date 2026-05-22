@@ -26,7 +26,7 @@ class BM25Retriever:
             .tolist()
         )
         self.bm25 = BM25Okapi(corpus)
-        print(f"✅ BM25 index built over {len(corpus):,} documents")
+        print(f"[OK] BM25 index built over {len(corpus):,} documents")
 
     def retrieve(self, query: str, top_k: int = 5) -> list[dict]:
         tokens = query.lower().split()

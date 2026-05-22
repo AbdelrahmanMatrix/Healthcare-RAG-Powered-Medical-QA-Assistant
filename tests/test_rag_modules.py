@@ -198,7 +198,7 @@ def _make_embeddings_module(mock_st=None):
 
     if mock_st is None:
         mock_st = MagicMock()
-        mock_st.get_sentence_embedding_dimension.return_value = 768
+        mock_st.get_embedding_dimension.return_value = 768
 
     mock_st_mod = MagicMock()
     mock_st_mod.SentenceTransformer.return_value = mock_st
@@ -228,7 +228,7 @@ class TestEmbeddingModelInit:
     def test_init_creates_model(self):
         """EmbeddingModel loads a SentenceTransformer."""
         mock_st = MagicMock()
-        mock_st.get_sentence_embedding_dimension.return_value = 768
+        mock_st.get_embedding_dimension.return_value = 768
         mock_st_mod = MagicMock()
         mock_st_mod.SentenceTransformer = MagicMock(return_value=mock_st)
 
@@ -245,7 +245,7 @@ class TestEmbeddingModelInit:
     def test_init_default_model(self):
         """EmbeddingModel defaults to DEFAULT_MODEL."""
         mock_st = MagicMock()
-        mock_st.get_sentence_embedding_dimension.return_value = 768
+        mock_st.get_embedding_dimension.return_value = 768
         mock_st_mod = MagicMock()
         mock_st_mod.SentenceTransformer = MagicMock(return_value=mock_st)
 
@@ -272,7 +272,7 @@ class TestEmbeddingModelEncode:
             return np.random.rand(n, 768).astype(np.float32)
 
         mock_st.encode = mock_encode
-        mock_st.get_sentence_embedding_dimension.return_value = 768
+        mock_st.get_embedding_dimension.return_value = 768
 
         return _make_embedding_model(mock_st)
 
@@ -285,7 +285,7 @@ class TestEmbeddingModelEncode:
         """batch_size parameter is passed through to SentenceTransformer.encode."""
         mock_st = MagicMock()
         mock_st.encode.return_value = np.random.rand(2, 768).astype(np.float32)
-        mock_st.get_sentence_embedding_dimension.return_value = 768
+        mock_st.get_embedding_dimension.return_value = 768
 
         model = _make_embedding_model(mock_st)
         model.encode(["a", "b"], batch_size=64)
@@ -310,7 +310,7 @@ class TestEmbeddingModelEncode:
         """encode_query passes normalize_embeddings=True."""
         mock_st = MagicMock()
         mock_st.encode.return_value = np.random.rand(1, 768).astype(np.float32)
-        mock_st.get_sentence_embedding_dimension.return_value = 768
+        mock_st.get_embedding_dimension.return_value = 768
 
         model = _make_embedding_model(mock_st)
         model.encode_query("test")

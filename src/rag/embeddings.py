@@ -15,7 +15,7 @@ class EmbeddingModel:
 
     def __init__(self, model_name: str = DEFAULT_MODEL):
         self.model = SentenceTransformer(model_name)
-        self.dimension = self.model.get_sentence_embedding_dimension()
+        self.dimension = self.model.get_embedding_dimension()
         print(f"✅ Embedding model loaded: {model_name} (dim={self.dimension})")
 
     def encode(self, texts: list, batch_size: int = 32) -> np.ndarray:
