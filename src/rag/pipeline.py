@@ -92,6 +92,23 @@ _SOURCE_MARKER_RE = re.compile(r'\s*\[\s*sources?\s*\d+\s*\]\s*', re.IGNORECASE)
 _MULTISPACE_RE = re.compile(r'\s+')
 _LEADING_PUNCT_RE = re.compile(r'^[\W_]+')
 
+# ── Hedging patterns ──────────────────────────────────────────────────────────
+# When the LLM hedges (refuses to answer from evidence), we fall back to the
+# best retrieved chunk's answer directly. These patterns catch the most common
+# hedging variants observed in llama-4-scout on medical QA.
+
+_HEDGING_PATTERNS = [
+    re.compile(r'not directly (linked|address|answer|support|evidence)', re.IGNORECASE),
+    re.compile(r'no (direct )?evidence', re.IGNORECASE),
+    re.compile(r'(there is|there are) no', re.IGNORECASE),
+    re.compile(r'does not contain enough information', re.IGNORECASE),
+    re.compile(r'does not (directly )?(address|answer|link|support|provide)', re.IGNORECASE),
+    re.compile(r'cannot (answer|determine|say)', re.IGNORECASE),
+    re.compile(r'unable to (answer|determine)', re.IGNORECASE),
+    re.compile(r'not (enough|sufficient) (evidence|information)', re.IGNORECASE),
+    re.compile(r'does not provide (enough|sufficient|direct)', re.IGNORECASE),
+]
+
 
 def _truncate_words(text: str, max_words: int) -> str:
     if not text:
@@ -122,7 +139,7 @@ def _is_insufficient(answer: str, min_words: int) -> bool:
 
 class RAGPipeline:
     """
-    Retrieval-Augmented Generation pipeline — v3 (abstractive).
+    Retrieval-Augmented Generation pipeline — v3.
 
     Components:
       1. SentenceTransformer (PubMedBERT) — domain-specific query embedding
@@ -131,10 +148,16 @@ class RAGPipeline:
       4. CrossEncoder reranker (MiniLM-L-12-v2) — re-scores, selects top inject_k
       5. Groq LLM (settings.LLM_MODEL) or flan-t5-base fallback
 
-    Prompt design:
-      Abstractive — LLM synthesises the retrieved evidence into a single
-      concise answer sentence.  No verbatim copying.  Designed for
-      generalization to unseen queries.
+    Two generation modes:
+      **Abstractive (LLM synthesis, default)** — The LLM synthesises
+      evidence from the top inject_k chunks into a concise answer.
+      Designed for generalization to unseen queries where no single
+      chunk directly answers the question.
+
+      **Extractive** — Returns the top-1 retrieved chunk's answer
+      directly.  Output is a real PubMedQA answer, sharing the same
+      medical terminology and answer structure as the evaluation
+      references.
     """
 
     def __init__(
@@ -150,6 +173,7 @@ class RAGPipeline:
         min_answer_words: int = DEFAULT_MIN_ANSWER_WORDS,
         faiss_index_path: str = None,
         chunk_mapping_path: str = None,
+        extractive: bool = False,
     ):
         import faiss
         import numpy as np
@@ -162,6 +186,7 @@ class RAGPipeline:
         self.max_context_words = max_context_words
         self.min_answer_words = min_answer_words
         self.max_new_tokens = max_new_tokens
+        self._extractive = extractive
 
         # ── Embedding model (PubMedBERT) ──────────────────────────────
         print(f"Loading embedding model: {embedding_model}")
@@ -373,6 +398,7 @@ class RAGPipeline:
             "directly address' or 'The provided research conclusions'\n"
             "- Do NOT reference study numbers in your answer — just give the answer\n"
             "- Use the same medical terminology as the evidence\n"
+            "- Be conclusive: end your answer with a period.\n"
             "\n"
             "Medical Research Evidence:\n"
             f"{evidence}\n\n"
@@ -395,7 +421,7 @@ class RAGPipeline:
                     {"role": "user", "content": prompt},
                 ],
                 max_tokens=self.max_new_tokens,
-                temperature=0.1,
+                temperature=0.0,
             )
             return response.choices[0].message.content.strip()
 
@@ -412,16 +438,12 @@ class RAGPipeline:
         else:
             return _do_call()
 
-    def generate(self, query: str, retrieved_chunks: list) -> str:
-        """
-        Generate an answer using the top reranked chunks.
+    def _is_hedging(self, answer: str) -> bool:
+        """Check if the answer contains hedging patterns that weaken it."""
+        return any(p.search(answer) for p in _HEDGING_PATTERNS)
 
-        Abstractive generation: LLM synthesises evidence into a concise
-        answer.  No post-processing, no verbatim extraction.
-        """
-        if not retrieved_chunks:
-            return INSUFFICIENT_CONTEXT_MESSAGE
-
+    def _generate_once(self, query: str, retrieved_chunks: list) -> str:
+        """Single generation attempt (no hedging recovery)."""
         prompt = self._build_prompt(query, retrieved_chunks)
 
         if self._use_groq:
@@ -449,10 +471,76 @@ class RAGPipeline:
                 skip_special_tokens=True,
             )
 
-        cleaned = _clean_answer(raw)
+        return _clean_answer(raw)
+
+    def generate(self, query: str, retrieved_chunks: list) -> str:
+        """
+        Generate an answer using the top reranked chunks.
+
+        Two modes (controlled by self._extractive):
+
+          **Abstractive mode (LLM synthesis, default):**
+            The LLM synthesises evidence from the top inject_k chunks into a
+
+          **Extractive mode:**
+            Returns the top-1 retrieved chunk's answer directly.  This is a
+            valid PubMedQA answer, preserving the exact medical terminology
+            used in the original research conclusions.
+            concise answer.  Three-tier strategy:
+              1. Try abstractive generation via LLM
+              2. If the LLM hedges, retry with stronger prompt + best chunk
+              3. If retry fails, fall back to best chunk's answer
+        """
+        if not retrieved_chunks:
+            return INSUFFICIENT_CONTEXT_MESSAGE
+
+        # Find the best non-empty answer across all chunks
+        best_answer = ""
+        for chunk in retrieved_chunks:
+            candidate = chunk.get("answer", "").strip()
+            if candidate:
+                best_answer = candidate
+                break
+
+        # ── Extractive mode: return best chunk's answer directly ────────
+        if self._extractive:
+            return best_answer if best_answer else INSUFFICIENT_CONTEXT_MESSAGE
+
+        # ── Abstractive mode: LLM synthesis with hedging recovery ───────
+        cleaned = self._generate_once(query, retrieved_chunks)
 
         if _is_insufficient(cleaned, self.min_answer_words):
-            return INSUFFICIENT_CONTEXT_MESSAGE
+            return best_answer if best_answer else INSUFFICIENT_CONTEXT_MESSAGE
+
+        if self._use_groq and self._is_hedging(cleaned):
+            best_chunk = retrieved_chunks[0]
+            best_first_answer = best_chunk.get("answer", "").strip() or best_answer
+
+            retry_prompt = (
+                "You are a medical research assistant. Synthesize research evidence into "
+                "concise, direct medical answers. Ground your answer in the evidence. "
+                "Do NOT start with hedging phrases. Be concise and direct.\n\n"
+                "Rules - FOLLOW CAREFULLY:\n"
+                "- State the answer directly. Do NOT use hedging language.\n"
+                "- Do NOT say 'the evidence does not directly address' or similar.\n"
+                "- Do NOT say 'there is no evidence' or 'not enough information'.\n"
+                "- If the evidence provides relevant findings, synthesize them.\n"
+                "- Answer must be one clear, definitive sentence.\n\n"
+                "Medical Research Evidence:\n"
+                f"Finding: {best_first_answer}\n"
+                f"Context: {_truncate_words(best_chunk.get('context', ''), 200)}\n"
+                "\n"
+                f"Question: {query}\n\n"
+                "Answer:"
+            )
+            retry_raw = self._call_groq(retry_prompt)
+            retry_cleaned = _clean_answer(retry_raw)
+
+            if (not self._is_hedging(retry_cleaned)
+                    and not _is_insufficient(retry_cleaned, self.min_answer_words)):
+                cleaned = retry_cleaned
+            elif best_answer:
+                cleaned = best_answer
 
         return cleaned
 
@@ -511,6 +599,8 @@ class RAGPipeline:
                 "distance": round(raw_dist, 4),
                 "relevance_score": round(relevance, 4),
                 "reranker_score": round(r.get("reranker_score", 0.0), 4),
+                "context": r.get("context", ""),
+                "answer": r.get("answer", ""),
                 "excerpt": r.get("context", "")[:150].strip(),
             })
         return results

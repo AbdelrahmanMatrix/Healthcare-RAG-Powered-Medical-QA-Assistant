@@ -88,11 +88,15 @@ def main():
         rag_outputs.append(result["answer_raw"])
         rag_latencies.append(elapsed)
 
-        retrieved = pipeline.retrieve(q)
+        # Extract contexts from the answer result to avoid a second retrieval call
+        # (pipeline.answer already retrieves internally)
         contexts = [
-            r.get("context", "") + " " + r.get("answer", "")
-            for r in retrieved
+            s.get("context", "") + " " + s.get("answer", "")
+            for s in result.get("retrieved_sources", [])
         ]
+        # If no sources returned (routing guard returned False), fall back
+        if not contexts:
+            contexts = [""]
         rag_contexts.append(contexts)
 
         if (i + 1) % 5 == 0:

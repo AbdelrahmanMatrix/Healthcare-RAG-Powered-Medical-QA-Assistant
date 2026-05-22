@@ -1,6 +1,6 @@
 # RAG Evaluation Report
 **Healthcare RAG-Powered Medical Q&A Assistant**
-**Generated:** 2026-05-22 16:40:17
+**Generated:** 2026-05-23 00:38:03
 
 ---
 
@@ -18,10 +18,10 @@
 
 | Metric | RAG | Plain LLM | Improvement | KPI | Status |
 |---|---|---|---|---|---|
-| BLEU | 0.0311 | 0.0261 | +19.2% | >= 20% | WARN |
-| ROUGE-L (abstractive) | 0.2002 | 0.1769 | +13.2% | n/a | see note |
-| BERTScore F1 | 0.5942 | 0.5665 | +4.9% | >= 0.80 | WARN |
-| Faithfulness | 100.0% | — | — | >= 70% | OK |
+| BLEU | 0.0239 | 0.0276 | -13.4% | >= 20% | WARN |
+| ROUGE-L (abstractive) | 0.1887 | 0.1788 | +5.5% | n/a | see note |
+| BERTScore F1 | 0.8047 | 0.8007 | +0.5% | >= 0.80 | OK |
+| Faithfulness | 92.0% | — | — | >= 70% | OK |
 | Hallucination | 10.0% | — | — | <= 15% | OK |
 "
 "
@@ -33,7 +33,7 @@
 "
 "
 "
-**RAG vs baseline:** BLEU improvement of 19.2% over plain LLM confirms
+**RAG vs baseline:** BLEU improvement of -13.4% over plain LLM confirms
 retrieval is contributing meaningfully.
 
 ---

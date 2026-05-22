@@ -77,6 +77,15 @@ class BM25Retriever:
         results = []
         for idx in top_indices:
             row = self.mapping_df.iloc[idx]
+            # Normalize BM25 score to a [0, 1] distance-like metric where
+            # lower = better match, consistent with FAISS IP distances.
+            # BM25 scores are unbounded but typically < 20 for medical text.
+            bm25_raw = float(scores[idx])
+            # Use a soft normalization: distance = 1 / (1 + score) ∈ (0, 1]
+            # score=0  → distance=1.0 (no match)
+            # score=10 → distance≈0.09 (strong match)
+            # score=20 → distance≈0.05 (near-perfect match)
+            dist = 1.0 / (1.0 + bm25_raw)
             results.append({
                 "chunk_id":   int(idx),
                 "question":   row["question"],
@@ -84,7 +93,7 @@ class BM25Retriever:
                 "answer":     row["answer"],
                 "category":   row.get("category", "Unknown"),
                 "text_chunk": row["text_chunk"],
-                "distance":   float(-scores[idx]),   # negative → lower = better (FAISS-consistent)
-                "bm25_score": float(scores[idx]),
+                "distance":   dist,
+                "bm25_score": bm25_raw,
             })
         return results

@@ -149,23 +149,12 @@ class TestComputeFaithfulness:
             result = compute_faithfulness(["test"], [["context"]])
             assert result == 0.0
 
-    def test_numpy_not_installed(self):
-        """When numpy can't be imported, returns 0.0 (lines 143-145)."""
+    def test_model_load_exception_handled(self):
+        """When _get_nli_model raises a general exception, returns 0.0."""
         from src.evaluation.metrics import compute_faithfulness
 
-        real_import = __builtins__["__import__"]
-
-        def mock_import(name, *args, **kwargs):
-            # Let sentence_transformers import succeed, but fail numpy
-            if name == "sentence_transformers":
-                mock_mod = MagicMock()
-                mock_mod.SentenceTransformer = MagicMock()
-                return mock_mod
-            if name == "numpy":
-                raise ImportError("mock: numpy not installed")
-            return real_import(name, *args, **kwargs)
-
-        with patch("builtins.__import__", side_effect=mock_import):
+        with patch("src.evaluation.metrics._get_nli_model") as mock_fn:
+            mock_fn.side_effect = Exception("model download failed")
             result = compute_faithfulness(["test"], [["context"]])
             assert result == 0.0
 
@@ -173,28 +162,40 @@ class TestComputeFaithfulness:
         """Empty predictions list → 0.0."""
         from src.evaluation.metrics import compute_faithfulness
 
-        # Patch _get_faithfulness_model to avoid loading SentenceTransformer
-        with patch("src.evaluation.metrics._get_faithfulness_model") as mock_model:
+        # Patch _get_nli_model to avoid loading CrossEncoder
+        with patch("src.evaluation.metrics._get_nli_model") as mock_model:
             mock_model.return_value = MagicMock()
             result = compute_faithfulness([], [["context"]])
             assert result == 0.0
 
     def test_empty_pred_in_pair(self):
-        """Empty pred string in a pair is skipped (lines 161-162)."""
+        """Empty pred string in a pair is skipped."""
         from src.evaluation.metrics import compute_faithfulness
 
-        with patch("src.evaluation.metrics._get_faithfulness_model") as mock_model:
+        with patch("src.evaluation.metrics._get_nli_model") as mock_model:
             mock_model.return_value = MagicMock()
             result = compute_faithfulness([""], [["context"]])
             assert result == 0.0
 
     def test_empty_context_list_in_pair(self):
-        """Empty context list in a pair is skipped (lines 161-162)."""
+        """Empty context list in a pair is skipped."""
         from src.evaluation.metrics import compute_faithfulness
 
-        with patch("src.evaluation.metrics._get_faithfulness_model") as mock_model:
+        with patch("src.evaluation.metrics._get_nli_model") as mock_model:
             mock_model.return_value = MagicMock()
             result = compute_faithfulness(["pred"], [[]])
+            assert result == 0.0
+
+    def test_predict_exception_handled(self):
+        """When model.predict raises an exception, pair is not counted as faithful."""
+        from src.evaluation.metrics import compute_faithfulness
+
+        with patch("src.evaluation.metrics._get_nli_model") as mock_fn:
+            mock_model = MagicMock()
+            mock_model.predict.side_effect = Exception("predict failed")
+            mock_fn.return_value = mock_model
+            # 1 prediction, model.predict fails → 0 faithful out of 1
+            result = compute_faithfulness(["test pred"], [["test context"]])
             assert result == 0.0
 
 

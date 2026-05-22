@@ -1,7 +1,7 @@
 # Model Development Documentation
 **Healthcare RAG-Powered Medical Q&A Assistant**
 **Owner:** Abdelrahman Mostafa Sayed
-**Generated:** 2026-05-21 14:59:01
+**Generated:** 2026-05-23 00:39:24
 
 ---
 
@@ -15,7 +15,7 @@ User Query
 │ category
 ▼
 ┌─────────────────────────┐
-│ FAISS Vector Store │ → Retrieves top-20 candidates, reranks to top-3
+│ FAISS Vector Store │ → Retrieves top-5 chunks
 │ (category-prioritised) │ (matching category boosted)
 └────────────┬────────────┘
 │ context chunks
@@ -43,10 +43,10 @@ User Query
 ### 2b. Vector Store
 | Item | Value |
 |---|---|
-| Type | FAISS `IndexFlatL2` |
-| Vectors | 210,186 |
+| Type | FAISS `IndexFlatIP` |
+| Vectors | 209,108 |
 | Chunk format | Question + Context + Answer |
-| Rationale | Exact search (no approximation errors). IndexFlatL2 chosen for correctness at the current corpus scale. |
+| Rationale | Exact search (no approximation errors). IndexFlatIP chosen for correctness at the current corpus scale. |
 
 ### 2c. Classifier (Routing Layer)
 | Item | Value |
@@ -59,7 +59,7 @@ User Query
 ### 2d. Language Model
 | Item | Value |
 |---|---|
-| Model | `meta-llama/llama-4-scout-17b-16e-instruct` via Groq API (fallback: `google/flan-t5-base`) |
+| Model | `llama-3.1-8b-instant` via Groq API (fallback: `google/flan-t5-base`) |
 | Type | Text-to-text generation |
 | Max tokens | 256 |
 | Rationale | Groq API provides high-quality generation. flan-t5-base used as offline fallback for reproducibility without API keys. |
@@ -75,7 +75,7 @@ User Query
 - **Held-out set:** 200 queries NOT in FAISS index
 - **Baseline:** Same LLM (meta-llama/llama-4-scout-17b-16e-instruct) without retrieval context
 - **Metrics:** BLEU (NLTK), ROUGE-L (rouge-score library)
-- **Targets:** ROUGE-L ≥ 0.20 (abstractive LLM on PubMedQA), BLEU improvement ≥ 20%
+- **Targets:** ROUGE-L ≥ 0.38, BLEU improvement ≥ 20%
 
 ### 3c. Hallucination
 - **Method:** Manual review of 30 random RAG responses
@@ -87,7 +87,7 @@ User Query
 The classifier doesn't just label queries — it improves retrieval:
 1. FAISS retrieves 3× more candidates than needed
 2. Candidates matching the predicted category are prioritised
-3. Top-20 candidates reranked → top-3 injected into LLM (category matches first, then by distance)
+3. Top-5 results returned (category matches first, then by distance)
 
 **Integrated test results:**
 - Queries tested: 10
@@ -98,15 +98,15 @@ The classifier doesn't just label queries — it improves retrieval:
 
 | Decision | Rationale |
 |---|---|
-| Chunk = Q + Context + Answer | Maximises semantic signal for retrieval |
-| Top-20 / inject-3 | Retrieves 20 candidates, reranker selects best 3 for LLM — balances recall with prompt length limits |
+| Chunk = RecursiveCharacterTextSplitter (700/150) | Maximises semantic signal for retrieval |
+| Top-5 retrieval | Balances context richness with prompt length limits |
 | Category routing | Improves precision for specialised medical queries |
 | Medical disclaimer | Mandatory for responsible AI in healthcare domain |
 | Local LLM (no API) | Ensures reproducibility, no cost, no rate limits |
 
 ## 6. Known Limitations
 - flan-t5-base has limited generation quality compared to larger models
-- FAISS IndexFlatL2 is exact search — may need IVF for larger datasets
+- FAISS IndexFlatIP is exact search — may need IVF for larger datasets
 - Category routing depends on classifier accuracy
 - Free-tier Azure deployment has cold-start latency
 - Medical disclaimer is static — doesn't adapt to confidence level
