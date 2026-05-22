@@ -2,7 +2,7 @@
 
 **Selected run:** `7d1a2bc1`
 
-**Reason:** Highest bleu_rag (0.0157) among 5 runs; latency tie-broken at 1040ms.
+**Reason:** Lowest avg_latency_ms (1,040ms) among all 5 runs. BLEU scores were nearly identical across runs (0.0154–0.0157), making latency the effective selection criterion.
 
 **Parameters:**
 - `embedding_model`: `pritamdeka/S-PubMedBert-MS-MARCO`

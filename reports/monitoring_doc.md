@@ -63,14 +63,15 @@ Azure App Service Basic tier (B1) and adding Azure Monitor alerts.
 
 ---
 
-## 5. Current Baseline (from MLflow run: baseline_topk5)
+## 5. Current Baseline (from evaluation_report.md — Groq, NB08)
 
 | Metric | Baseline Value |
 |--------|---------------|
-| BLEU (RAG) | 0.0157 |
-| ROUGE-L (RAG) | 0.1663 |
-| BLEU improvement over LLM | 1862.5% |
-| Classifier Macro F1 | 0.867 |
+| BLEU (RAG) | 0.0239 |
+| ROUGE-L (RAG) | 0.1887 |
+| BERTScore F1 (primary) | 0.8047 |
+| BLEU improvement over plain LLM | −13.4% (see evaluation_report.md note) |
+| Classifier Macro F1 | 0.9066 |
 | Avg latency (warm) | 3,197 ms |
 | Hallucination rate | 10% |
 

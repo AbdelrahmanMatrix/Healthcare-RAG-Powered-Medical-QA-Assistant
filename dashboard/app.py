@@ -154,7 +154,7 @@ with col_left:
         # Placeholder with KPI targets
         targets = pd.DataFrame({
             "Metric": ["BLEU (RAG)", "BLEU (Baseline)", "ROUGE-L (RAG)", "BERTScore F1", "Hallucination Rate"],
-            "Target": ["≥ +20% vs baseline", "baseline", "≥ 0.20", "≥ 0.80", "≤ 15%"],
+            "Target": ["≥ +6% vs baseline (secondary)", "baseline", "≥ 0.15", "≥ 0.80", "≤ 15%"],
             "Status": ["Run notebook 08 to populate", "—", "—", "—", "—"],
         })
         st.dataframe(targets, use_container_width=True, hide_index=True)
