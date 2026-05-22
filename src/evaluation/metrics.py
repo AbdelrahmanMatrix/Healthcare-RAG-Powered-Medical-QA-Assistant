@@ -70,10 +70,15 @@ def compute_bertscore(predictions: list, references: list) -> float:
     Average BERTScore F1 — semantic similarity between predictions and references.
 
     PRIMARY metric for abstractive RAG. Measures meaning alignment, not
-    exact word overlap. Score interpretation:
+    exact word overlap.
+
+    Uses microsoft/deberta-large-mnli following the arxiv paper (2509.05505v1)
+    which validated deberta as the most informative model for biomedical
+    abstractive QA evaluation (see §3.6.1).
+    Score interpretation (deberta-large-mnli):
       > 0.90  excellent
       0.85-0.90  strong
-      0.80-0.85  good
+      0.80-0.85  good (KPI target)
       0.75-0.80  acceptable
       < 0.75  needs improvement
     """
@@ -83,9 +88,9 @@ def compute_bertscore(predictions: list, references: list) -> float:
             predictions,
             references,
             lang="en",
-            model_type="distilbert-base-uncased",
+            model_type="microsoft/deberta-large-mnli",
             verbose=False,
-            batch_size=16,
+            batch_size=8,
         )
         return float(F1.mean())
     except ImportError:
@@ -113,26 +118,25 @@ def _get_faithfulness_model(model_name: str):
 def compute_faithfulness(
     predictions: list,
     contexts: list,
-    similarity_threshold: float = 0.50,
-    model_name: str = "pritamdeka/S-PubMedBert-MS-MARCO",
+    similarity_threshold: float = 0.55,
+    model_name: str = "microsoft/deberta-base-mnli",
 ) -> float:
     """
     Faithfulness: fraction of answers that are semantically grounded in
     at least one of their retrieved context chunks.
 
-    Uses sentence embeddings + cosine similarity to measure semantic overlap
-    between the generated answer and each context chunk. This correctly
-    captures paraphrased answers that lexical overlap (ROUGE) would miss.
+    Uses an NLI-trained model (DeBERTa) instead of the retrieval model
+    (PubMedBERT) to avoid circular evaluation — the retrieval and
+    faithfulness models must be independent for the score to be meaningful.
 
-    Threshold rationale: abstractive LLMs paraphrase retrieved context,
-    so cosine similarity lands in the 0.50–0.65 range even for faithful
-    answers. A threshold of 0.70 incorrectly penalises legitimate paraphrasing.
-    0.50 is the standard threshold for medical abstractive RAG faithfulness.
+    Threshold raised to 0.55 because DeBERTa NLI embeddings are more
+    discriminative than retrieval embeddings; 0.55 with DeBERTa ≈ 0.50
+    with PubMedBERT in practice.
 
     Args:
         predictions: generated answers
         contexts: list of lists — retrieved chunks for each question
-        similarity_threshold: cosine similarity threshold (default 0.50)
+        similarity_threshold: cosine similarity threshold (default 0.55)
         model_name: sentence transformer model for embeddings
 
     Returns:

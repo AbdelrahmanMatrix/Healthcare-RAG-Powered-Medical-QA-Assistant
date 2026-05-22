@@ -26,12 +26,15 @@ EXPERIMENT_CONFIGS = [
      "embedding_model": "pritamdeka/S-PubMedBert-MS-MARCO"},
     {"name": "pubmedbert_topk5_inject3", "top_k": 5, "inject_k": 3, "max_context_words": 200,
      "embedding_model": "pritamdeka/S-PubMedBert-MS-MARCO"},
-    {"name": "pubmedbert_topk10_inject5", "top_k": 10, "inject_k": 5, "max_context_words": 300,
+    {"name": "pubmedbert_topk10_inject5", "top_k": 10, "inject_k": 5, "max_context_words": 350,
      "embedding_model": "pritamdeka/S-PubMedBert-MS-MARCO"},
     {"name": "baseline_miniLM_topk5", "top_k": 5, "inject_k": 3, "max_context_words": 200,
      "embedding_model": "sentence-transformers/all-MiniLM-L6-v2"},
     {"name": "baseline_miniLM_topk10", "top_k": 10, "inject_k": 3, "max_context_words": 200,
      "embedding_model": "sentence-transformers/all-MiniLM-L6-v2"},
+    # Added for Finding 7: sentence-aware chunking with more context
+    {"name": "pubmedbert_topk10_inject5_ctx350", "top_k": 10, "inject_k": 5, "max_context_words": 350,
+     "embedding_model": "pritamdeka/S-PubMedBert-MS-MARCO"},
 ]
 
 EVAL_REPORT_PATH = PROJECT_ROOT / "reports" / "rag_evaluation_results.csv"

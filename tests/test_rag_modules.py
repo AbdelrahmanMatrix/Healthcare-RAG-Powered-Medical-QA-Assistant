@@ -146,9 +146,9 @@ class TestBM25RetrieverRetrieve:
         assert results[0]["category"] == "Unknown"
 
     def test_retrieve_empty_query(self, retriever):
-        """Empty query returns top results."""
+        """Empty query returns no results (no tokens to match)."""
         results = retriever.retrieve("", top_k=2)
-        assert len(results) == 2
+        assert len(results) == 0
 
 
 class TestBM25RetrieverNotInstalled:

@@ -71,9 +71,10 @@ DEFAULT_RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-12-v2"
 
 DEFAULT_TOP_K = 20          # FAISS retrieval candidates
 DEFAULT_INJECT_K = 5        # chunks fed to LLM after reranking
-DEFAULT_MAX_CONTEXT_WORDS = 200
+DEFAULT_MAX_CONTEXT_WORDS = 350
 DEFAULT_MAX_NEW_TOKENS = 256
 DEFAULT_MIN_ANSWER_WORDS = 3
+CLASSIFIER_CONFIDENCE_THRESHOLD = 0.70
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 FAISS_INDEX_PATH = (
@@ -191,6 +192,16 @@ class RAGPipeline:
             self._bm25_threshold = settings.BM25_THRESHOLD
         except Exception:
             self._bm25_threshold = 5.0
+
+        # ── Classifier (optional, for category routing) ──────────────────
+        self._use_classifier = False
+        try:
+            from src.classification.classifier import MedicalClassifier
+            self._classifier = MedicalClassifier()
+            self._use_classifier = True
+            print("[OK] Classifier ready for category routing")
+        except Exception as e:
+            print(f"[WARN] Classifier unavailable ({e}) — category routing disabled")
 
         # ── CrossEncoder Reranker (MiniLM-L-12-v2) ───────────────────
         self._use_reranker = use_reranker
@@ -445,16 +456,54 @@ class RAGPipeline:
 
         return cleaned
 
+    # ── Query routing guard (Finding 3) ──────────────────────────────────────
+
+    def _needs_retrieval(self, query: str) -> bool:
+        """
+        Lightweight guard: asks the LLM whether this query needs retrieved context.
+        Returns False for greetings, meta-questions, and very general knowledge.
+        Returns True for specific medical/clinical/pharmacological questions.
+
+        Falls back to True (always retrieve) if LLM call fails.
+        """
+        if not self._use_groq:
+            return True   # no guard without a capable LLM
+
+        ROUTING_PROMPT = (
+            "You are a router. Reply with JSON only — no explanation.\n"
+            "Decide if this query needs medical literature retrieval:\n"
+            '{"needs_rag": true}  — specific clinical/medical/pharmacological question\n'
+            '{"needs_rag": false} — greeting, meta-question, or general knowledge\n\n'
+            "Examples that need RAG: 'Does metformin reduce HbA1c?', 'Symptoms of sepsis'\n"
+            "Examples that don't: 'Hi', 'What can you do?', 'What year is it?'\n\n"
+            f"Query: {query}"
+        )
+        try:
+            import json
+            resp = self._groq_client.chat.completions.create(
+                model=self._groq_model,
+                messages=[{"role": "user", "content": ROUTING_PROMPT}],
+                max_tokens=20,
+                temperature=0.0,
+            )
+            raw = resp.choices[0].message.content.strip()
+            return json.loads(raw).get("needs_rag", True)
+        except Exception:
+            return True   # safe fallback — always retrieve
+
     # ── Public answer methods ─────────────────────────────────────────────────
 
     def format_sources(self, retrieved: list) -> list:
+        """Format retrieved sources with relevance scores.
+
+        With IndexFlatIP + L2-normalised embeddings, distance IS cosine
+        similarity in [0, 1] — no arbitrary scaling needed.
+        """
         results = []
         for r in retrieved:
             raw_dist = r["distance"]
-            if raw_dist <= 0:
-                relevance = min(1.0, -raw_dist / 30.0)
-            else:
-                relevance = max(0.0, 1.0 - raw_dist / 200.0)
+            # With IndexFlatIP + normalised vectors, distance = cosine sim [0, 1]
+            relevance = max(0.0, min(1.0, float(raw_dist)))
             results.append({
                 "chunk_id": r["chunk_id"],
                 "question": r["question"],
@@ -467,23 +516,68 @@ class RAGPipeline:
         return results
 
     def answer(self, query: str, top_k: int = None) -> dict:
-        """Full RAG pipeline: retrieve -> rerank -> generate -> disclaimer."""
-        retrieved = self.retrieve(query, top_k)
-        raw_answer = self.generate(query, retrieved)
+        """Full RAG pipeline with intelligent routing guard + quality logging."""
+        needs_rag = self._needs_retrieval(query)
+
+        if needs_rag:
+            retrieved = self.retrieve(query, top_k)
+            raw_answer = self.generate(query, retrieved)
+        else:
+            # Direct LLM answer — no retrieval overhead
+            retrieved = []
+            prompt = (
+                "You are a medical research assistant. "
+                f"Answer concisely: {query}"
+            )
+            if self._use_groq:
+                raw_answer = self._call_groq(prompt)
+            else:
+                raw_answer = INSUFFICIENT_CONTEXT_MESSAGE
+
+        sources = self.format_sources(retrieved)
+
+        # Quality scores for monitoring (Finding 8)
+        if retrieved:
+            retrieval_quality = float(
+                self._np.mean([r.get("reranker_score", 0.0) for r in retrieved])
+            )
+            mean_cosine_sim = float(
+                self._np.mean([float(r.get("distance", 0.0)) for r in retrieved])
+            )
+        else:
+            retrieval_quality = 0.0
+            mean_cosine_sim = 0.0
 
         return {
             "question": query,
             "answer": raw_answer + DISCLAIMER,
             "answer_raw": raw_answer,
-            "retrieved_sources": self.format_sources(retrieved),
+            "retrieved_sources": sources,
             "disclaimer_present": True,
             "top_k": len(retrieved),
+            "used_rag": needs_rag,
+            "retrieval_quality": round(retrieval_quality, 4),
+            "mean_cosine_similarity": round(mean_cosine_sim, 4),
         }
 
     def answer_with_routing(self, query: str, category: str = None, top_k: int = None) -> dict:
-        """Full pipeline with optional classifier routing + reranking."""
-        if category:
-            retrieved = self.retrieve_by_category(query, category, top_k)
+        """Full pipeline with confidence-gated classifier routing + reranking.
+
+        Category routing is only applied when classifier confidence >= threshold.
+        Below threshold, falls back to general retrieval (better than biased retrieval).
+        """
+        effective_category = category
+        confidence = 1.0
+
+        if category is None and self._use_classifier:
+            result = self._classifier.predict_with_confidence(query)
+            confidence = result["confidence"]
+            if confidence >= CLASSIFIER_CONFIDENCE_THRESHOLD:
+                effective_category = result["category"]
+            # else: confidence too low — use general retrieval
+
+        if effective_category:
+            retrieved = self.retrieve_by_category(query, effective_category, top_k)
         else:
             retrieved = self.retrieve(query, top_k)
 
@@ -492,15 +586,17 @@ class RAGPipeline:
 
         return {
             "question": query,
-            "category": category or "Unknown",
+            "category": effective_category or "Unknown",
+            "classifier_confidence": round(confidence, 4),
+            "routing_applied": effective_category is not None,
             "answer": raw_answer + DISCLAIMER,
             "answer_raw": raw_answer,
             "retrieved_sources": sources,
             "disclaimer_present": True,
             "top_k": len(retrieved),
             "category_matched_sources": sum(
-                1 for s in sources if s["category"] == category
-            ),
+                1 for s in sources if s["category"] == effective_category
+            ) if effective_category else 0,
         }
 
 
@@ -525,8 +621,9 @@ def build_rag_pipeline(**kwargs) -> RAGPipeline:
                         "use_reranker": settings.USE_RERANKER,
                         "top_k": settings.TOP_K,
                         "inject_k": settings.INJECT_K,
-                        "max_new_tokens": settings.MAX_TOKENS,
-                    }
+                    "max_new_tokens": settings.MAX_TOKENS,
+                    "max_context_words": settings.MAX_CONTEXT_WORDS,
+                }
                     defaults.update(kwargs)
                     kwargs = defaults
                 except Exception:

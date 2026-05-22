@@ -39,6 +39,9 @@ faiss-cpu>=1.7.4,<2.0.0
 # ─── BM25 (hybrid retrieval) ───────────────────────────────
 rank-bm25==0.2.2
 
+# ─── Text Splitting (Finding 7: sentence-aware chunking) ────
+langchain-text-splitters>=0.2.0,<1.0.0
+
 # ─── Machine Learning ──────────────────────────────────────
 scikit-learn==1.4.2
 

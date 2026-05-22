@@ -109,21 +109,63 @@ for cat, count in df_eval["category"].value_counts().items():
 df_eval.to_csv(HOLDOUT_PATH, index=False)
 print(f"\n   Holdout saved: {HOLDOUT_PATH}")
 
-# ── 4. Build Text Chunks ──────────────────────────────────────────────────
+# ── 4. Build Text Chunks (sentence-aware with overlap) ─────────────────────
 print("\n" + "=" * 60)
-print("STEP 4: Build Text Chunks")
+print("STEP 4: Build Text Chunks — RecursiveCharacterTextSplitter")
 print("=" * 60)
 
-df_train["text_chunk"] = (
-    "Question: " + df_train["question"] + "\n"
-    + "Context: " + df_train["context"] + "\n"
-    + "Answer: " + df_train["answer"]
-)
+try:
+    from langchain.text_splitter import RecursiveCharacterTextSplitter
+    HAS_LANGCHAIN = True
+except ImportError:
+    HAS_LANGCHAIN = False
+    print("   ⚠️  langchain-text-splitters not installed. Falling back to flat chunks.")
+    print("        Install: pip install langchain-text-splitters")
 
-text_chunks = df_train["text_chunk"].tolist()
-n_chunks = len(text_chunks)
-print(f"   Built {n_chunks:,} text chunks")
-print(f"   Sample:\n{text_chunks[0][:300]}")
+if HAS_LANGCHAIN:
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=700,
+        chunk_overlap=150,
+        separators=["\n\n", "\n", ". ", " ", ""],
+    )
+
+    all_chunks = []
+    all_meta = []
+
+    for _, row in df_train.iterrows():
+        full_text = (
+            f"Question: {row['question']}\n"
+            f"Context: {row['context']}\n"
+            f"Answer: {row['answer']}"
+        )
+        sub_chunks = splitter.split_text(full_text)
+        for chunk in sub_chunks:
+            all_chunks.append(chunk)
+            all_meta.append({
+                "question": row["question"],
+                "context": row["context"],
+                "answer": row["answer"],
+                "category": row.get("category", "Unknown"),
+                "text_chunk": chunk,
+            })
+
+    df_chunks = pd.DataFrame(all_meta)
+    text_chunks = all_chunks
+    n_chunks = len(text_chunks)
+    print(f"   Built {n_chunks:,} text chunks (from {len(df_train):,} records)")
+    print(f"   Sample:\n{text_chunks[0][:300]}")
+else:
+    # Fallback: flat concatenation
+    df_train["text_chunk"] = (
+        "Question: " + df_train["question"] + "\n"
+        + "Context: " + df_train["context"] + "\n"
+        + "Answer: " + df_train["answer"]
+    )
+    df_chunks = df_train[["question", "context", "answer", "category", "text_chunk"]].copy()
+    text_chunks = df_train["text_chunk"].tolist()
+    n_chunks = len(text_chunks)
+    print(f"   Built {n_chunks:,} text chunks")
+    print(f"   Sample:\n{text_chunks[0][:300]}")
 
 # ── 5. Load Model & Generate Embeddings ──────────────────────────────────
 print("\n" + "=" * 60)
@@ -162,7 +204,7 @@ print("STEP 6: Build FAISS Index")
 print("=" * 60)
 
 d = embeddings.shape[1]
-index = faiss.IndexFlatL2(d)
+index = faiss.IndexFlatIP(d)
 index.add(embeddings)
 
 print(f"   Dimension: {d}")
@@ -176,8 +218,8 @@ print("=" * 60)
 # Save FAISS index
 faiss.write_index(index, str(INDEX_PATH))
 
-# Save mapping table
-mapping_df = df_train[["question", "context", "answer", "category", "text_chunk"]].copy()
+# Save mapping table (from df_chunks which has one row per sub-chunk)
+mapping_df = df_chunks.copy()
 mapping_df.insert(0, "chunk_id", np.arange(len(mapping_df), dtype=np.int32))
 
 mapping_df.to_csv(MAPPING_CSV, index=False)
@@ -192,8 +234,8 @@ print(f"   Mapping CSV:  {MAPPING_CSV}")
 print(f"   Mapping PKL:  {MAPPING_PKL}")
 
 # Final sanity check
-assert index.ntotal == len(mapping_df) == len(df_train), \
-    f"Mismatch: index={index.ntotal}, mapping={len(mapping_df)}, df_train={len(df_train)}"
+assert index.ntotal == len(mapping_df) == len(df_chunks), \
+    f"Mismatch: index={index.ntotal}, mapping={len(mapping_df)}, df_chunks={len(df_chunks)}"
 print(f"\n   Sanity check PASSED: {index.ntotal:,} vectors == {len(mapping_df):,} mapping rows")
 
 # ── 8. Quick Sanity Check (5 queries) ─────────────────────────────────────
@@ -232,7 +274,7 @@ for qi, query in enumerate(test_queries):
         idx = int(indices[0, rank])
         dist = float(distances[0, rank])
         chunk = mapping_df.loc[idx, "text_chunk"]
-        print(f"    Top {rank+1} | Chunk {idx} | L2={dist:.4f}")
+        print(f"    Top {rank+1} | Chunk {idx} | IP={dist:.4f}")
         print(f"      {chunk[:200]}...")
 
 print("\n  LATENCY SUMMARY")
