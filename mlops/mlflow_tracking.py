@@ -12,6 +12,13 @@ Usage (from project root):
 This will run ≥ 5 experiment variations and register the best model.
 """
 
+import sys
+# Fix stdout encoding so emoji don't crash on Windows cp1252 terminals
+try:
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+except (AttributeError, ValueError):
+    pass
+
 import mlflow
 import mlflow.pyfunc
 from pathlib import Path
@@ -60,8 +67,8 @@ def _load_eval_metrics() -> dict:
     for _pkg in ("punkt", "punkt_tab"):
         try:
             nltk.data.find(f"tokenizers/{_pkg}")
-        except LookupError:
-            nltk.download(_pkg, quiet=True)
+        except (LookupError, OSError):
+            nltk.download(_pkg, quiet=False)
 
     df = pd.read_csv(EVAL_REPORT_PATH).dropna(subset=["rag_answer", "llm_answer", "reference"])
 
@@ -84,6 +91,16 @@ def _load_eval_metrics() -> dict:
     rouge_rag = compute_rouge(rag_answers, refs)
     rouge_llm = compute_rouge(llm_answers, refs)
 
+    # Compute BERTScore F1 (primary metric) for RAG answers
+    try:
+        from src.evaluation.metrics import compute_bertscore
+        bertscore_f1 = compute_bertscore(rag_answers, refs)
+        if bertscore_f1 <= 0:
+            print("  ⚠️  BERTScore F1 returned 0 — PyTorch/torch may be unavailable on this machine")
+    except Exception as e:
+        print(f"  ⚠️  BERTScore F1 computation failed: {e}")
+        bertscore_f1 = 0.0
+
     import numpy as np
     mean_bleu_rag = float(np.mean(bleu_rag))
     mean_bleu_llm = float(np.mean(bleu_llm))
@@ -99,6 +116,7 @@ def _load_eval_metrics() -> dict:
         "rouge_improvement_pct": round(
             ((rouge_rag - rouge_llm) / max(rouge_llm, 1e-9)) * 100, 2
         ),
+        "bertscore_f1": round(bertscore_f1, 4),
     }
 
 
@@ -143,6 +161,11 @@ def run_experiment(config: dict, base_metrics: dict, clf_metrics: dict) -> str:
             mlflow.log_metric(k, v)
         for k, v in clf_metrics.items():
             mlflow.log_metric(k, v)
+
+        # Log BERTScore F1 (primary metric for KPI tracking)
+        # Always log even if 0, so the metric column appears in MLflow UI
+        bs_val = base_metrics.get("bertscore_f1", 0.0)
+        mlflow.log_metric("bertscore_f1_primary", bs_val)
 
         # Simulate small latency measurement per config
         simulated_latency = 800 + (config["top_k"] * 50) + (config["inject_k"] * 30)

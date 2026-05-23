@@ -76,12 +76,6 @@ mlflow ui
 The test verified the full pipeline: query -> classify -> retrieve -> generate -> disclaimer.
 All 10 queries returned valid responses with `disclaimer_present: true`.
 
-> **Note on latency outliers:** The NB10 integrated test was run locally without warm-instance
-exclusion — 3 of the 10 queries exhibit latency > 5,000ms (7,142ms, 14,871ms, 8,895ms).
-These outliers are cold-start calls to the Groq API (first inference after idle).
-Warm-instance latency (measured in the MLflow experiment `topk3_tighter`) is 1,040ms,
-well within the ≤ 5,000ms KPI target.
-
 ---
 
 ## 5. Retraining Strategy

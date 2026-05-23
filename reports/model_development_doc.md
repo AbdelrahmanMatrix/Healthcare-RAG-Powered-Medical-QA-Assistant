@@ -72,7 +72,7 @@ User Query
 - **Class weights:** Applied via custom WeightedTrainer
 
 ### 3b. RAG Pipeline
-- **Held-out set:** 200 queries NOT in FAISS index
+- **Held-out set:** 2,000 queries NOT in FAISS index
 - **Baseline:** Same LLM (meta-llama/llama-4-scout-17b-16e-instruct) without retrieval context
 - **Metrics:** BLEU (NLTK), ROUGE-L (rouge-score library)
 - **Targets:** ROUGE-L ≥ 0.15, BLEU improvement ≥ +6% (secondary; BERTScore F1 ≥ 0.80 is the primary metric)
@@ -88,6 +88,10 @@ The classifier doesn't just label queries — it improves retrieval:
 1. FAISS retrieves 3× more candidates than needed
 2. Candidates matching the predicted category are prioritised
 3. Top-5 results returned (category matches first, then by distance)
+
+**Retrieval detail:** The pipeline retrieves 20 candidates from FAISS (`top_k=20`),
+reranks them with a CrossEncoder, and injects the top 5 into the LLM prompt.
+All 20 candidates are returned in the API payload for transparency.
 
 **Integrated test results:**
 - Queries tested: 10

@@ -76,7 +76,7 @@ api/routes/query.py  →  run_pipeline (src/pipeline.py)
     │
     ├─▶ FAISS Vector Store (src/rag/vectorstore.py)
     │       └─ data/embeddings/faiss_index/pubmedqa_index_flatl2.faiss
-    │          (~211K vectors, S-PubMedBert-MS-MARCO embeddings)
+    │          (209,108 vectors, S-PubMedBert-MS-MARCO embeddings)
     │
     ├─▶ BM25 Retriever (src/rag/bm25_retriever.py)  [hybrid retrieval]
     │
@@ -163,7 +163,7 @@ az webapp restart \
 | All 20 queries return disclaimer | 20/20 | `python scripts/latency_test.py` → Disclaimer OK |
 | Warm latency ≤ 5,000ms | 20/20 | `python scripts/latency_test.py` → Latency pass |
 | Stable Docker deployment | ≥ 1 release | Azure portal → App Service → Deployment logs |
-| API uptime ≥ 90% over 48h | ≥ 90% | Azure portal → App Service → Metrics → HTTP 2xx |
+| API uptime ≥ 90% over 48h | Pending | Azure deployment not completed — verified locally only |
 
 ---
 

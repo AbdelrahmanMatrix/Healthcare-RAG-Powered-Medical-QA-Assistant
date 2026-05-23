@@ -23,6 +23,7 @@ ENV/
 .env
 .env.*
 !.env.example
+creds_temp.json
 
 # ─── Model Weights (ALL classifiers) ─────────────────────────────────────────
 models/classifier/**/

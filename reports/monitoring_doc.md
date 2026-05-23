@@ -24,7 +24,11 @@
 | ROUGE-L | >= 0.15 | 0.10 - 0.15 | < 0.10 over 7-day window |
 | Macro F1 | >= 0.80 | 0.72 - 0.80 | < 0.72 on new query sample |
 | Avg latency | <= 3,500 ms | 3,500 - 5,000 ms | > 5,000 ms sustained warm |
-| Hallucination rate | <= 10% | 10 - 15% | > 15% on manual review |
+| Hallucination rate | < 10% | 10 - 15% | > 15% on manual review |
+
+> **Note:** The current baseline hallucination rate is exactly 10.0%, which sits
+> at the boundary between Healthy and Warning. Any upward trend in the next
+> evaluation cycle should trigger investigation.
 
 Drift is measured as a rolling 7-day average against the baselines recorded
 in MLflow experiment run `baseline_topk5`.
@@ -53,7 +57,7 @@ in MLflow experiment run `baseline_topk5`.
 ## 4. Infrastructure Constraints
 
 This monitoring strategy is documented as a **future enhancement**.
-The target deployment platform is Azure App Service Free Tier (F1). For this submission, all deployment and latency tests were performed against a local FastAPI instance, as Azure deployment was not completed. Once deployed, the Free Tier will not support:
+The target deployment platform is Azure App Service Free Tier (F1). For this submission, all deployment and latency tests were performed against a local FastAPI instance, as Azure deployment was not completed at the time of writing. Once deployed, the Free Tier will not support:
 - Continuous monitoring agents
 - Automated retraining pipelines
 - Scheduled jobs or cron tasks
@@ -67,8 +71,8 @@ Azure App Service Basic tier (B1) and adding Azure Monitor alerts.
 
 | Metric | Baseline Value |
 |--------|---------------|
-| BLEU (RAG) | 0.0239 |
-| ROUGE-L (RAG) | 0.1887 |
+| BLEU (RAG, secondary) | 0.0239 |
+| ROUGE-L (RAG, secondary) | 0.1887 |
 | BERTScore F1 (primary) | 0.8047 |
 | BLEU improvement over plain LLM | −13.4% (see evaluation_report.md note) |
 | Classifier Macro F1 | 0.9066 |
