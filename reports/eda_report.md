@@ -86,7 +86,7 @@
 - [x] Missing values handled ≥ 90%
 - [x] Data accuracy after preprocessing ≥ 85%
 - [x] All 6 categories present with ≥ 1% each
-- [x] EDA report contains all 4 required visualisations
+- [x] EDA report contains all 4 required visualisations (5 produced)
 - [ ] Full pipeline reproducible (Task 5)
 
 **Status: M1 Task 4 — Completed ✅**

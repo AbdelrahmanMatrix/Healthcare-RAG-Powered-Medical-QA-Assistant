@@ -12,15 +12,15 @@ import numpy as np
 import pandas as pd
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
-DEFAULT_INDEX_PATH = PROJECT_ROOT / "data" / "embeddings" / "faiss_index" / "pubmedqa_index_flatl2.faiss"
+DEFAULT_INDEX_PATH = PROJECT_ROOT / "data" / "embeddings" / "faiss_index" / "pubmedqa_index_flatip.faiss"
 DEFAULT_MAPPING_PATH = PROJECT_ROOT / "data" / "embeddings" / "faiss_index" / "chunk_mapping.pkl"
 
 
 def build_index(embeddings: np.ndarray) -> faiss.IndexFlatIP:
-    """Build a FAISS IndexFlatIP (inner product) from L2-normalised embeddings.
-
-    With normalize_embeddings=True, inner product = cosine similarity [0, 1].
-    """
+    """Build a FAISS IndexFlatIP index. Normalizes embeddings in-place to unit L2 norm,
+    making inner product equivalent to cosine similarity in [0, 1]."""
+    embeddings = np.array(embeddings, dtype=np.float32)
+    faiss.normalize_L2(embeddings)
     d = embeddings.shape[1]
     index = faiss.IndexFlatIP(d)
     index.add(embeddings)

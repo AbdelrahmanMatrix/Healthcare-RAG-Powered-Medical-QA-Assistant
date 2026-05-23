@@ -1008,8 +1008,8 @@
 
         <table>
             <tr><th>Metric</th><th>Threshold</th><th>Action</th></tr>
-            <tr><td>ROUGE-L drops below 0.32</td><td>For 7+ days</td><td>Re-embed updated corpus, retrain</td></tr>
-            <tr><td>Classifier F1 drops below 0.70</td><td>On new data</td><td>Fine-tune classifier with new examples</td></tr>
+            <tr><td>ROUGE-L drops below 0.10</td><td>For 7+ days (7-day rolling avg)</td><td>Re-embed updated corpus, retrain</td></tr>
+            <tr><td>Classifier F1 drops below 0.72</td><td>On new data</td><td>Fine-tune classifier with new examples</td></tr>
             <tr><td>Latency exceeds 5,000ms</td><td>Consistently</td><td>Optimise FAISS index or scale Azure resources</td></tr>
         </table>
 

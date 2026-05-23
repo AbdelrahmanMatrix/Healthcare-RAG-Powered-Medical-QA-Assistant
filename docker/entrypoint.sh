@@ -7,7 +7,7 @@
 #   - Falls back to 8000 if neither is set
 set -e
 
-INDEX_PATH="data/embeddings/faiss_index/pubmedqa_index_flatl2.faiss"
+INDEX_PATH="data/embeddings/faiss_index/pubmedqa_index_flatip.faiss"
 MAPPING_PATH="data/embeddings/faiss_index/chunk_mapping.pkl"
 
 if [ ! -f "$INDEX_PATH" ] || [ ! -f "$MAPPING_PATH" ]; then

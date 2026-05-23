@@ -34,9 +34,9 @@ REQUIRED_FILES = [
      PROJECT_ROOT / "data" / "processed" / "pubmedqa_cleaned.csv"),
     ("processed/pubmedqa_labelled.csv",
      PROJECT_ROOT / "data" / "processed" / "pubmedqa_labelled.csv"),
-    ("embeddings/pubmedqa_index_flatl2.faiss",
+    ("embeddings/pubmedqa_index_flatip.faiss",
      PROJECT_ROOT
-     / "data" / "embeddings" / "faiss_index" / "pubmedqa_index_flatl2.faiss"),
+     / "data" / "embeddings" / "faiss_index" / "pubmedqa_index_flatip.faiss"),
     ("embeddings/chunk_mapping.pkl",
      PROJECT_ROOT
      / "data" / "embeddings" / "faiss_index" / "chunk_mapping.pkl"),

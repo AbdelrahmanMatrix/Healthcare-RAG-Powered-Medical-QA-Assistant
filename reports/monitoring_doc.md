@@ -28,7 +28,9 @@
 
 > **Note:** The current baseline hallucination rate is exactly 10.0%, which sits
 > at the boundary between Healthy and Warning. Any upward trend in the next
-> evaluation cycle should trigger investigation.
+> evaluation cycle should trigger investigation per Section 4.
+> ⚠️ **Current baseline (10.0%) sits at the exact Healthy/Warning boundary.**
+> Any increase in the next evaluation cycle must trigger investigation per Section 4.
 
 Drift is measured as a rolling 7-day average against the baselines recorded
 in MLflow experiment run `baseline_topk5`.

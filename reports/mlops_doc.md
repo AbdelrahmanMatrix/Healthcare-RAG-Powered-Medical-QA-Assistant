@@ -40,8 +40,8 @@
 ## 2. MLflow Model Registry
 
 **Registered model name:** `healthcare-rag-classifier`
-**Production version:** v1 (run: `topk3_tighter` — lowest latency at 1,040 ms)
-**Selection criteria:** lowest `avg_latency_ms` among all 5 runs
+**Production version:** v1 (run selected by highest `bleu_rag` score among all 5 experiment runs)
+**Selection criteria:** highest `bleu_rag` among all 5 runs (latency also logged for reference)
 
 Start the MLflow UI to inspect all runs:
 ```

@@ -150,7 +150,7 @@ def run_experiment(config: dict, base_metrics: dict, clf_metrics: dict) -> str:
         })
 
         # Log FAISS index size (if index exists)
-        faiss_path = PROJECT_ROOT / "data" / "embeddings" / "faiss_index" / "pubmedqa_index_flatl2.faiss"
+        faiss_path = PROJECT_ROOT / "data" / "embeddings" / "faiss_index" / "pubmedqa_index_flatip.faiss"
         if faiss_path.exists():
             import faiss
             idx = faiss.read_index(str(faiss_path))

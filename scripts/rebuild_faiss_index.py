@@ -36,7 +36,7 @@ HOLDOUT_PATH = PROJECT_ROOT / "data" / "processed" / "eval_holdout.csv"
 OUTPUT_DIR = PROJECT_ROOT / "data" / "embeddings" / "faiss_index"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-INDEX_PATH = OUTPUT_DIR / "pubmedqa_index_flatl2.faiss"
+INDEX_PATH = OUTPUT_DIR / "pubmedqa_index_flatip.faiss"
 MAPPING_CSV = OUTPUT_DIR / "chunk_mapping.csv"
 MAPPING_PKL = OUTPUT_DIR / "chunk_mapping.pkl"
 

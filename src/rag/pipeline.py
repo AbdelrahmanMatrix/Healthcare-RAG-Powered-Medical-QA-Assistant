@@ -79,7 +79,7 @@ CLASSIFIER_CONFIDENCE_THRESHOLD = 0.70
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 FAISS_INDEX_PATH = (
     PROJECT_ROOT / "data" / "embeddings" / "faiss_index" /
-    "pubmedqa_index_flatl2.faiss"
+    "pubmedqa_index_flatip.faiss"
 )
 CHUNK_MAPPING_PATH = (
     PROJECT_ROOT / "data" / "embeddings" / "faiss_index" / "chunk_mapping.pkl"
@@ -311,6 +311,7 @@ class RAGPipeline:
         query_vector = self.encoder.encode(
             [query], convert_to_numpy=True
         ).astype(self._np.float32)
+        self._faiss.normalize_L2(query_vector)
         D, faiss_idx = self.index.search(query_vector, k)
         faiss_results = [
             self._row_to_dict(int(faiss_idx[0, r]), float(D[0, r]))
@@ -342,6 +343,7 @@ class RAGPipeline:
         query_vector = self.encoder.encode(
             [query], convert_to_numpy=True
         ).astype(self._np.float32)
+        self._faiss.normalize_L2(query_vector)
         D, faiss_idx = self.index.search(query_vector, search_k)
 
         candidates = [

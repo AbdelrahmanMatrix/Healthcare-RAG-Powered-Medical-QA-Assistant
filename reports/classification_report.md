@@ -6,7 +6,7 @@
 | Base model | `dmis-lab/biobert-v1.1` |
 | Classes | 6 |
 | Training split | 80/10/10 |
-| Epochs | 3 |
+| Epochs | 10 (configured) / 5 (early stopping at patience=2; best checkpoint from epoch 3) |
 | Learning rate | 2e-5 |
 | Batch size | 16 |
 | Class weights | Applied (balanced) |

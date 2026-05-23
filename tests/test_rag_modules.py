@@ -327,8 +327,8 @@ class TestEmbeddingModelEncode:
 class TestVectorstoreBuildIndex:
     """Tests for vectorstore.build_index()."""
 
-    def test_build_index_flatl2(self):
-        """build_index creates an IndexFlatL2 with correct dimension."""
+    def test_build_index_flatip(self):
+        """build_index creates an IndexFlatIP with correct dimension."""
         from src.rag.vectorstore import build_index
 
         embeddings = np.random.rand(10, 768).astype(np.float32)
@@ -409,7 +409,7 @@ class TestVectorstoreIO:
             load_index()
             mock_read.assert_called_once()
             args, _ = mock_read.call_args
-            assert "pubmedqa_index_flatl2.faiss" in str(args[0])
+            assert "pubmedqa_index_flatip.faiss" in str(args[0])
 
 
 class TestVectorstoreMapping:
@@ -453,7 +453,7 @@ class TestVectorstoreDefaultPaths:
     def test_default_index_path_ends_correctly(self):
         """DEFAULT_INDEX_PATH ends with the expected filename."""
         from src.rag.vectorstore import DEFAULT_INDEX_PATH
-        assert str(DEFAULT_INDEX_PATH).endswith("pubmedqa_index_flatl2.faiss")
+        assert str(DEFAULT_INDEX_PATH).endswith("pubmedqa_index_flatip.faiss")
 
     def test_default_mapping_path_ends_correctly(self):
         """DEFAULT_MAPPING_PATH ends with the expected filename."""

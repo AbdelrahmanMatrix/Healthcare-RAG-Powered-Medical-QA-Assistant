@@ -15,7 +15,8 @@ User Query
 │ category
 ▼
 ┌─────────────────────────┐
-│ FAISS Vector Store │ → Retrieves top-5 chunks
+│ FAISS Vector Store │ → Retrieves top-20 candidates
+│ (category-prioritised) │ (reranked to top-5 for injection)
 │ (category-prioritised) │ (matching category boosted)
 └────────────┬────────────┘
 │ context chunks
@@ -73,6 +74,7 @@ User Query
 
 ### 3b. RAG Pipeline
 - **Held-out set:** 2,000 queries NOT in FAISS index
+- **Retrieval:** FAISS retrieves top-20 candidates, CrossEncoder reranker scores them, top-inject_k (default 5) injected into LLM prompt
 - **Baseline:** Same LLM (meta-llama/llama-4-scout-17b-16e-instruct) without retrieval context
 - **Metrics:** BLEU (NLTK), ROUGE-L (rouge-score library)
 - **Targets:** ROUGE-L ≥ 0.15, BLEU improvement ≥ +6% (secondary; BERTScore F1 ≥ 0.80 is the primary metric)
@@ -90,7 +92,7 @@ The classifier doesn't just label queries — it improves retrieval:
 3. Top-5 results returned (category matches first, then by distance)
 
 **Retrieval detail:** The pipeline retrieves 20 candidates from FAISS (`top_k=20`),
-reranks them with a CrossEncoder, and injects the top 5 into the LLM prompt.
+reranks them with a CrossEncoder, and injects the top-`inject_k` (default 5) into the LLM prompt.
 All 20 candidates are returned in the API payload for transparency.
 
 **Integrated test results:**
@@ -103,7 +105,7 @@ All 20 candidates are returned in the API payload for transparency.
 | Decision | Rationale |
 |---|---|
 | Chunk = RecursiveCharacterTextSplitter (700/150) | Maximises semantic signal for retrieval |
-| Top-5 retrieval | Balances context richness with prompt length limits |
+| Top-20 candidates (reranked to top-5 for injection) | Balances recall (20 candidates) with context richness (top-5 injected into LLM) |
 | Category routing | Improves precision for specialised medical queries |
 | Medical disclaimer | Mandatory for responsible AI in healthcare domain |
 | Local LLM (no API) | Ensures reproducibility, no cost, no rate limits |

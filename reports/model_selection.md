@@ -9,7 +9,7 @@
 - `inject_k`: `3`
 - `llm_model`: `meta-llama/llama-4-scout-17b-16e-instruct (via Groq)`
 - `max_context_words`: `200`
-- `top_k`: `5`
+- `top_k`: `20`
 
 **Metrics:**
 - `avg_latency_ms`: `1140.0000`

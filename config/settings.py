@@ -10,7 +10,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 class Settings(BaseSettings):
     # ── Data Paths (relative to repo root) ────────────────────────────────────
-    FAISS_INDEX_PATH: str = "data/embeddings/faiss_index/pubmedqa_index_flatl2.faiss"
+    FAISS_INDEX_PATH: str = "data/embeddings/faiss_index/pubmedqa_index_flatip.faiss"
     CHUNKS_PKL_PATH: str = "data/embeddings/faiss_index/chunk_mapping.pkl"
     EVAL_HOLDOUT_PATH: str = "data/processed/eval_holdout.csv"
 
