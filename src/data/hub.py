@@ -18,6 +18,7 @@ Public API:
 """
 
 import os
+import shutil
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -96,7 +97,6 @@ def download_file(remote_path: str, local_path: Path) -> bool:
             token=hf_token,
         )
         # Copy from HF cache to the expected local path
-        import shutil
         shutil.copy2(cached_path, local_path)
         if local_path.exists():
             size_mb = local_path.stat().st_size / (1024 * 1024)
