@@ -8,8 +8,10 @@
 
 ## Live URL
 
-> To be added upon Azure deployment (M3 Task 3).
-> Format: `https://healthcare-rag-app.azurewebsites.net`
+> **Deployment status:** Azure deployment was not completed for this submission. All M3 KPIs (warm latency ≤ 5,000ms and disclaimer presence) were verified against a local FastAPI instance, as documented in reports/deployment_test_report.md.
+>
+> Once deployed, the production endpoint will be:
+> `https://healthcare-rag-app.azurewebsites.net`
 
 ---
 
@@ -25,6 +27,7 @@
 ### Sample `/query` Request
 
 ```bash
+# Example shown for production format. For local testing, replace with http://localhost:8000
 curl -X POST https://healthcare-rag-app.azurewebsites.net/query \
   -H "Content-Type: application/json" \
   -d '{"question": "What are the symptoms of type 2 diabetes?"}'
@@ -156,7 +159,7 @@ az webapp restart \
 
 | KPI | Target | How to Verify |
 |---|---|---|
-| Live URL returns 200 | ✅ | `curl https://healthcare-rag-app.azurewebsites.net/health` |
+| Local API returns 200 | ✅ | `curl http://localhost:8000/health` (verified locally — Azure URL pending deployment) |
 | All 20 queries return disclaimer | 20/20 | `python scripts/latency_test.py` → Disclaimer OK |
 | Warm latency ≤ 5,000ms | 20/20 | `python scripts/latency_test.py` → Latency pass |
 | Stable Docker deployment | ≥ 1 release | Azure portal → App Service → Deployment logs |

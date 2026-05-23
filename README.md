@@ -124,6 +124,14 @@ User Query
 | Classes | 6 medical categories |
 | HuggingFace | [AbdoMatrix/biobert-medical-classifier](https://huggingface.co/AbdoMatrix/biobert-medical-classifier) |
 
+### Fallback Classifier (DistilBERT)
+| Item | Value |
+|------|-------|
+| Location | `models/classifier/distilbert_classifier/` |
+| Status | Tokenizer configs present; weights are gitignored and downloaded separately |
+| Active | No — BioBERT is the primary classifier for all evaluation and deployment |
+| Purpose | Offline fallback for resource-constrained environments without HuggingFace access |
+
 ### RAG Pipeline
 | Item | Value |
 |------|-------|

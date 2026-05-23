@@ -53,7 +53,7 @@ in MLflow experiment run `baseline_topk5`.
 ## 4. Infrastructure Constraints
 
 This monitoring strategy is documented as a **future enhancement**.
-Current deployment uses Azure App Service Free Tier (F1), which does not support:
+The target deployment platform is Azure App Service Free Tier (F1). For this submission, all deployment and latency tests were performed against a local FastAPI instance, as Azure deployment was not completed. Once deployed, the Free Tier will not support:
 - Continuous monitoring agents
 - Automated retraining pipelines
 - Scheduled jobs or cron tasks

@@ -31,9 +31,9 @@ This document describes the complete end-to-end M1 pipeline:
 **All 6 categories have ≥ 1% representation** → KPI passed.
 
 ## 4. Key Findings from EDA
-- Average question length: 13.3 words
-- Average context length: 197.2 words  
-- Average answer length: 42.3 words
+- Average question length: 15.3 words
+- Average context length: 197.3 words  
+- Average answer length: 37.6 words
 - Dataset is well-balanced and ready for RAG + classification model
 - No major skewness in categories
 

@@ -1,5 +1,7 @@
 # MLflow Model Selection
 
+> **Scope note:** The BLEU scores in this file (bleu_rag: 0.0157, bleu_baseline: 0.0008, improvement: +1,759%) were recorded during MLflow hyperparameter search experiments using google/flan-t5-base as the comparison baseline — a small local model with near-zero BLEU output. The official submission evaluation in reports/evaluation_report.md uses meta-llama/llama-4-scout-17b-16e-instruct via Groq as the baseline, which is a far stronger model and produces different absolute BLEU values (RAG: 0.0239, baseline: 0.0276, delta: −13.4%). These two documents measure different things. The evaluation_report.md figures are the authoritative submission metrics. This file documents the hyperparameter selection process only.
+
 **Selected run:** `7d1a2bc1`
 
 **Reason:** Lowest avg_latency_ms (1,040ms) among all 5 runs. BLEU scores were nearly identical across runs (0.0154–0.0157), making latency the effective selection criterion.

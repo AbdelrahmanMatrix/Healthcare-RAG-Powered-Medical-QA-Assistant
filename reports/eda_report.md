@@ -71,7 +71,7 @@
 
 ## 5. Key Findings
 - Strongest length correlation: context ↔ answer (0.063)
-- Dataset is dominated by Symptoms (33.9%) and Diagnosis (23.0%)
+- Dataset is dominated by Medication (33.9%) and Treatment (23.0%), which together account for over 56% of the corpus. Symptoms is the smallest category at 4.1%, which still satisfies the ≥ 1% KPI minimum.
 - ✅ No critically skewed categories
 - Dataset is ready for RAG + Classification training
 

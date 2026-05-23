@@ -23,7 +23,7 @@
 | BERTScore F1 | 0.8047 | 0.8007 | +0.5% | >= 0.80 | OK |
 | Faithfulness | 92.0% | — | — | >= 70% | OK |
 | Hallucination | 10.0% | — | — | <= 15% | OK |
-"
+
 **Note on ROUGE-L:** ROUGE-L of 0.15-0.25 is normal for any abstractive LLM on PubMedQA (Lewis et al. 2020). BERTScore F1 is the primary metric for semantic quality.
 
 
