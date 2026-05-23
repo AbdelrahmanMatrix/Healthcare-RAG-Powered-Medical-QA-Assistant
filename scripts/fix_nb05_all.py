@@ -88,7 +88,9 @@ for i, cell in enumerate(nb["cells"]):
         else:
             # Check for execute_result with ename (some errors show differently)
             for output in cell["outputs"]:
-                if output.get("output_type") == "execute_result" and output.get("data", {}).get("text/plain", "").startswith("NameError"):
+                if (output.get("output_type") == "execute_result"
+                        and output.get("data", {}).get("text/plain", "")
+                        .startswith("NameError")):
                     cell["outputs"] = []
                     print(f"  [Cell {i}] Cleared error execute_result outputs")
                     fixes_applied += 1

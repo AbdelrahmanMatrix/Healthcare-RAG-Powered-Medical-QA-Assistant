@@ -711,9 +711,9 @@ def build_rag_pipeline(**kwargs) -> RAGPipeline:
                         "use_reranker": settings.USE_RERANKER,
                         "top_k": settings.TOP_K,
                         "inject_k": settings.INJECT_K,
-                    "max_new_tokens": settings.MAX_TOKENS,
-                    "max_context_words": settings.MAX_CONTEXT_WORDS,
-                }
+                        "max_new_tokens": settings.MAX_TOKENS,
+                        "max_context_words": settings.MAX_CONTEXT_WORDS,
+                    }
                     defaults.update(kwargs)
                     kwargs = defaults
                 except Exception:

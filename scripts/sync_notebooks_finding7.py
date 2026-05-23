@@ -15,6 +15,7 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
+
 def save(nb, path):
     path.write_text(json.dumps(nb, indent=1, ensure_ascii=False), encoding="utf-8")
     print(f"  [OK] Saved: {path.name} ({len(nb['cells'])} cells)")
@@ -82,7 +83,7 @@ def update_nb05(path):
                 '    print(f"   Sample:\\n{text_chunks[0][:300]}")',
             ]
             cell["source"] = new_src
-            print(f"  [NB05] Updated chunking cell")
+            print("  [NB05] Updated chunking cell")
 
         # Update mapping_df -> df_chunks
         if 'mapping_df = df_train[["question", "context", "answer", "category", "text_chunk"]].copy()' in src:
@@ -92,7 +93,7 @@ def update_nb05(path):
                     'mapping_df = df_chunks.copy()'
                 ) for line in cell["source"]
             ]
-            print(f"  [NB05] Updated mapping_df -> df_chunks")
+            print("  [NB05] Updated mapping_df -> df_chunks")
 
         # Update assertion
         if "index.ntotal == len(mapping_df) == len(df_train)" in src:
@@ -100,12 +101,12 @@ def update_nb05(path):
                 line.replace("len(df_train)", "len(df_chunks)")
                 for line in cell["source"]
             ]
-            print(f"  [NB05] Updated assertion to df_chunks")
+            print("  [NB05] Updated assertion to df_chunks")
 
         # Update markdown: "L2-normalize" -> "normalize"
         if "L2-normalize" in src:
             cell["source"] = [line.replace("L2-normalize", "normalize") for line in cell["source"]]
-            print(f"  [NB05] 'L2-normalize' -> 'normalize'")
+            print("  [NB05] 'L2-normalize' -> 'normalize'")
 
     save(nb, path)
 
@@ -118,7 +119,7 @@ def update_nb06(path):
         # Fix markdown: IndexFlatL2 -> IndexFlatIP
         if "IndexFlatL2" in src:
             cell["source"] = [line.replace("IndexFlatL2", "IndexFlatIP") for line in cell["source"]]
-            print(f"  [NB06] 'IndexFlatL2' -> 'IndexFlatIP'")
+            print("  [NB06] 'IndexFlatL2' -> 'IndexFlatIP'")
 
         # Fix top_k == 5 assertion
         if "All with 5 sources:" in src and "print" in src:
@@ -128,14 +129,14 @@ def update_nb06(path):
                     "print(f\"All with sources:  {all(r['top_k'] >= 5 for r in results)}\")"
                 ) for line in cell["source"]
             ]
-            print(f"  [NB06] Fixed top_k assertion")
+            print("  [NB06] Fixed top_k assertion")
 
         # Fix summary message
         if "5 sources retrieved" in src:
             cell["source"] = [
                 line.replace("5 sources retrieved", "sources retrieved") for line in cell["source"]
             ]
-            print(f"  [NB06] Fixed summary message")
+            print("  [NB06] Fixed summary message")
 
     save(nb, path)
 
@@ -148,7 +149,7 @@ def update_nb09(path):
         # Fix IndexFlatL2 -> IndexFlatIP
         if "IndexFlatL2" in src:
             cell["source"] = [line.replace("IndexFlatL2", "IndexFlatIP") for line in cell["source"]]
-            print(f"  [NB09] 'IndexFlatL2' -> 'IndexFlatIP'")
+            print("  [NB09] 'IndexFlatL2' -> 'IndexFlatIP'")
 
         # Fix Chunk format description
         if "Chunk = Q + Context + Answer" in src:
@@ -158,7 +159,7 @@ def update_nb09(path):
                     "Chunk = RecursiveCharacterTextSplitter (700/150)"
                 ) for line in cell["source"]
             ]
-            print(f"  [NB09] Updated chunk format description")
+            print("  [NB09] Updated chunk format description")
 
     save(nb, path)
 
@@ -176,12 +177,12 @@ def update_nb10(path):
                     "assert len(df_holdout) == 2000, f\"Expected 2,000 holdout rows, got {len(df_holdout)}\""
                 ) for line in cell["source"]
             ]
-            print(f"  [NB10] Fixed holdout assertion 1000 -> 2000")
+            print("  [NB10] Fixed holdout assertion 1000 -> 2000")
 
         # Fix print statement
         if "Eval holdout: 1,000" in src:
             cell["source"] = [line.replace("1,000", "2,000") for line in cell["source"]]
-            print(f"  [NB10] Updated holdout print 1,000 -> 2,000")
+            print("  [NB10] Updated holdout print 1,000 -> 2,000")
 
     save(nb, path)
 
