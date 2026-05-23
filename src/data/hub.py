@@ -27,19 +27,19 @@ HF_DATASET_REPO = "AbdoMatrix/healthcare-rag-data"
 
 # Files to check/download: (relative_path_in_repo, local_path)
 REQUIRED_FILES = [
-    ("data/raw/pubmedqa_raw.csv",
+    ("raw/pubmedqa_raw.csv",
      PROJECT_ROOT / "data" / "raw" / "pubmedqa_raw.csv"),
-    ("data/processed/pubmedqa_cleaned.csv",
+    ("processed/pubmedqa_cleaned.csv",
      PROJECT_ROOT / "data" / "processed" / "pubmedqa_cleaned.csv"),
-    ("data/processed/pubmedqa_labelled.csv",
+    ("processed/pubmedqa_labelled.csv",
      PROJECT_ROOT / "data" / "processed" / "pubmedqa_labelled.csv"),
-    ("data/embeddings/faiss_index/pubmedqa_index_flatl2.faiss",
+    ("embeddings/pubmedqa_index_flatl2.faiss",
      PROJECT_ROOT
      / "data" / "embeddings" / "faiss_index" / "pubmedqa_index_flatl2.faiss"),
-    ("data/embeddings/faiss_index/chunk_mapping.pkl",
+    ("embeddings/chunk_mapping.pkl",
      PROJECT_ROOT
      / "data" / "embeddings" / "faiss_index" / "chunk_mapping.pkl"),
-    ("data/processed/eval_holdout.csv",
+    ("processed/eval_holdout.csv",
      PROJECT_ROOT / "data" / "processed" / "eval_holdout.csv"),
 ]
 
@@ -66,6 +66,11 @@ def download_file(remote_path: str, local_path: Path) -> bool:
     """
     Download a single file from the HuggingFace dataset repo.
 
+    Files are first downloaded to the HuggingFace cache, then copied
+    to the expected local path. This decouples remote paths from local
+    paths so the directory structure can differ between the HF repo
+    and the local project layout.
+
     Args:
         remote_path: Path within the HF dataset repo.
         local_path: Local filesystem path to save to.
@@ -84,13 +89,15 @@ def download_file(remote_path: str, local_path: Path) -> bool:
 
     try:
         _ensure_dir(local_path)
-        hf_hub_download(
+        cached_path = hf_hub_download(
             repo_id=HF_DATASET_REPO,
             filename=remote_path,
-            local_dir=PROJECT_ROOT,
-            local_dir_use_symlinks=False,
+            repo_type="dataset",
             token=hf_token,
         )
+        # Copy from HF cache to the expected local path
+        import shutil
+        shutil.copy2(cached_path, local_path)
         if local_path.exists():
             size_mb = local_path.stat().st_size / (1024 * 1024)
             rel = local_path.relative_to(PROJECT_ROOT)
