@@ -125,10 +125,11 @@ class TestBM25RetrieverRetrieve:
         scores = [r["bm25_score"] for r in results]
         assert scores == sorted(scores, reverse=True)
 
-    def test_retrieve_distance_negative(self, retriever):
-        """distance is negative of BM25 score (FAISS-consistent)."""
+    def test_retrieve_distance_normalized(self, retriever):
+        """distance is soft-normalized from BM25 score: 1/(1+score)."""
         results = retriever.retrieve("test query", top_k=1)
-        assert results[0]["distance"] == -results[0]["bm25_score"]
+        expected = 1.0 / (1.0 + results[0]["bm25_score"])
+        assert results[0]["distance"] == pytest.approx(expected)
 
     def test_retrieve_category_fallback(self):
         """When category column is missing, defaults to 'Unknown'."""
