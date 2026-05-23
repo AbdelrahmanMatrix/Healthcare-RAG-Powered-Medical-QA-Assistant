@@ -101,12 +101,12 @@ class TestHubDownloadFile:
         test_root = tmp_path / "project"
         test_root.mkdir()
         dest = test_root / "data" / "raw" / "downloaded.csv"
-        
+
         # Create a temp cache file that hf_hub_download will "return"
         cache_file = tmp_path / "cache" / "downloaded.csv"
         cache_file.parent.mkdir(parents=True, exist_ok=True)
         cache_file.write_text("dummy content that is long enough for size calc")
-        
+
         mock_hf_download = MagicMock(return_value=str(cache_file))
 
         real_import = __builtins__["__import__"]
@@ -123,7 +123,9 @@ class TestHubDownloadFile:
                 with patch("src.data.hub.os.getenv", return_value=None):
                     dest.parent.mkdir(parents=True, exist_ok=True)
                     result = download_file("data/raw/downloaded.csv", dest)
+
                 assert result is True, f"download failed: dest={dest}, exists={dest.exists()}"
+
                 mock_hf_download.assert_called_once_with(
                     repo_id="AbdoMatrix/healthcare-rag-data",
                     filename="data/raw/downloaded.csv",
