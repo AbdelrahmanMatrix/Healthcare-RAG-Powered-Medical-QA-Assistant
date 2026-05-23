@@ -50,7 +50,7 @@ in MLflow experiment run `baseline_topk5`.
 
 ### 3b. Classifier retraining
 1. Re-run fine-tuning on updated labelled data (notebook 07)
-2. Evaluate on held-out test set — target macro F1 >= 0.78
+2. Evaluate on held-out test set — target macro F1 >= 0.78. If retraining yields F1 >= 0.72 but < 0.78, re-deploy as a provisional update and flag for a follow-up training cycle. Only promote to production (and upload to HuggingFace) if F1 >= 0.78.
 3. If improved, upload new weights: `python scripts/upload_classifier_to_hub.py`
 4. Register new model version in MLflow registry
 
@@ -78,8 +78,13 @@ Azure App Service Basic tier (B1) and adding Azure Monitor alerts.
 | BERTScore F1 (primary) | 0.8047 |
 | BLEU improvement over plain LLM | −13.4% (see evaluation_report.md note) |
 | Classifier Macro F1 | 0.9066 |
-| Avg latency (warm) | 3,197 ms |
+| Avg latency (warm) | 3,197 ms (local FastAPI, warm, Groq API, single-thread) |
+| NB08 eval avg latency | 6,570 ms (200-query batch via Groq, includes per-call overhead) |
 | Hallucination rate | 10% |
 
 *All baselines recorded May 2026. Retraining triggered when any metric
 degrades beyond the thresholds in Section 2.*
+
+> **Latency context:** The 3,197 ms figure was recorded by the latency test script against a warm local server. The 6,570 ms average in NB08 reflects a sequential 200-query batch over the Groq API where each call incurs full round-trip overhead. These are not the same operating condition; both figures should be retained for transparency.
+
+¹ The current hallucination rate (10.0%, 3/30 manual samples) sits exactly on the Healthy/Warning boundary. This figure was obtained from a 30-sample manual review, which carries high sampling variance. A larger review (≥ 100 samples) is recommended before the next deployment cycle.

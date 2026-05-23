@@ -39,7 +39,7 @@ Fine-tuned distilbert-base-uncased for classifying medical questions into 6 cate
 | Item | Value |
 |------|-------|
 | Base model | distilbert-base-uncased |
-| Dataset | qiaojin/PubMedQA (pqa_artificial, 211,269 rows — 10,000-row training subset) |
+| Dataset | qiaojin/PubMedQA (pqa_artificial, 211,186 rows — 10,000-row training subset) |
 | Split | 80/10/10 |
 | Epochs | 3 |
 | Learning rate | 2e-5 |

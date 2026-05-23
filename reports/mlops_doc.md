@@ -25,23 +25,24 @@
 - `faiss_index_size` — number of vectors in the FAISS index
 - `avg_latency_ms` — estimated response latency
 
-### 5 experiment configurations run
+### 6 experiment configurations run
 
 | Run name | top_k | inject_k | max_context_words |
 |----------|-------|----------|------------------|
-| baseline_topk5 | 5 | 3 | 200 |
-| topk3_tighter | 3 | 3 | 200 |
-| topk5_more_context | 5 | 5 | 300 |
-| topk7_wide | 7 | 3 | 200 |
-| inject5_wide_context | 7 | 5 | 350 |
+| pubmedbert_topk10_inject3 | 10 | 3 | 200 |
+| pubmedbert_topk5_inject3 | 5 | 3 | 200 |
+| pubmedbert_topk10_inject5 | 10 | 5 | 350 |
+| baseline_miniLM_topk5 | 5 | 3 | 200 |
+| baseline_miniLM_topk10 | 10 | 3 | 200 |
+| pubmedbert_topk10_inject5_ctx350 | 10 | 5 | 350 |
 
 ---
 
 ## 2. MLflow Model Registry
 
 **Registered model name:** `healthcare-rag-classifier`
-**Production version:** v1 (run selected by highest `bleu_rag` score among all 5 experiment runs)
-**Selection criteria:** highest `bleu_rag` among all 5 runs (latency also logged for reference)
+**Production version:** v1 (run: `pubmedbert_topk5_inject3` — lowest top_k among PubMedBERT configurations)
+**Selection criteria:** highest `bleu_rag` among all 6 runs (latency also logged for reference)
 
 Start the MLflow UI to inspect all runs:
 ```

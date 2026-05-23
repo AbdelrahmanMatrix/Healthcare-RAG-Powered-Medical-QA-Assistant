@@ -87,11 +87,13 @@ User Query
 ## 4. Category Routing Strategy
 
 The classifier doesn't just label queries — it improves retrieval:
-1. FAISS retrieves 3× more candidates than needed
+1. FAISS retrieves 20 candidates from FAISS (fixed DEFAULT_TOP_K=20)
 2. Candidates matching the predicted category are prioritised
-3. Top-5 results returned (category matches first, then by distance)
+3. CrossEncoder reranks the 20 candidates; top-5 are injected into the LLM prompt (DEFAULT_INJECT_K=5)
 
 **Retrieval detail:** The pipeline retrieves 20 candidates from FAISS (`top_k=20`),
+**BM25 keyword index:** retrieves the top-k results by BM25 score using a medical-aware tokeniser that preserves hyphenated compound terms. Results are merged with FAISS candidates, deduplicated by chunk ID, and the unified list is re-ranked by the CrossEncoder.
+**Note on the FAISS index file:** The file is named `pubmedqa_index_flatl2.faiss`. Although the underlying index type is IndexFlatIP (inner product), the file was saved with the `flatl2` suffix. With L2-normalised embeddings, inner product is equivalent to cosine similarity.
 reranks them with a CrossEncoder, and injects the top-`inject_k` (default 5) into the LLM prompt.
 All 20 candidates are returned in the API payload for transparency.
 
