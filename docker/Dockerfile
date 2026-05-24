@@ -7,9 +7,8 @@ FROM python:3.10-slim
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Accept HF_TOKEN at build time (used by entrypoint to download models/data)
-ARG HF_TOKEN=""
-ENV HF_TOKEN=${HF_TOKEN}
+# HF_TOKEN is provided at runtime via Azure App Service app settings or .env file.
+# Do NOT bake it into the image for security reasons.
 
 WORKDIR /app
 
@@ -17,6 +16,9 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential curl \
     && rm -rf /var/lib/apt/lists/*
+
+# Create a symlink so that App Service log streaming works
+RUN mkdir -p /home/LogFiles && ln -sf /dev/stdout /home/LogFiles/entrypoint.log
 
 # Install Python deps first — cached unless requirements.txt changes
 COPY requirements.txt .
