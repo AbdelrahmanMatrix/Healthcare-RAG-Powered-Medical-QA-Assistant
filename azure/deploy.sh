@@ -25,7 +25,8 @@ set -e
 
 # ── Configuration — edit these if needed ─────────────────────────────────────
 RESOURCE_GROUP="healthcare-rag-rg"
-LOCATION="eastus"
+LOCATION="germanywestcentral"
+# Resource group already exists here from previous deployment
 ACR_NAME="healthcareragacr"          # must be globally unique, lowercase, 5-50 chars
 APP_NAME="healthcare-rag-app"        # must be globally unique
 APP_SERVICE_PLAN="healthcare-rag-plan"
