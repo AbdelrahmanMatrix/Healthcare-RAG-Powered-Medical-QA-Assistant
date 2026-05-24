@@ -79,7 +79,7 @@ CLASSIFIER_CONFIDENCE_THRESHOLD = 0.70
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 FAISS_INDEX_PATH = (
     PROJECT_ROOT / "data" / "embeddings" / "faiss_index" /
-    "pubmedqa_index_flatl2.faiss"
+    "pubmedqa_index_flatip.faiss"
 )
 CHUNK_MAPPING_PATH = (
     PROJECT_ROOT / "data" / "embeddings" / "faiss_index" / "chunk_mapping.pkl"
@@ -715,6 +715,8 @@ def build_rag_pipeline(**kwargs) -> RAGPipeline:
                         "inject_k": settings.INJECT_K,
                         "max_new_tokens": settings.MAX_TOKENS,
                         "max_context_words": settings.MAX_CONTEXT_WORDS,
+                        "faiss_index_path": str(PROJECT_ROOT / settings.FAISS_INDEX_PATH),
+                        "chunk_mapping_path": str(PROJECT_ROOT / settings.CHUNKS_PKL_PATH),
                     }
                     defaults.update(kwargs)
                     kwargs = defaults

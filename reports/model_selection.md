@@ -11,7 +11,7 @@ BERTScore F1 is the primary quality metric for abstractive RAG systems (Lewis et
 - `inject_k`: `3`
 - `llm_model`: `meta-llama/llama-4-scout-17b-16e-instruct (via Groq)`
 - `max_context_words`: `200`
-- `top_k`: `10`
+- `top_k`: `20`
 
 **Metrics:**
 - `avg_latency_ms`: `2227.3000`

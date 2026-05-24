@@ -71,6 +71,10 @@ nul
 *.bak
 *.orig
 
+# ─── Build Artifacts (archives, exports) ──────────────────────────────────────
+*.zip
+Healthcare RAG Medical Q&A Assistant.html
+
 # ─── MLflow (local tracking) ──────────────────────────────────────────────────
 mlruns/
 mlartifacts/

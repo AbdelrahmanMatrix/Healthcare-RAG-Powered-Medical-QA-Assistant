@@ -296,12 +296,22 @@ python download.py
 
 Expected output:
 ```
-📥 Downloading 5 missing files...
+============================================================
+🏥 Healthcare RAG — Data Setup
+============================================================
+
+📂 Found 0/6 files locally.
+   ❌ ...
+
+📥 Downloading 6 missing files...
+
   ✅ Downloaded: data/raw/pubmedqa_raw.csv (15.2 MB)
   ✅ Downloaded: data/processed/pubmedqa_cleaned.csv (12.1 MB)
   ✅ Downloaded: data/processed/pubmedqa_labelled.csv (12.3 MB)
-  ✅ Downloaded: data/embeddings/faiss_index/pubmedqa_index_flatl2.faiss (14.7 MB)
+  ✅ Downloaded: data/embeddings/faiss_index/pubmedqa_index_flatip.faiss (14.7 MB)
   ✅ Downloaded: data/embeddings/faiss_index/chunk_mapping.pkl (11.8 MB)
+  ✅ Downloaded: data/processed/eval_holdout.csv (3.3 MB)
+
 🎉 Setup complete! You can now run any notebook.
 ```
 

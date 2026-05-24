@@ -75,7 +75,7 @@ api/routes/query.py  →  run_pipeline (src/pipeline.py)
     │          (huggingface.co/AbdoMatrix/biobert-medical-classifier)
     │
     ├─▶ FAISS Vector Store (src/rag/vectorstore.py)
-    │       └─ data/embeddings/faiss_index/pubmedqa_index_flatl2.faiss
+    │       └─ data/embeddings/faiss_index/pubmedqa_index_flatip.faiss
     │          (209,108 vectors, S-PubMedBert-MS-MARCO embeddings)
     │
     ├─▶ BM25 Retriever (src/rag/bm25_retriever.py)  [hybrid retrieval]
