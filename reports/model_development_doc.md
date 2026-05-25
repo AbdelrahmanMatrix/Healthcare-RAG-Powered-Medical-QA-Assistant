@@ -1,7 +1,7 @@
 # Model Development Documentation
 **Healthcare RAG-Powered Medical Q&A Assistant**
 **Owner:** Abdelrahman Mostafa Sayed
-**Generated:** 2026-05-23 00:39:24
+**Generated:** 2026-05-26 02:22:10
 
 ---
 
@@ -15,9 +15,8 @@ User Query
 │ category
 ▼
 ┌─────────────────────────┐
-│ FAISS Vector Store │ → Retrieves top-15 candidates
-│ (category-prioritised)
-│ (reranked to top-3 for injection)
+│ FAISS Vector Store │ → Retrieves top-5 chunks
+│ (category-prioritised) │ (matching category boosted)
 └────────────┬────────────┘
 │ context chunks
 ▼
@@ -73,8 +72,7 @@ User Query
 - **Class weights:** Applied via custom WeightedTrainer
 
 ### 3b. RAG Pipeline
-- **Held-out set:** 2,000 queries NOT in FAISS index
-- **Retrieval:** FAISS retrieves top-15 candidates, CrossEncoder reranker scores them, top-inject_k (default 3) injected into LLM prompt
+- **Held-out set:** 200 queries NOT in FAISS index
 - **Baseline:** Same LLM (meta-llama/llama-4-scout-17b-16e-instruct) without retrieval context
 - **Metrics:** BLEU (NLTK), ROUGE-L (rouge-score library)
 - **Targets:** ROUGE-L ≥ 0.15, BLEU improvement ≥ +6% (secondary; BERTScore F1 ≥ 0.80 is the primary metric)
@@ -87,18 +85,13 @@ User Query
 ## 4. Category Routing Strategy
 
 The classifier doesn't just label queries — it improves retrieval:
-1. FAISS retrieves 15 candidates from FAISS (fixed DEFAULT_TOP_K=15)
+1. FAISS retrieves 3× more candidates than needed
 2. Candidates matching the predicted category are prioritised
-3. CrossEncoder reranks the 20 candidates; top-3 are injected into the LLM prompt (DEFAULT_INJECT_K=3)
-
-**Retrieval detail:** The pipeline retrieves 15 candidates from FAISS (`top_k=15`).
-**BM25 keyword index:** retrieves the top-k results by BM25 score using a medical-aware tokeniser that preserves hyphenated compound terms. Results are merged with FAISS candidates, deduplicated by chunk ID, and the unified list is re-ranked by the CrossEncoder.
-**Note on the FAISS index file:** The file is named `pubmedqa_index_flatip.faiss`. The underlying index type is IndexFlatIP (inner product). With L2-normalised embeddings, inner product is equivalent to cosine similarity.
-All 20 candidates are returned in the API payload for transparency.
+3. Top-5 results returned (category matches first, then by distance)
 
 **Integrated test results:**
 - Queries tested: 10
-- Category routing match rate: 84.5%
+- Category routing match rate: 91.3%
 - All disclaimers present: True
 
 ## 5. Design Decisions
@@ -106,7 +99,7 @@ All 20 candidates are returned in the API payload for transparency.
 | Decision | Rationale |
 |---|---|
 | Chunk = RecursiveCharacterTextSplitter (700/150) | Maximises semantic signal for retrieval |
-| Top-15 candidates (reranked to top-3 for injection) | Balances recall (20 candidates) with context richness (top-3 injected into LLM) |
+| Top-5 retrieval | Balances context richness with prompt length limits |
 | Category routing | Improves precision for specialised medical queries |
 | Medical disclaimer | Mandatory for responsible AI in healthcare domain |
 | Local LLM (no API) | Ensures reproducibility, no cost, no rate limits |
