@@ -88,7 +88,7 @@ User Query
              │
              ▼
 ┌─────────────────────────┐
-│  FAISS Vector Store     │  → Retrieves top-20 candidates, reranks to top-3
+│  FAISS Vector Store     │  → Retrieves top-15 candidates, reranks to top-3
 │  (category-prioritised) │     (category matches boosted)
 └────────────┬────────────┘
              │
@@ -139,7 +139,7 @@ User Query
 | Embeddings | `pritamdeka/S-PubMedBert-MS-MARCO` (768d) |
 | Vector Store | FAISS IndexFlatIP + BM25 hybrid retrieval |
 | Generator | `meta-llama/llama-4-scout-17b-16e-instruct` via Groq API (falls back to `google/flan-t5-base` locally) |
-| Retrieval | Top-20 candidates → reranked top-3 with category routing |
+| Retrieval | Top-15 candidates → reranked top-3 with category routing |
 | HTTP Client | `openai` Python SDK pointed at `api.groq.com/openai/v1` |
 
 ---
@@ -217,10 +217,135 @@ streamlit run dashboard/app.py
 
 ## 🐳 Docker
 
+The project ships a full containerised stack with three services:
+
+| Service | Container | Description |
+|---------|-----------|-------------|
+| **healthcare-rag** | `healthcare-rag-api` | FastAPI backend (port `8000`) |
+| **dashboard** | `healthcare-rag-dashboard` | Streamlit UI (port `8501`) |
+| **mlflow** | `healthcare-rag-mlflow` | MLflow experiment tracking (port `5000`) |
+
+Three Docker Compose files live in the `docker/` directory:
+
+| File | Purpose |
+|------|---------|
+| `docker-compose.yml` | **Base** — production-ready service definitions, health checks, named volumes |
+| `docker-compose.override.yml` | **Dev** — auto-loaded; adds source-code mounts + `--reload` for hot-reloading |
+| `docker-compose.prod.yml` | **Prod** — explicit `-f` override; adds resource limits, logging rotation, security hardening |
+
+### Quick Start
+
 ```bash
-cd docker
-docker-compose up --build
+# Development stack (auto-loads dev override with hot-reload)
+make docker-dev
+
+# Production stack (explicit -f overrides, no hot-reload)
+make docker-prod
 ```
+
+Or manually:
+
+```bash
+# Dev (auto-loads docker-compose.override.yml)
+docker compose -f docker/docker-compose.yml up --build -d
+
+# Prod (specify both files so dev override is NOT auto-loaded)
+docker compose -f docker/docker-compose.yml -f docker/docker-compose.prod.yml up --build -d
+```
+
+### All Makefile Targets
+
+#### Build & Image Management
+
+| Target | Description |
+|--------|-------------|
+| `make docker-build` | Build the Docker image from the Dockerfile |
+| `make docker-build-no-cache` | Clean rebuild ignoring all layer cache (use after dependency changes) |
+| `make docker-push` | Tag and push the image to Azure Container Registry |
+| `make docker-pull` | Pull the latest image from ACR + third-party service images |
+| `make docker-login` | Authenticate Docker to ACR via `az acr login` (requires Azure CLI) |
+
+#### Run & Deploy
+
+| Target | Description |
+|--------|-------------|
+| `make docker-dev` | Start the full dev stack with hot-reloading (auto-loads override) |
+| `make docker-prod` | Start the full production stack with resource limits & security |
+| `make docker-run` | Run a standalone container locally (`docker run`) |
+
+#### Management
+
+| Target | Description |
+|--------|-------------|
+| `make docker-ps` | List all stack containers with status and ports |
+| `make docker-stats` | Live CPU, memory, network, and block I/O usage |
+| `make docker-top` | Show running processes inside each container |
+| `make docker-logs` | Tail logs from all three services simultaneously |
+| `make docker-restart` | Gracefully restart all stack services |
+| `make docker-exec` | Open an interactive shell (`sh`) inside the API container |
+| `make docker-test` | Run the test suite inside a disposable container |
+
+#### Cleanup & Air-Gapped
+
+| Target | Description |
+|--------|-------------|
+| `make docker-clean` | Stop stack, remove containers, volumes, and dangling images |
+| `make docker-save` | Export all stack images to `docker/images/` as `.tar` archives |
+| `make docker-load` | Restore all stack images from `docker/images/` archives |
+
+### Development Override (`docker-compose.override.yml`)
+
+When you run `make docker-dev`, Docker automatically merges the dev override:
+
+- **Source-code mounts** — `api/`, `src/`, `config/`, `scripts/`, `dashboard/` are bind-mounted so edits reflect instantly
+- **Hot-reload** — uvicorn starts with `--reload`, auto-restarting on file changes
+- **Relaxed `depends_on`** — dashboard starts as soon as the API container is running (no need to wait for full health check)
+- **Shorter healthcheck grace periods** — 30s for API, 15s for dashboard
+
+### Production Override (`docker-compose.prod.yml`)
+
+Apply explicitly for production deployments (the dev override is NOT loaded):
+
+```bash
+docker compose -f docker/docker-compose.yml -f docker/docker-compose.prod.yml up -d
+```
+
+| Feature | API | Dashboard | MLflow |
+|---------|-----|-----------|--------|
+| CPU limit | 2 cores | 1 core | 0.5 cores |
+| Memory limit | 4 GB | 2 GB | 1 GB |
+| Logging | JSON file, 10m/3-file rotation | Same | Same |
+| Security | `no-new-privileges` | `no-new-privileges` | `no-new-privileges` |
+| Restart | `unless-stopped` | `unless-stopped` | `unless-stopped` |
+
+### Air-Gapped Deployment
+
+For environments without internet access:
+
+```bash
+# On the internet-connected machine:
+make docker-build        # Build the image
+make docker-save         # Export images to docker/images/
+
+# Transfer docker/images/ to the target machine, then:
+make docker-load         # Restore images
+make docker-prod         # Start the stack
+```
+
+### Container Image
+
+The `Dockerfile` (`docker/Dockerfile`) produces a `python:3.10-slim`-based image:
+
+- Installs production dependencies from `requirements.txt`
+- Copies application source (`src/`, `api/`, `config/`, `scripts/`, `mlops/`, `dashboard/`)
+- Classifier config files included; model weights downloaded at runtime from HuggingFace
+- FAISS vector index downloaded at container start via `download.py`
+- Exposes port `8000` with `uvicorn` as the entrypoint
+
+### `.dockerignore`
+
+The `.dockerignore` excludes everything not needed for the build:
+`notebooks/`, `reports/`, `tests/`, `docs/`, `azure/`, model weight files (`*.bin`, `*.safetensors`), `data/`, `.git/`, `__pycache__/`, and more — ensuring a lean build context and faster image transfers.
 
 ---
 

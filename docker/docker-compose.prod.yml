@@ -1,0 +1,73 @@
+# docker-compose.prod.yml
+#
+# Production override for the Healthcare RAG stack.
+# Apply on top of the base compose file:
+#
+#   docker compose -f docker/docker-compose.yml -f docker/docker-compose.prod.yml up -d
+#
+# What this adds:
+#   - CPU & memory resource limits for every service
+#   - Structured JSON logging with log rotation
+#   - Production environment variables
+#   - Security hardening (no-new-privileges, read-only root where possible)
+#   - Healthier restart policy defaults for production uptime
+
+services:
+  healthcare-rag:
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 4G
+        reservations:
+          cpus: "0.5"
+          memory: 1G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    environment:
+      - DEPLOY_ENV=production
+      - LOG_LEVEL=info
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+  dashboard:
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 2G
+        reservations:
+          cpus: "0.25"
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    environment:
+      - DEPLOY_ENV=production
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+  mlflow:
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 1G
+        reservations:
+          cpus: "0.1"
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped

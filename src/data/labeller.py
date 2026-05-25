@@ -85,9 +85,7 @@ _GENERAL = {
     "introduction", "basics of", "difference between",
     "how does", "how do", "what does", "meaning of",
     "description of", "understanding", "example of",
-    "mechanism", "pathophysiology", "etiology", "cause",
-    "risk factor", "epidemiology", "prevalence", "incidence",
-    "mortality", "morbidity", "complication", "prognosis",
+    "mechanism", "pathophysiology", "etiology",
 }
 
 

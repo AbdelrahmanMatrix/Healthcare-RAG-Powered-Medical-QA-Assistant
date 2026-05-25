@@ -31,7 +31,7 @@ def update_nb05(path):
             new_src = [
                 "# Build text chunks with RecursiveCharacterTextSplitter (chunk_size=700, overlap=150)",
                 "try:",
-                "    from langchain.text_splitter import RecursiveCharacterTextSplitter",
+                "    from langchain_text_splitters import RecursiveCharacterTextSplitter",
                 "    HAS_LANGCHAIN = True",
                 "except ImportError:",
                 "    HAS_LANGCHAIN = False",

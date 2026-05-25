@@ -48,7 +48,7 @@ jobs:
 
       - name: Lint
         run: |
-          flake8 src/ api/ config/ scripts/ mlops/ tests/ \
+          flake8 src/ api/ config/ scripts/ mlops/ tests/ dashboard/ \
             --max-line-length 120 \
             --exclude __pycache__,*.pyc
 

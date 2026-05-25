@@ -1,0 +1,46 @@
+# docker-compose.override.yml
+#
+# Development override for the Healthcare RAG stack.
+# Auto-loaded by `docker compose -f docker/docker-compose.yml up`
+# (Docker automatically merges docker-compose.override.yml from the same directory).
+#
+# What this adds:
+#   - Source-code volume mounts for instant hot-reloading (no image rebuilds)
+#   - API server starts with --reload for auto-restart on file changes
+#   - Dashboard inherits source-code mounts (Streamlit reloads natively)
+#   - Handy dev defaults for env vars (override via .env or shell)
+
+services:
+  healthcare-rag:
+    # Mount source code so uvicorn --reload picks up changes instantly
+    volumes:
+      - ../api:/app/api
+      - ../src:/app/src
+      - ../config:/app/config
+      - ../scripts:/app/scripts
+      - ../setup.py:/app/setup.py
+    # Enable hot-reload for local development
+    command: >
+      sh -c "python download.py &&
+             uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload --log-level debug"
+    environment:
+      - DEPLOY_ENV=local
+    restart: unless-stopped
+    healthcheck:
+      start_period: 30s   # shorter wait in dev
+
+  dashboard:
+    # Mount the entire dashboard directory + shared home module
+    volumes:
+      - ../dashboard:/app/dashboard
+    depends_on:
+      healthcare-rag:
+        condition: service_started   # relaxed from service_healthy for quicker startup
+    environment:
+      - DEPLOY_ENV=local
+    restart: unless-stopped
+    healthcheck:
+      start_period: 15s
+
+  mlflow:
+    restart: unless-stopped

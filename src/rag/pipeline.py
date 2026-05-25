@@ -69,12 +69,34 @@ DEFAULT_FALLBACK_MODEL = "google/flan-t5-base"
 # CrossEncoder reranker (12-layer, higher precision than 6-layer)
 DEFAULT_RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-12-v2"
 
-DEFAULT_TOP_K = 20          # FAISS retrieval candidates
+DEFAULT_TOP_K = 15          # FAISS retrieval candidates
 DEFAULT_INJECT_K = 3        # chunks fed to LLM after reranking
 DEFAULT_MAX_CONTEXT_WORDS = 200
 DEFAULT_MAX_NEW_TOKENS = 256
 DEFAULT_MIN_ANSWER_WORDS = 3
 CLASSIFIER_CONFIDENCE_THRESHOLD = 0.70
+
+# ── Per-category FAISS expansion factors ──────────────────────────
+# When category routing is active, FAISS searches top_k × expansion_factor
+# candidates to ensure enough category-matched chunks survive the split.
+#
+# Calibrated from pubmedqa_labelled.csv (211,186 rows):
+#   Medication (33.87%) → 2× — very dense, 2× × 15 = 30 → ~10 expected matches
+#   Treatment  (23.00%) → 2× — dense,      2× × 15 = 30 → ~7 expected matches
+#   Diagnosis  (15.11%) → 3× — moderate,   3× × 15 = 45 → ~7 expected matches
+#   General    (13.38%) → 3× — moderate,   3× × 15 = 45 → ~6 expected matches
+#   Prevention (10.50%) → 4× — sparse,     4× × 15 = 60 → ~6 expected matches
+#   Symptoms   ( 4.13%) → 5× — very sparse, 5× × 15 = 75 → ~3 expected matches
+#
+# If a category is not found in the map, defaults to 3× (the original fixed factor).
+CATEGORY_EXPANSION = {
+    "Medication": 2,
+    "Treatment": 2,
+    "Diagnosis": 3,
+    "General": 3,
+    "Prevention": 4,
+    "Symptoms": 5,
+}
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 FAISS_INDEX_PATH = (
@@ -143,7 +165,7 @@ class RAGPipeline:
 
     Components:
       1. SentenceTransformer (PubMedBERT) — domain-specific query embedding
-      2. FAISS index — vector retrieval (top_k=20 candidates)
+      2. FAISS index — vector retrieval (top_k=15 candidates)
       3. BM25 keyword index (optional hybrid retrieval)
       4. CrossEncoder reranker (MiniLM-L-12-v2) — re-scores, selects top inject_k
       5. Groq LLM (settings.LLM_MODEL) or flan-t5-base fallback
@@ -174,6 +196,7 @@ class RAGPipeline:
         faiss_index_path: str = None,
         chunk_mapping_path: str = None,
         extractive: bool = False,
+        category_expansion: dict = None,
     ):
         import faiss
         import numpy as np
@@ -216,10 +239,20 @@ class RAGPipeline:
             from config.settings import settings
             self._bm25_threshold = settings.BM25_THRESHOLD
         except Exception:
-            self._bm25_threshold = 5.0
+            # Fallback: 12.0 calibrated from BM25 score distribution analysis
+            # (see config/settings.py for full analysis details)
+            self._bm25_threshold = 12.0
 
         # ── Classifier (optional, for category routing) ──────────────────
         self._use_classifier = False
+        self._category_expansion = CATEGORY_EXPANSION.copy()
+        if category_expansion is not None:
+            try:
+                import json
+                overrides = json.loads(category_expansion) if isinstance(category_expansion, str) else category_expansion
+                self._category_expansion.update(overrides)
+            except Exception:
+                pass
         try:
             from src.classification.classifier import load_classifier
             self._classifier = load_classifier()
@@ -339,13 +372,46 @@ class RAGPipeline:
 
         return self._rerank(query, candidates)
 
-    def retrieve_by_category(self, query: str, category: str, top_k: int = None) -> list:
-        """Retrieve top-k chunks prioritising `category`, then rerank."""
+    def retrieve_by_category(self, query: str, category: str, top_k: int = None, all_scores: dict = None) -> list:
+        """
+        Hybrid category-prioritised retrieval: BM25 + FAISS -> scored matching -> rerank.
+
+        Mirrors the same BM25 boost as `retrieve()`, then applies continuous
+        category scoring using the classifier's per-class softmax probabilities.
+
+        The FAISS expansion factor is dynamic per category:
+          - Dense categories (Medication, Treatment): 2×
+          - Moderate categories (Diagnosis, General): 3×
+          - Sparse categories (Prevention): 4×
+          - Very sparse categories (Symptoms): 5×
+
+        Category scoring (when all_scores is provided):
+          Each candidate chunk receives a category_score = softmax probability
+          of its category from the classifier's output. Candidates are sorted
+          by (category_score descending, FAISS distance descending), creating
+          a continuous gradient from highly-relevant categories to tangentially-
+          related ones — no hard binary cutoff.
+
+        Args:
+            query: The user's question.
+            category: The predicted category for expansion factor selection.
+            top_k: Override for default retrieval depth.
+            all_scores: Dict of {category: softmax_prob} from the classifier.
+                        If None, falls back to binary matched/unmatched split.
+
+        Steps:
+          1. FAISS retrieves top_k * expansion_factor semantic candidates
+          2. BM25 prepends high-confidence keyword hits (if available)
+          3. Each candidate is scored with category_score from all_scores
+          4. Pool is sorted by category_score then distance, truncated to k
+          5. CrossEncoder reranks the final pool
+        """
         requested_k = self.top_k if top_k is None else top_k
         k = max(0, min(requested_k, self.index.ntotal))
         if k == 0:
             return []
-        search_k = min(k * 3, self.index.ntotal)
+        factor = self._category_expansion.get(category, 3)
+        search_k = min(k * factor, self.index.ntotal)
 
         query_vector = self.encoder.encode(
             [query], convert_to_numpy=True
@@ -353,15 +419,42 @@ class RAGPipeline:
         self._faiss.normalize_L2(query_vector)
         D, faiss_idx = self.index.search(query_vector, search_k)
 
-        candidates = [
+        faiss_candidates = [
             self._row_to_dict(int(faiss_idx[0, r]), float(D[0, r]))
             for r in range(search_k)
             if int(faiss_idx[0, r]) >= 0
         ]
 
-        matched = [c for c in candidates if c["category"] == category]
-        unmatched = [c for c in candidates if c["category"] != category]
-        pool = (matched + unmatched)[:k]
+        # ── BM25 hybrid merge (same logic as retrieve()) ─────────────────
+        if not self._use_bm25:
+            merged = faiss_candidates
+        else:
+            bm25_results = self.bm25.retrieve(query, top_k=k)
+            seen = set()
+            merged = []
+            for r in bm25_results:
+                if r["bm25_score"] > self._bm25_threshold and r["chunk_id"] not in seen:
+                    merged.append(r)
+                    seen.add(r["chunk_id"])
+            for r in faiss_candidates:
+                if r["chunk_id"] not in seen:
+                    merged.append(r)
+                    seen.add(r["chunk_id"])
+
+        # ── Continuous scored category matching ────────────────────────────
+        if all_scores:
+            for c in merged:
+                c["category_score"] = all_scores.get(c["category"], 0.0)
+            pool = sorted(
+                merged,
+                key=lambda x: (x.get("category_score", 0.0), x.get("distance", 0.0)),
+                reverse=True,
+            )[:k]
+        else:
+            # Fallback: binary matched/unmatched split (backward-compatible)
+            matched   = [c for c in merged if c["category"] == category]
+            unmatched = [c for c in merged if c["category"] != category]
+            pool = (matched + unmatched)[:k]
 
         return self._rerank(query, pool)
 
@@ -606,6 +699,7 @@ class RAGPipeline:
                 "chunk_id": r["chunk_id"],
                 "question": r["question"],
                 "category": r["category"],
+                "category_score": round(r.get("category_score", 0.0), 4),
                 "distance": round(raw_dist, 4),
                 "relevance_score": round(relevance, 4),
                 "reranker_score": round(r.get("reranker_score", 0.0), 4),
@@ -668,16 +762,18 @@ class RAGPipeline:
         """
         effective_category = category
         confidence = 1.0
+        all_scores = None
 
         if category is None and self._use_classifier:
             result = self._classifier.predict_with_confidence(query)
             confidence = result["confidence"]
             if confidence >= CLASSIFIER_CONFIDENCE_THRESHOLD:
                 effective_category = result["category"]
+                all_scores = result["all_scores"]
             # else: confidence too low — use general retrieval
 
         if effective_category:
-            retrieved = self.retrieve_by_category(query, effective_category, top_k)
+            retrieved = self.retrieve_by_category(query, effective_category, top_k, all_scores=all_scores)
         else:
             retrieved = self.retrieve(query, top_k)
 
@@ -726,6 +822,14 @@ def build_rag_pipeline(**kwargs) -> RAGPipeline:
                         "faiss_index_path": str(PROJECT_ROOT / settings.FAISS_INDEX_PATH),
                         "chunk_mapping_path": str(PROJECT_ROOT / settings.CHUNKS_PKL_PATH),
                     }
+                    # Parse per-category expansion override from settings
+                    exp_override = getattr(settings, "CATEGORY_EXPANSION", None)
+                    if exp_override:
+                        try:
+                            import json
+                            defaults["category_expansion"] = json.loads(exp_override)
+                        except Exception:
+                            pass
                     defaults.update(kwargs)
                     kwargs = defaults
                 except Exception:

@@ -25,7 +25,17 @@ from pathlib import Path
 
 # ── Config ────────────────────────────────────────────────────────────────────
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
-DEFAULT_LOCAL_PATH = PROJECT_ROOT / "models" / "classifier" / "biobert_classifier"
+
+# Allow override via settings.CLASSIFIER_PATH (env var CLASSIFIER_PATH=...)
+try:
+    from config.settings import settings as _cfg
+    _path_override = _cfg.CLASSIFIER_PATH
+    DEFAULT_LOCAL_PATH = Path(_path_override).resolve() \
+        if os.path.isabs(_path_override) \
+        else (PROJECT_ROOT / _path_override).resolve()
+except (ImportError, Exception):
+    DEFAULT_LOCAL_PATH = PROJECT_ROOT / "models" / "classifier" / "biobert_classifier"
+
 HF_REPO_ID = "AbdoMatrix/biobert-medical-classifier"
 
 # Fallback to DistilBERT repo if BioBERT weights not yet uploaded

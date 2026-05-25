@@ -32,6 +32,12 @@ services:
     volumes:
       - mlflow-data:/mlruns
     restart: on-failure
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/api/2.0/mlflow/experiments/list')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
 
   dashboard:
     build:
@@ -46,8 +52,15 @@ services:
     volumes:
       - rag-embeddings:/app/data/embeddings
     depends_on:
-      - healthcare-rag
+      healthcare-rag:
+        condition: service_healthy
     restart: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
 volumes:
   rag-embeddings:

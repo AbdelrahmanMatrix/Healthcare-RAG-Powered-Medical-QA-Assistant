@@ -40,14 +40,20 @@ def run_pipeline(question: str, top_k: int = None, category: str = None) -> dict
     """
     rag = _get_rag()
 
-    # FIX: Skip the classifier (~50–200ms) when caller already provides category.
+    # Use classifier's per-class probabilities for continuous scoring
     if category:
         effective_category = category
+        all_scores = None
+    elif rag._use_classifier:
+        result = rag._classifier.predict_with_confidence(question)
+        effective_category = result["category"]
+        all_scores = result["all_scores"]
     else:
         effective_category = predict(question)
+        all_scores = None
 
     if effective_category:
-        retrieved = rag.retrieve_by_category(question, effective_category, top_k)
+        retrieved = rag.retrieve_by_category(question, effective_category, top_k, all_scores=all_scores)
     else:
         retrieved = rag.retrieve(question, top_k)
 

@@ -34,6 +34,9 @@ def reset_rag_global():
 def mock_rag():
     """Build a mock RAG object with all methods used by run_pipeline."""
     rag = MagicMock()
+    # Make the pipeline fall back to the module-level predict() so tests
+    # can continue to mock src.pipeline.predict for category control.
+    rag._use_classifier = False
 
     def _format_sources(retrieved):
         return [
@@ -257,7 +260,7 @@ class TestRunPipelineTopK:
         with patch("src.pipeline.predict", return_value="Diagnosis"):
             run_pipeline("test", top_k=10, category="Diagnosis")
             mock_rag.retrieve_by_category.assert_called_once_with(
-                "test", "Diagnosis", 10
+                "test", "Diagnosis", 10, all_scores=None
             )
 
     def test_top_k_passed_to_general_retrieve(self, mock_rag_cls, mock_rag):
@@ -286,7 +289,7 @@ class TestRunPipelineTopK:
         with patch("src.pipeline.predict", return_value="Symptoms"):
             run_pipeline("test", top_k=0, category="Symptoms")
             mock_rag.retrieve_by_category.assert_called_once_with(
-                "test", "Symptoms", 0
+                "test", "Symptoms", 0, all_scores=None
             )
 
 

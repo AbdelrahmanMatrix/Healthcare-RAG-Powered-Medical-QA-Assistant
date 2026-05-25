@@ -50,7 +50,8 @@ app = FastAPI(
     version="1.2.0",
     description=(
         "RAG-powered medical Q&A grounded in PubMedQA peer-reviewed research. "
-        "Every /query response includes a mandatory medical disclaimer."
+        "Every /query response includes a mandatory medical disclaimer.\n\n"
+        f"📊 **[Dashboard]({settings.DASHBOARD_URL})** — system KPIs, model performance, and query interface."
     ),
     lifespan=lifespan,
 )
@@ -87,7 +88,8 @@ app.include_router(query.router)
 async def root():
     return {
         "project": "Healthcare RAG Medical Q&A Assistant",
-        "docs": "/docs",
-        "health": "/health",
         "version": "1.2.0",
+        "api_docs": "/docs",
+        "health": "/health",
+        "dashboard": settings.DASHBOARD_URL,
     }

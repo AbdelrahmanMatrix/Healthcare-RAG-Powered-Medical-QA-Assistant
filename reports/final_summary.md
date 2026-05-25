@@ -29,13 +29,13 @@ User Query
              ▼
 ┌──────────────────────────────┐
 │  FAISS IndexFlatIP + BM25    │  → Hybrid retrieval
-│  S-PubMedBert-MS-MARCO (768d)│     top-20 candidates
+│  S-PubMedBert-MS-MARCO (768d)│     top-15 candidates
 │  209,108 vectors             │     category-prioritised scoring
 └────────────┬─────────────────┘
              │
              ▼
 ┌──────────────────────────────┐
-│  CrossEncoder Reranker       │  → Reranks top-20 to top-3
+│  CrossEncoder Reranker       │  → Reranks top-15 to top-3
 │  ms-marco-MiniLM-L-12-v2     │
 └────────────┬─────────────────┘
              │
@@ -57,7 +57,7 @@ User Query
 | Embedding model | `pritamdeka/S-PubMedBert-MS-MARCO` |
 | LLM | `meta-llama/llama-4-scout-17b-16e-instruct` (via Groq) |
 | FAISS index | `IndexFlatIP` (inner product = cosine similarity) |
-| `top_k` (retrieved) | 20 |
+| `top_k` (retrieved) | 15 |
 | `inject_k` (injected) | 3 |
 | `max_context_words` | 200 |
 | Reranker | `cross-encoder/ms-marco-MiniLM-L-12-v2` |

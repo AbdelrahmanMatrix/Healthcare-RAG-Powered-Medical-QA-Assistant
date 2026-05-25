@@ -122,7 +122,7 @@ Fill results in `reports/deployment_test_report.md`.
 | File | Change |
 |---|---|
 | `config/settings.py` | PubMedBERT embedding, reranker, BioBERT classifier path |
-| `src/rag/pipeline.py` | Reranker, extractive prompt, top_k=20, inject_k=3 |
+| `src/rag/pipeline.py` | Reranker, extractive prompt, top_k=15, inject_k=3 |
 | `src/rag/embeddings.py` | PubMedBERT default, normalize_embeddings=True |
 | `src/evaluation/metrics.py` | Added BERTScore + Faithfulness metrics |
 | `src/classification/classifier.py` | BioBERT (AutoTokenizer/AutoModel), fallback to DistilBERT |

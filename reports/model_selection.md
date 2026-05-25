@@ -1,6 +1,6 @@
 # MLflow Model Selection
 
-**Selected run:** `037cf69f`
+**Selected run:** `830d2493`
 
 **Reason:** Highest bertscore_f1_primary (0.8047) among 6 runs (latency: 2227ms).
 
@@ -11,7 +11,7 @@ BERTScore F1 is the primary quality metric for abstractive RAG systems (Lewis et
 - `inject_k`: `3`
 - `llm_model`: `meta-llama/llama-4-scout-17b-16e-instruct (via Groq)`
 - `max_context_words`: `200`
-- `top_k`: `20`
+- `top_k`: `10`
 
 **Metrics:**
 - `avg_latency_ms`: `2227.3000`
@@ -20,6 +20,7 @@ BERTScore F1 is the primary quality metric for abstractive RAG systems (Lewis et
 - `bleu_baseline`: `0.0276`
 - `bleu_improvement_pct`: `-13.2400`
 - `bleu_rag`: `0.0239`
+- `faiss_index_size`: `209108.0000`
 - `macro_f1`: `0.9100`
 - `rouge_baseline`: `0.1788`
 - `rouge_improvement_pct`: `5.5300`

@@ -81,7 +81,7 @@ api/routes/query.py  →  run_pipeline (src/pipeline.py)
     ├─▶ BM25 Retriever (src/rag/bm25_retriever.py)  [hybrid retrieval]
     │
     └─▶ LLM (Groq meta-llama/llama-4-scout-17b-16e-instruct via openai client)
-            └─ Generates answer from top-3 reranked chunks (retrieved from top-20 FAISS candidates)
+            └─ Generates answer from top-3 reranked chunks (retrieved from top-15 FAISS candidates)
 
     │
     ▼

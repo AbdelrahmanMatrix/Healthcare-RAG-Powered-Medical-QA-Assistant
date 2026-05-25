@@ -115,7 +115,7 @@ print("STEP 4: Build Text Chunks — RecursiveCharacterTextSplitter")
 print("=" * 60)
 
 try:
-    from langchain.text_splitter import RecursiveCharacterTextSplitter
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
     HAS_LANGCHAIN = True
 except ImportError:
     HAS_LANGCHAIN = False

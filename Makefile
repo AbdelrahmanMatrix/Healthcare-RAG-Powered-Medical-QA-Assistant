@@ -3,7 +3,7 @@ API_PORT  := 8000
 ACR_NAME  := healthcareragacr
 .DEFAULT_GOAL := help
 
-.PHONY: install test test-api run lint docker-build docker-run docker-push latency-test mlflow dashboard download-classifier clean help
+.PHONY: install test test-api run lint docker-build docker-build-no-cache docker-run docker-push docker-pull docker-login docker-dev docker-prod docker-clean docker-stats docker-logs docker-exec docker-restart docker-ps docker-top docker-test docker-save docker-load latency-test mlflow dashboard download-classifier clean help
 
 install:       ## Install all dependencies
 	pip install --upgrade pip && pip install -r requirements.txt && pip install -e .
@@ -29,9 +29,64 @@ docker-build:  ## Build Docker image
 docker-run:    ## Run Docker container locally
 	docker run -p $(API_PORT):$(API_PORT) --env-file .env --rm $(APP_NAME):latest
 
+docker-build-no-cache:  ## Build Docker image from scratch (no cache), use when dependencies change
+	docker build --no-cache -f docker/Dockerfile -t $(APP_NAME):latest .
+
 docker-push:   ## Push image to Azure Container Registry
 	docker tag $(APP_NAME):latest $(ACR_NAME).azurecr.io/$(APP_NAME):v1
 	docker push $(ACR_NAME).azurecr.io/$(APP_NAME):v1
+
+docker-pull:   ## Pull latest stack images from Azure Container Registry
+	docker pull $(ACR_NAME).azurecr.io/$(APP_NAME):v1
+	docker tag $(ACR_NAME).azurecr.io/$(APP_NAME):v1 $(APP_NAME):latest
+	docker compose -f docker/docker-compose.yml pull
+
+docker-login:   ## Authenticate Docker to Azure Container Registry (requires az CLI)
+	az acr login --name $(ACR_NAME)
+
+docker-dev:    ## Start full stack with dev hot-reloading (auto-loads docker-compose.override.yml)
+	docker compose -f docker/docker-compose.yml up --build -d
+
+docker-prod:   ## Start full stack with production overrides
+	docker compose -f docker/docker-compose.yml -f docker/docker-compose.prod.yml up --build -d
+
+docker-clean:  ## Stop stack, remove containers, volumes, and dangling images
+	docker compose -f docker/docker-compose.yml down -v --remove-orphans
+	docker image prune -f 2>/dev/null || true
+
+docker-stats:  ## Show live resource usage of running stack containers (CPU, memory, net, block IO)
+	docker stats --filter "name=healthcare-rag"
+
+docker-logs:   ## Tail logs from all stack services simultaneously
+	docker compose -f docker/docker-compose.yml logs -f
+
+docker-exec:   ## Open interactive shell in the API container
+	docker compose -f docker/docker-compose.yml exec healthcare-rag sh
+
+docker-restart:  ## Restart all stack services
+	docker compose -f docker/docker-compose.yml restart
+
+docker-ps:     ## List all stack containers with their status and ports
+	docker compose -f docker/docker-compose.yml ps
+
+docker-top:    ## Show running processes inside each stack container
+	docker compose -f docker/docker-compose.yml top
+
+docker-test:   ## Run test suite inside a disposable container (pass extra args via ARGS="-k test_api")
+	docker compose -f docker/docker-compose.yml run --rm healthcare-rag pytest tests/ -v --tb=short $(ARGS)
+
+docker-save:   ## Export all stack images to tar archives in docker/images/ (for air-gapped deployment)
+	mkdir -p docker/images
+	docker save $(APP_NAME):latest -o docker/images/$(APP_NAME).tar
+	docker save python:3.10-slim -o docker/images/mlflow-base.tar
+	@echo ""
+	@echo "Images saved to docker/images/. Transfer these .tar files to the air-gapped machine."
+
+docker-load:   ## Load all stack images from tar archives in docker/images/ (for air-gapped deployment)
+	docker load -i docker/images/$(APP_NAME).tar
+	docker load -i docker/images/mlflow-base.tar
+	@echo ""
+	@echo "Images loaded. Run 'make docker-dev' or 'make docker-prod' to start the stack."
 
 latency-test:  ## Run 20-query latency test against live Azure API
 	python scripts/latency_test.py

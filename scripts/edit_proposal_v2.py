@@ -109,7 +109,7 @@ set_para_text(doc.paragraphs[40],
     "pre-trained on PubMed biomedical literature and fine-tuned on the MS-MARCO passage "
     "retrieval benchmark, making it specifically suited for biomedical question-answering "
     "retrieval. It outperforms general-purpose models like all-MiniLM-L6-v2 on medical "
-    "domain text. Vectors are stored in a FAISS IndexFlatL2 index containing 209,108 "
+    "domain text. Vectors are stored in a FAISS IndexFlatIP index containing 209,108 "
     "chunk embeddings.")
 
 # Para [43]: Classifier (was DistilBERT)

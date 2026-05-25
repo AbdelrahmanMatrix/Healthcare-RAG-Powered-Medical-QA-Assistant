@@ -1,49 +1,82 @@
-# Large data files — downloaded at container startup via entrypoint.sh
+# ── Data & models ───────────────────────────────────────────────
+# Downloaded at container startup via download.py
 data/
-
-# Dev, docs, and reports — not needed for production image
-notebooks/
-reports/
-*.md
-*.docx
-Makefile
-pytest.ini
-RUN_ORDER.md
-
-# Environment files
-.env
-.env.example
-
-# Local development state
-.venv/
-venv/
-.idea/
-.vscode/
-.pytest_cache/
-.coverage
-htmlcov/
-reports/coverage_html/
-mlruns/
-mlartifacts/
-LogFiles/
-
-# Local model weights are downloaded at container startup when needed
 models/**/*.bin
 models/**/*.safetensors
 models/**/training_args.bin
 models/**/optimizer.pt
 models/**/scheduler.pt
 
-# Git
+# ── Source code NOT shipped ─────────────────────────────────────
+# Azure deploy scripts — not part of the image
+azure/
+# Test files — not needed in production
+tests/
+# Documentation & notebooks
+docs/
+notebooks/
+reports/
+# MLOps runtime artifacts
+mlruns/
+mlartifacts/
+LogFiles/
+
+# ── Docker build files (keep only entrypoint) ───────────────────
+docker/*
+!docker/entrypoint.sh
+
+# ── Markup & config files ───────────────────────────────────────
+*.md
+*.docx
+*.log
+*.zip
+*.tar.gz
+.flake8
+.gitignore
+.gitattributes
+Makefile
+pytest.ini
+RUN_ORDER.md
+
+# ── Environment ─────────────────────────────────────────────────
+.env
+.env.example
+
+# ── Git ─────────────────────────────────────────────────────────
 .git/
 .gitignore
 .github/
 
-# Python cache
+# ── Python build & cache ────────────────────────────────────────
 __pycache__/
 *.pyc
 *.pyo
 *.egg-info/
+.eggs/
+dist/
+build/
+*.so
 
-# Archives
-*.zip
+# ── Virtual environments ────────────────────────────────────────
+.venv/
+venv/
+.env/
+
+# ── IDE & editor ────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ── Testing & coverage ──────────────────────────────────────────
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+reports/coverage_html/
+coverage.xml
+*.coverage
+
+# ── Jupyter ─────────────────────────────────────────────────────
+.ipynb_checkpoints/

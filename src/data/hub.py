@@ -18,8 +18,15 @@ Public API:
 """
 
 import os
+import sys
 import shutil
 from pathlib import Path
+
+# Ensure emoji/Unicode output works on Windows terminals
+try:
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+except AttributeError:
+    pass
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
@@ -44,10 +51,15 @@ REQUIRED_FILES = [
      PROJECT_ROOT / "data" / "processed" / "eval_holdout.csv"),
 ]
 
-MIN_FILE_BYTES = {
-    str(local_path): 1024
-    for _, local_path in REQUIRED_FILES
-}
+MIN_FILE_BYTES = {}
+for _, local_path in REQUIRED_FILES:
+    ext = local_path.suffix
+    if ext == ".faiss":
+        MIN_FILE_BYTES[str(local_path)] = 1_048_576      # 1 MB for FAISS index
+    elif ext == ".pkl":
+        MIN_FILE_BYTES[str(local_path)] = 102_400        # 100 KB for pickle files
+    else:
+        MIN_FILE_BYTES[str(local_path)] = 10_240         # 10 KB for CSV / other files
 
 
 def _ensure_dir(path: Path) -> None:
