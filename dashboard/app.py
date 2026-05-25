@@ -172,13 +172,24 @@ with col_left:
     else:
         # Show final known evaluation KPIs as fallback
         targets = pd.DataFrame({
-            "Metric": ["BERTScore F1 (primary)", "ROUGE-L (abstractive)", "BLEU (RAG)", "BLEU (Plain LLM)", "Faithfulness", "Hallucination Rate"],
+            "Metric": [
+                "BERTScore F1 (primary)", "ROUGE-L (abstractive)",
+                "BLEU (RAG)", "BLEU (Plain LLM)",
+                "Faithfulness", "Hallucination Rate",
+            ],
             "Result": ["0.8047", "0.1887", "0.0239", "0.0276", "92.0%", "10.0%"],
-            "Target": ["≥ 0.80", "≥ 0.15", "≥ +6% vs baseline (secondary)", "baseline", "≥ 70%", "≤ 15%"],
+            "Target": [
+                "≥ 0.80", "≥ 0.15",
+                "≥ +6% vs baseline (secondary)", "baseline",
+                "≥ 70%", "≤ 15%",
+            ],
             "Status": ["✅ Pass", "✅ Pass", "⚠️ See note", "—", "✅ Pass", "✅ Met"],
         })
         st.dataframe(targets, use_container_width=True, hide_index=True)
-        st.caption("Final evaluation results from notebook 08 (holdout: 200 queries). Load `rag_evaluation_results.csv` to enable interactive charts.")
+        st.caption(
+            "Final evaluation results from notebook 08 (holdout: 200 queries). "
+            "Load `rag_evaluation_results.csv` to enable interactive charts."
+        )
 
 with col_right:
     st.subheader("MLflow Experiment Runs")
