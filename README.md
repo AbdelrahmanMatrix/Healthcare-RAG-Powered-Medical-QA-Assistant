@@ -50,7 +50,8 @@ That's it. Run any notebook now.
 │   ├── rag/
 │   │   ├── pipeline.py                  # RAG pipeline (FAISS + Groq LLM)
 │   │   ├── embeddings.py                # Embedding utilities
-│   │   └── vectorstore.py               # FAISS index utilities
+│   │   ├── vectorstore.py               # FAISS index utilities
+│   │   └── bm25_retriever.py            # BM25 hybrid retrieval
 │   ├── classification/
 │   │   └── classifier.py                # BioBERT classifier
 │   ├── evaluation/
@@ -171,7 +172,9 @@ uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/query` | Submit a medical question |
-| GET | `/health` | Health check |
+| GET | `/health` | Health check (model loaded, classifier ready, Groq configured) |
+| GET | `/docs` | Swagger UI (interactive API docs) |
+| GET | `/` | Root info (project, docs link, version) |
 
 ### Example
 
@@ -261,11 +264,21 @@ docker-compose up --build
 ## 📄 Reports
 
 All generated reports are in the `reports/` folder:
-- `schema_validation_report.md`
-- `eda_report.md`
-- `classification_report.md`
-- `evaluation_report.md`
-- `model_development_doc.md`
+- `schema_validation_report.md` — Data schema validation
+- `eda_report.md` — Exploratory data analysis
+- `classification_report.md` — BioBERT classifier metrics
+- `evaluation_report.md` — RAG vs plain LLM evaluation (A/B)
+- `model_selection.md` — MLflow run selection & parameters
+- `model_development_doc.md` — Model architecture & development
+- `integration_doc.md` — Integration & deployment documentation
+- `mlops_doc.md` — MLflow experiment tracking
+- `monitoring_doc.md` — Monitoring & retraining strategy
+- `preprocessing_pipeline_doc.md` — Text preprocessing pipeline
+- `deployment_test_report.md` — Latency & disclaimer verification
+- `final_summary.md` — Final project summary with all KPIs
+- `integrated_pipeline_test_results.json` — Integrated test output
+- `rag_evaluation_results.csv` — RAG evaluation data
+- `rag_pipeline_test_log.json` — Pipeline test logs
 
 ---
 
@@ -282,38 +295,22 @@ a qualified healthcare provider for medical decisions.
 MIT License
 ```
 
----
 
-## 💻 Quick Reproduce
-
-```bash
-git clone https://github.com/AbdooMatrix/Healthcare-RAG-Powered-Medical-QA-Assistant.git
-cd Healthcare-RAG-Powered-Medical-QA-Assistant
-pip install -r requirements.txt
-pip install -e .
-python download.py
-```
-
-Expected output:
-```
-============================================================
-🏥 Healthcare RAG — Data Setup
-============================================================
-
-📂 Found 0/6 files locally.
-   ❌ ...
-
-📥 Downloading 6 missing files...
-
-  ✅ Downloaded: data/raw/pubmedqa_raw.csv (15.2 MB)
-  ✅ Downloaded: data/processed/pubmedqa_cleaned.csv (12.1 MB)
-  ✅ Downloaded: data/processed/pubmedqa_labelled.csv (12.3 MB)
-  ✅ Downloaded: data/embeddings/faiss_index/pubmedqa_index_flatip.faiss (14.7 MB)
-  ✅ Downloaded: data/embeddings/faiss_index/chunk_mapping.pkl (11.8 MB)
-  ✅ Downloaded: data/processed/eval_holdout.csv (3.3 MB)
-
-🎉 Setup complete! You can now run any notebook.
-```
-
-The BioBERT classifier auto-downloads from HuggingFace on first inference.
-Open any notebook (e.g. `notebooks/10_end_to_end_test.ipynb`) and run all cells.
+> **Expected output** from `python download.py`:
+> ```
+> ============================================================
+> 🏥 Healthcare RAG — Data Setup
+> ============================================================
+>
+> ✅ Downloaded: data/raw/pubmedqa_raw.csv (15.2 MB)
+> ✅ Downloaded: data/processed/pubmedqa_cleaned.csv (12.1 MB)
+> ✅ Downloaded: data/processed/pubmedqa_labelled.csv (12.3 MB)
+> ✅ Downloaded: data/embeddings/faiss_index/pubmedqa_index_flatip.faiss (14.7 MB)
+> ✅ Downloaded: data/embeddings/faiss_index/chunk_mapping.pkl (11.8 MB)
+> ✅ Downloaded: data/processed/eval_holdout.csv (3.3 MB)
+>
+> 🎉 Setup complete! You can now run any notebook.
+> ```
+>
+> The BioBERT classifier auto-downloads from HuggingFace on first inference.
+> Open any notebook (e.g. `notebooks/10_end_to_end_test.ipynb`) and run all cells.

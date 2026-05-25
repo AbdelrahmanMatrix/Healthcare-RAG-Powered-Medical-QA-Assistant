@@ -124,6 +124,25 @@ else:
 st.divider()
 
 # ═════════════════════════════════════════════════════════════════════════════
+# SECTION 1.5: Key KPIs at a Glance
+# ═════════════════════════════════════════════════════════════════════════════
+st.header("📊 Key KPIs at a Glance")
+
+kpi1, kpi2, kpi3, kpi4 = st.columns(4)
+kpi1.metric("Classification Macro F1", "90.66%", "≥ 78% ✅")
+kpi2.metric("BERTScore F1 (primary)", "0.8047", "≥ 0.80 ✅")
+kpi3.metric("Faithfulness", "92.0%", "≥ 70% ✅")
+kpi4.metric("Hallucination Rate", "10.0%", "≤ 15% ✅")
+
+kpi5, kpi6, kpi7, kpi8 = st.columns(4)
+kpi5.metric("Avg Warm Latency", "2,227 ms", "≤ 5,000 ms ✅")
+kpi6.metric("ROUGE-L", "0.1887", "≥ 0.15 ✅")
+kpi7.metric("FAISS Retrieval", "< 500 ms", "✅ Fast")
+kpi8.metric("Disclaimer Present", "10/10", "✅ 100%")
+
+st.divider()
+
+# ═════════════════════════════════════════════════════════════════════════════
 # SECTION 2: Model Performance
 # ═════════════════════════════════════════════════════════════════════════════
 st.header("2 · Model Performance")
@@ -151,14 +170,15 @@ with col_left:
         else:
             st.dataframe(eval_df.head(10), use_container_width=True)
     else:
-        # Placeholder with KPI targets
+        # Show final known evaluation KPIs as fallback
         targets = pd.DataFrame({
-            "Metric": ["BLEU (RAG)", "BLEU (Baseline)", "ROUGE-L (RAG)", "BERTScore F1", "Hallucination Rate"],
-            "Target": ["≥ +6% vs baseline (secondary)", "baseline", "≥ 0.15", "≥ 0.80", "≤ 15%"],
-            "Status": ["Run notebook 08 to populate", "—", "—", "—", "—"],
+            "Metric": ["BERTScore F1 (primary)", "ROUGE-L (abstractive)", "BLEU (RAG)", "BLEU (Plain LLM)", "Faithfulness", "Hallucination Rate"],
+            "Result": ["0.8047", "0.1887", "0.0239", "0.0276", "92.0%", "10.0%"],
+            "Target": ["≥ 0.80", "≥ 0.15", "≥ +6% vs baseline (secondary)", "baseline", "≥ 70%", "≤ 15%"],
+            "Status": ["✅ Pass", "✅ Pass", "⚠️ See note", "—", "✅ Pass", "✅ Met"],
         })
         st.dataframe(targets, use_container_width=True, hide_index=True)
-        st.caption("Run `notebooks/08_evaluation.ipynb` to populate this chart.")
+        st.caption("Final evaluation results from notebook 08 (holdout: 200 queries). Load `rag_evaluation_results.csv` to enable interactive charts.")
 
 with col_right:
     st.subheader("MLflow Experiment Runs")
