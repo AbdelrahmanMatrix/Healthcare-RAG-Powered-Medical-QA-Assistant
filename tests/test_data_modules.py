@@ -74,6 +74,20 @@ class TestHubCheckDataExists:
             true_count = sum(1 for v in status.values() if v)
             assert true_count == 1
 
+    def test_default_required_file_rejects_stub(self, tmp_path):
+        """Default required artifacts smaller than the minimum size are treated as missing."""
+        from src.data.hub import check_data_exists
+
+        stub = tmp_path / "data" / "raw" / "pubmedqa_raw.csv"
+        stub.parent.mkdir(parents=True, exist_ok=True)
+        stub.write_text("dummy")
+
+        with patch("src.data.hub.REQUIRED_FILES", [("raw/pubmedqa_raw.csv", stub)]):
+            with patch.dict("src.data.hub.MIN_FILE_BYTES", {str(stub): 1024}, clear=True):
+                status = check_data_exists()
+
+        assert status[str(stub)] is False
+
 
 class TestHubDownloadFile:
     """Tests for hub.download_file()."""

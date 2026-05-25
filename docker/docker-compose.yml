@@ -25,8 +25,8 @@ services:
     container_name: healthcare-rag-mlflow
     working_dir: /app
     command: >
-      bash -c "pip install mlflow --quiet &&
-               mlflow ui --host 0.0.0.0 --port 5000 --backend-store-uri /mlruns"
+      sh -c "pip install mlflow --quiet &&
+             mlflow ui --host 0.0.0.0 --port 5000 --backend-store-uri /mlruns"
     ports:
       - "5000:5000"
     volumes:

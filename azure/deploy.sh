@@ -78,7 +78,6 @@ echo ""
 echo "▶ Step 3/7 — Building and pushing Docker image to $ACR_LOGIN_SERVER"
 docker build \
     -f docker/Dockerfile \
-    --build-arg HF_TOKEN="$HF_TOKEN" \
     -t "${ACR_LOGIN_SERVER}/healthcare-rag:latest" \
     .
 
@@ -118,6 +117,7 @@ az webapp config appsettings set \
         DEPLOY_ENV="azure" \
         DEPLOY_DATE="$(date +%Y-%m-%d)" \
         AZURE_APP_URL="https://${APP_NAME}.azurewebsites.net" \
+        WEBSITES_PORT="8000" \
     --output table
 
 echo ""

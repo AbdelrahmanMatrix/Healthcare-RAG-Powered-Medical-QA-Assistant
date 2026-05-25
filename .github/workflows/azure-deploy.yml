@@ -87,7 +87,6 @@ jobs:
 
           docker build \
             -f docker/Dockerfile \
-            --build-arg HF_TOKEN=${{ secrets.HF_TOKEN }} \
             -t $IMAGE \
             -t $LATEST \
             .
@@ -125,17 +124,21 @@ jobs:
               GROQ_API_KEY="${{ secrets.GROQ_API_KEY }}" \
               HF_TOKEN="${{ secrets.HF_TOKEN }}" \
               DEPLOY_DATE="$(date +%Y-%m-%d)" \
-              DEPLOY_ENV="azure"
+              DEPLOY_ENV="azure" \
+              AZURE_APP_URL="https://${APP_NAME}.azurewebsites.net" \
+              WEBSITES_PORT="8000"
 
       - name: Wait for deployment and smoke test
         run: |
-          echo "Waiting 60s for container restart..."
-          sleep 60
           URL="https://${APP_NAME}.azurewebsites.net"
-          STATUS=$(curl -so /dev/null -w "%{http_code}" "${URL}/health" || echo "000")
-          echo "Health check HTTP status: $STATUS"
-          if [ "$STATUS" != "200" ]; then
-            echo "⚠️  Health check returned $STATUS — container may still be starting"
-          else
-            echo "✅ Deployment healthy: ${URL}"
-          fi
+          for attempt in {1..12}; do
+            STATUS=$(curl -so /dev/null -w "%{http_code}" "${URL}/health" || echo "000")
+            echo "Health check attempt ${attempt}/12: HTTP ${STATUS}"
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ Deployment healthy: ${URL}"
+              exit 0
+            fi
+            sleep 30
+          done
+          echo "❌ Deployment did not become healthy within 6 minutes."
+          exit 1

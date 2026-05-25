@@ -64,9 +64,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build Docker image (smoke test)
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           docker build -f docker/Dockerfile \
-            --build-arg HF_TOKEN=$HF_TOKEN \
             -t healthcare-rag:ci-${{ github.sha }} .

@@ -23,6 +23,9 @@ az login
 bash azure/deploy.sh
 ```
 
+On Windows, run the shell scripts from Git Bash, WSL, or the GitHub Actions
+workflow. Plain PowerShell cannot execute the `.sh` scripts directly.
+
 The script:
 - Creates Resource Group, Container Registry, App Service Plan, and Web App
 - Builds and pushes the Docker image
@@ -64,7 +67,7 @@ open https://healthcare-rag-app.azurewebsites.net/docs
 | `HF_TOKEN` | ✅ | Download BioBERT + FAISS data from HuggingFace |
 | `API_KEY` | Optional | Protects `/query` endpoint (leave empty to disable) |
 | `DEPLOY_ENV` | Auto | Set to `azure` by deploy script |
-| `WEBSITES_PORT` | Auto | Set by Azure App Service automatically |
+| `WEBSITES_PORT` | Auto | Set to `8000` by deploy script for App Service routing |
 
 ---
 

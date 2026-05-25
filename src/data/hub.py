@@ -44,10 +44,24 @@ REQUIRED_FILES = [
      PROJECT_ROOT / "data" / "processed" / "eval_holdout.csv"),
 ]
 
+MIN_FILE_BYTES = {
+    str(local_path): 1024
+    for _, local_path in REQUIRED_FILES
+}
+
 
 def _ensure_dir(path: Path) -> None:
     """Create parent directories for a file path if they don't exist."""
     path.parent.mkdir(parents=True, exist_ok=True)
+
+
+def _file_is_ready(path: Path) -> bool:
+    """Return True when a required local artifact exists and is not a stub."""
+    if not path.exists():
+        return False
+
+    min_bytes = MIN_FILE_BYTES.get(str(path), 1)
+    return path.stat().st_size >= min_bytes
 
 
 def check_data_exists() -> dict:
@@ -59,7 +73,7 @@ def check_data_exists() -> dict:
     """
     status = {}
     for _, local_path in REQUIRED_FILES:
-        status[str(local_path)] = local_path.exists()
+        status[str(local_path)] = _file_is_ready(local_path)
     return status
 
 
