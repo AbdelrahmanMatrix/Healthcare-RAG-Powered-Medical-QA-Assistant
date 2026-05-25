@@ -73,7 +73,7 @@ User Query
 - **Class weights:** Applied via custom WeightedTrainer
 
 ### 3b. RAG Pipeline
-- **Held-out set:** 1,000 queries NOT in FAISS index
+- **Held-out set:** 2,000 queries NOT in FAISS index
 - **Retrieval:** FAISS retrieves top-20 candidates, CrossEncoder reranker scores them, top-inject_k (default 3) injected into LLM prompt
 - **Baseline:** Same LLM (meta-llama/llama-4-scout-17b-16e-instruct) without retrieval context
 - **Metrics:** BLEU (NLTK), ROUGE-L (rouge-score library)

@@ -82,5 +82,12 @@ class TestQuery:
         # min_length=5 on the question field
         assert client.post("/query", json={"question": "hi"}).status_code == 422
 
+    def test_invalid_category_returns_422(self):
+        payload = {
+            "question": "How is hypertension treated?",
+            "category": "Not a category",
+        }
+        assert client.post("/query", json=payload).status_code == 422
+
     def test_root_returns_200(self):
         assert client.get("/").status_code == 200

@@ -88,7 +88,7 @@ User Query
              │
              ▼
 ┌─────────────────────────┐
-│  FAISS Vector Store     │  → Retrieves top-20 candidates, reranks to top-5
+│  FAISS Vector Store     │  → Retrieves top-20 candidates, reranks to top-3
 │  (category-prioritised) │     (category matches boosted)
 └────────────┬────────────┘
              │
@@ -139,7 +139,7 @@ User Query
 | Embeddings | `pritamdeka/S-PubMedBert-MS-MARCO` (768d) |
 | Vector Store | FAISS IndexFlatIP + BM25 hybrid retrieval |
 | Generator | `meta-llama/llama-4-scout-17b-16e-instruct` via Groq API (falls back to `google/flan-t5-base` locally) |
-| Retrieval | Top-20 candidates → reranked top-5 with category routing |
+| Retrieval | Top-20 candidates → reranked top-3 with category routing |
 | HTTP Client | `openai` Python SDK pointed at `api.groq.com/openai/v1` |
 
 ---

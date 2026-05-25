@@ -129,7 +129,7 @@ User Query
 | Faithfulness | 92.0% | — | — |
 | Hallucination rate | 10.0% | — | — |
 
-**200 evaluation queries** from 1,000-row holdout (excluded from FAISS index).
+**200 evaluation queries** from 2,000-row holdout (excluded from FAISS index).
 
 ---
 
@@ -240,4 +240,4 @@ aa543c5 - fix: resolve flake8 E402 import-ordering in scripts/fix_milestone_plan
 
 ---
 
-*Generated for final submission — Healthcare RAG-Powered Medical Q&A Assistant | eyouth × DEPI 2025*
+*Generated for final submission — Healthcare RAG-Powered Medical Q&A Assistant | eyouth × DEPI 2026*

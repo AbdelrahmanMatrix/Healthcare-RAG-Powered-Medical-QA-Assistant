@@ -1,5 +1,14 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from typing import List, Optional
+
+VALID_CATEGORIES = {
+    "Symptoms",
+    "Diagnosis",
+    "Treatment",
+    "Medication",
+    "Prevention",
+    "General",
+}
 
 
 class QueryRequest(BaseModel):
@@ -20,6 +29,22 @@ class QueryRequest(BaseModel):
         json_schema_extra={"example": "Treatment"},
     )
 
+    @field_validator("category")
+    @classmethod
+    def validate_category(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+
+        value = value.strip()
+        if not value:
+            return None
+
+        normalised = value.title()
+        if normalised not in VALID_CATEGORIES:
+            valid = ", ".join(sorted(VALID_CATEGORIES))
+            raise ValueError(f"category must be one of: {valid}")
+        return normalised
+
 
 class SourceCitation(BaseModel):
     chunk_id: str
@@ -34,7 +59,7 @@ class QueryResponse(BaseModel):
     answer: str
     category: str
     retrieved_sources: List[str]
-    source_citations: List[SourceCitation] = []
+    source_citations: List[SourceCitation] = Field(default_factory=list)
     disclaimer: str
 
 

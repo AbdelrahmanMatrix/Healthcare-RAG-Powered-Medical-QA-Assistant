@@ -36,8 +36,8 @@ class Settings(BaseSettings):
 
     # ── Pipeline behaviour ─────────────────────────────────────────────────────
     TOP_K: int = 20      # FAISS retrieval candidates
-    INJECT_K: int = 5    # chunks fed to LLM after reranking
-    MAX_CONTEXT_WORDS: int = 350  # max words per evidence chunk (Finding 7)
+    INJECT_K: int = 3    # chunks fed to LLM after reranking
+    MAX_CONTEXT_WORDS: int = 200  # max words per evidence chunk (Finding 7)
     MAX_TOKENS: int = 256    # max new tokens for LLM generation
     BM25_THRESHOLD: float = 5.0
 

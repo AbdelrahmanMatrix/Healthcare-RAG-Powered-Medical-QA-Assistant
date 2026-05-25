@@ -64,9 +64,11 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 nul
+data;C/
 
 # ─── Logs & Temp Files ────────────────────────────────────────────────────────
 *.log
+LogFiles/
 *.tmp
 *.bak
 *.orig
@@ -86,6 +88,7 @@ docker/.env
 .pytest_cache/
 .coverage
 htmlcov/
+reports/coverage_html/
 .tox/
 
 # ─── HuggingFace / Transformers Cache ─────────────────────────────────────────

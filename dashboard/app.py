@@ -95,7 +95,7 @@ def load_mlflow_runs() -> pd.DataFrame | None:
 
 # ── Header ────────────────────────────────────────────────────────────────────
 st.title("🏥 Healthcare RAG — KPI Dashboard")
-st.caption(f"eyouth × DEPI 2025 | Last refreshed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+st.caption(f"eyouth × DEPI 2026 | Last refreshed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 st.divider()
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -308,6 +308,6 @@ if labelled is not None and "category" in labelled.columns:
 
 st.divider()
 st.caption(
-    "Healthcare RAG-Powered Medical Q&A Assistant · eyouth × DEPI 2025 · "
+    "Healthcare RAG-Powered Medical Q&A Assistant · eyouth × DEPI 2026 · "
     "Team: Abdelrahman · Ziad · Youssef · Doha · Eman"
 )

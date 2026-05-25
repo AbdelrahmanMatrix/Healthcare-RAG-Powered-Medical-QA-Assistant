@@ -14,6 +14,26 @@ RUN_ORDER.md
 .env
 .env.example
 
+# Local development state
+.venv/
+venv/
+.idea/
+.vscode/
+.pytest_cache/
+.coverage
+htmlcov/
+reports/coverage_html/
+mlruns/
+mlartifacts/
+LogFiles/
+
+# Local model weights are downloaded at container startup when needed
+models/**/*.bin
+models/**/*.safetensors
+models/**/training_args.bin
+models/**/optimizer.pt
+models/**/scheduler.pt
+
 # Git
 .git/
 .gitignore

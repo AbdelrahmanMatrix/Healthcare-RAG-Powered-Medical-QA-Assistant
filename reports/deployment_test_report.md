@@ -66,4 +66,4 @@ These are excluded per the KPI definition (cold-start outliers from pipeline ini
 
 ---
 
-*Healthcare RAG — M3 Task 4 Deployment Test Report | eyouth × DEPI 2025*
+*Healthcare RAG — M3 Task 4 Deployment Test Report | eyouth × DEPI 2026*

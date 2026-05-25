@@ -70,8 +70,8 @@ DEFAULT_FALLBACK_MODEL = "google/flan-t5-base"
 DEFAULT_RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-12-v2"
 
 DEFAULT_TOP_K = 20          # FAISS retrieval candidates
-DEFAULT_INJECT_K = 5        # chunks fed to LLM after reranking
-DEFAULT_MAX_CONTEXT_WORDS = 350
+DEFAULT_INJECT_K = 3        # chunks fed to LLM after reranking
+DEFAULT_MAX_CONTEXT_WORDS = 200
 DEFAULT_MAX_NEW_TOKENS = 256
 DEFAULT_MIN_ANSWER_WORDS = 3
 CLASSIFIER_CONFIDENCE_THRESHOLD = 0.70
@@ -221,8 +221,8 @@ class RAGPipeline:
         # ── Classifier (optional, for category routing) ──────────────────
         self._use_classifier = False
         try:
-            from src.classification.classifier import MedicalClassifier
-            self._classifier = MedicalClassifier()
+            from src.classification.classifier import load_classifier
+            self._classifier = load_classifier()
             self._use_classifier = True
             print("[OK] Classifier ready for category routing")
         except Exception as e:
@@ -306,7 +306,10 @@ class RAGPipeline:
           2. BM25 prepends high-confidence keyword hits (if available)
           3. CrossEncoder reranks the merged pool
         """
-        k = top_k or self.top_k
+        requested_k = self.top_k if top_k is None else top_k
+        k = max(0, min(requested_k, self.index.ntotal))
+        if k == 0:
+            return []
 
         query_vector = self.encoder.encode(
             [query], convert_to_numpy=True
@@ -316,6 +319,7 @@ class RAGPipeline:
         faiss_results = [
             self._row_to_dict(int(faiss_idx[0, r]), float(D[0, r]))
             for r in range(k)
+            if int(faiss_idx[0, r]) >= 0
         ]
 
         if not self._use_bm25:
@@ -337,7 +341,10 @@ class RAGPipeline:
 
     def retrieve_by_category(self, query: str, category: str, top_k: int = None) -> list:
         """Retrieve top-k chunks prioritising `category`, then rerank."""
-        k = top_k or self.top_k
+        requested_k = self.top_k if top_k is None else top_k
+        k = max(0, min(requested_k, self.index.ntotal))
+        if k == 0:
+            return []
         search_k = min(k * 3, self.index.ntotal)
 
         query_vector = self.encoder.encode(
@@ -349,6 +356,7 @@ class RAGPipeline:
         candidates = [
             self._row_to_dict(int(faiss_idx[0, r]), float(D[0, r]))
             for r in range(search_k)
+            if int(faiss_idx[0, r]) >= 0
         ]
 
         matched = [c for c in candidates if c["category"] == category]

@@ -33,7 +33,7 @@ cp .env.example .env
 ```
 05_embeddings_vectorstore.ipynb
 ```
-- Reserves **1,000 rows** as clean holdout (NOT in FAISS)
+- Reserves **2,000 rows** as clean holdout (NOT in FAISS)
 - Generates embeddings with **S-PubMedBert-MS-MARCO** (biomedical)
 - Builds FAISS index
 - Saves `data/embeddings/faiss_index/` and `data/processed/eval_holdout.csv`
@@ -102,7 +102,7 @@ curl http://localhost:8000/health
 
 ## Step 8 — Azure Deployment (Eman)
 
-Follow `docs/M3_Complete_Guide.md`.
+Follow `azure/README.md`.
 
 ---
 
@@ -127,7 +127,7 @@ Fill results in `reports/deployment_test_report.md`.
 | `src/evaluation/metrics.py` | Added BERTScore + Faithfulness metrics |
 | `src/classification/classifier.py` | BioBERT (AutoTokenizer/AutoModel), fallback to DistilBERT |
 | `requirements.txt` | bert-score, rank-bm25 added, torch uncommented |
-| `notebooks/05_embeddings_vectorstore.ipynb` | PubMedBERT, holdout=1000, saves eval_holdout.csv |
+| `notebooks/05_embeddings_vectorstore.ipynb` | PubMedBERT, holdout=2000, saves eval_holdout.csv |
 | `notebooks/07_classification_model.ipynb` | dmis-lab/biobert-v1.1, updated repo ID |
 | `notebooks/08_evaluation.ipynb` | Loads holdout CSV, BERTScore, Faithfulness, honest report |
 | `scripts/upload_classifier_to_hub.py` | Updated for BioBERT repo |

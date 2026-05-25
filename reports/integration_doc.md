@@ -1,6 +1,6 @@
 # M3 Integration Documentation
 
-**Owner:** Ziad Ahmed El-Nady | eyouth × DEPI 2025
+**Owner:** Ziad Ahmed El-Nady | eyouth × DEPI 2026
 **Milestone:** M3 — Azure Deployment
 **Date:** May 2026
 
@@ -167,4 +167,4 @@ az webapp restart \
 
 ---
 
-*Healthcare RAG — M3 Integration Documentation | eyouth × DEPI 2025*
+*Healthcare RAG — M3 Integration Documentation | eyouth × DEPI 2026*

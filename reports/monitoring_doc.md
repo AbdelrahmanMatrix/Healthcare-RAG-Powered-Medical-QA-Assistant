@@ -1,7 +1,7 @@
 # Monitoring & Retraining Strategy
 
 **Healthcare RAG-Powered Medical Q&A Assistant**
-**Owner:** Ziad Ahmed El-Nady | eyouth x DEPI 2025
+**Owner:** Ziad Ahmed El-Nady | eyouth x DEPI 2026
 
 ---
 

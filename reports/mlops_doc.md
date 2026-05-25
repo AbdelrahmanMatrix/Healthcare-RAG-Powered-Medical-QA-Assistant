@@ -1,7 +1,7 @@
 # MLOps Setup Summary
 
 **Healthcare RAG-Powered Medical Q&A Assistant**
-**Owner:** Youssef George Youssef | eyouth x DEPI 2025
+**Owner:** Youssef George Youssef | eyouth x DEPI 2026
 
 ---
 

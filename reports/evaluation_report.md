@@ -8,7 +8,7 @@
 | Item | Value |
 |---|---|
 | Evaluation queries | 200 |
-| Held-out from FAISS | Yes — 1,000-row clean holdout (NB05) |
+| Held-out from FAISS | Yes — 2,000-row clean holdout (NB05) |
 | RAG model | meta-llama/llama-4-scout-17b-16e-instruct via Groq + FAISS retrieval (top-20 candidates, CrossEncoder reranked, top-3 injected into LLM) |
 | Embedding model | S-PubMedBert-MS-MARCO (biomedical domain) |
 | Reranker | cross-encoder/ms-marco-MiniLM-L-12-v2 |

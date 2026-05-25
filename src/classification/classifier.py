@@ -20,6 +20,7 @@ Usage:
 """
 
 import os
+import threading
 from pathlib import Path
 
 # ── Config ────────────────────────────────────────────────────────────────────
@@ -130,13 +131,16 @@ class MedicalClassifier:
 # ── Module-level convenience functions ────────────────────────────────────────
 
 _classifier_instance = None
+_classifier_lock = threading.Lock()
 
 
 def load_classifier(**kwargs) -> MedicalClassifier:
     """Load and cache classifier instance (no-op if already loaded)."""
     global _classifier_instance
     if _classifier_instance is None:
-        _classifier_instance = MedicalClassifier(**kwargs)
+        with _classifier_lock:
+            if _classifier_instance is None:
+                _classifier_instance = MedicalClassifier(**kwargs)
     return _classifier_instance
 
 
