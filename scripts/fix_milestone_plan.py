@@ -11,13 +11,13 @@ Changes applied:
   3. M2 Task 3: "distilbert-base-uncased" → "dmis-lab/biobert-v1.1"
 """
 
-import sys
 import io
+import sys
+from pathlib import Path
+
+import docx
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
-
-from pathlib import Path
-import docx
 
 DOC_PATH = Path(__file__).resolve().parents[1] / "docs" / "Milestone_Execution_Plan.docx"
 doc = docx.Document(str(DOC_PATH))
