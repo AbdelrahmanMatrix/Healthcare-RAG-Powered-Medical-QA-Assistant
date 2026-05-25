@@ -29,7 +29,8 @@ CATEGORY_COLORS = {
 # ── Custom CSS Theme (Modern, Minimalist, Futuristic) ────────────────────────
 CUSTOM_CSS = """
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap');
 
     :root {
         --font-display: 'Space Grotesk', sans-serif;
@@ -44,7 +45,7 @@ CUSTOM_CSS = """
         --text-secondary: #6C757D;
         --primary: #000000;
         --accent: #00E5FF;
-        
+
         --shadow: 0 4px 12px rgba(0,0,0,0.05);
         --shadow-hover: 0 8px 24px rgba(0,229,255,0.15);
         --radius: 12px;
@@ -181,7 +182,7 @@ CUSTOM_CSS = """
         border-radius: 20px 20px 4px 20px;
     }
     .user-bubble p, .user-bubble .bubble-header-label { color: var(--bg) !important; }
-    
+
     .bot-bubble {
         background: var(--card);
         border: 1px solid var(--border);
@@ -214,10 +215,9 @@ CUSTOM_CSS = """
     }
     div[data-testid="stMetricValue"] {
         color: var(--text) !important;
-        font-family: var(--font-display) !important;
-        letter-spacing: -0.05em;
+        font-family: var(--font-display) !important;        letter-spacing: -0.05em;
     }
-    
+
     /* ── Input & Buttons ───────────────────────────────────── */
     /* All text-type inputs — explicit color ensures visibility in light mode */
     input:not([type="checkbox"]):not([type="radio"]):not([type="range"]) {
@@ -254,7 +254,7 @@ CUSTOM_CSS = """
         background: var(--surface) !important;
         border-color: var(--border) !important;
     }
-    div[data-baseweb="select"] input, 
+    div[data-baseweb="select"] input,
     div[data-baseweb="select"] [data-testid="stMarkdownContainer"] p {
         color: var(--text) !important;
     }
@@ -568,20 +568,20 @@ DARK_MODE_CSS = """
         background: rgba(11, 15, 25, 0.7);
         backdrop-filter: blur(10px);
     }
-    
+
     [data-theme="dark"] .user-bubble {
         background: #111827;
         border: 1px solid #1F2937;
         color: #F9FAFB;
     }
-    [data-theme="dark"] .user-bubble p, 
+    [data-theme="dark"] .user-bubble p,
     [data-theme="dark"] .user-bubble .bubble-header-label { color: #F9FAFB !important; }
-    
+
     [data-theme="dark"] .bot-bubble {
         background: #0B0F19;
         border-color: #1F2937;
     }
-    
+
     [data-theme="dark"] .stTextInput input {
         background: #0B0F19 !important;
         color: #F9FAFB !important;
@@ -590,7 +590,7 @@ DARK_MODE_CSS = """
         background: #0B0F19 !important;
         color: #F9FAFB !important;
     }
-    
+
     [data-theme="dark"] .stButton button[kind="primary"] {
         background: #00E5FF !important;
         color: #030712 !important;
@@ -691,10 +691,12 @@ DARK_MODE_CSS = """
 </style>
 """
 
+
 def _dark_mode_js():
     dark = st.session_state.get("dark_mode", False)
     theme = "dark" if dark else "light"
     return f'<script type="text/javascript">document.documentElement.setAttribute("data-theme", "{theme}");</script>'
+
 
 # ── Clean Minimalist Plotly Themes ───────────────────────────────────────────
 MEDICAL_PLOTLY_THEME = {
@@ -721,10 +723,12 @@ MEDICAL_PLOTLY_DARK_THEME = {
     }
 }
 
+
 def inject_custom_css():
     st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
     st.markdown(DARK_MODE_CSS, unsafe_allow_html=True)
     st.markdown(_dark_mode_js(), unsafe_allow_html=True)
+
 
 def apply_plotly_theme():
     dark = st.session_state.get("dark_mode", False)
@@ -735,15 +739,18 @@ def apply_plotly_theme():
         pio.templates["medical"] = MEDICAL_PLOTLY_THEME
         pio.templates.default = "plotly_white+medical"
 
+
 def section_header(title: str, icon: str = ""):
     st.markdown(
         f"""
-        <div style="margin: 2rem 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); font-family: var(--font-display);">
+        <div style="margin: 2rem 0 1rem 0; padding-bottom: 0.5rem; \
+border-bottom: 1px solid var(--border); font-family: var(--font-display);">
             <h3 style="margin:0; font-size: 1.2rem; font-weight: 600;">{icon} {title}</h3>
         </div>
         """,
         unsafe_allow_html=True,
     )
+
 
 def build_top_nav(current_page: str):
     pages = [
@@ -774,7 +781,9 @@ def build_top_nav(current_page: str):
         st.markdown(f'<div class="mode-indicator">{mode_label}</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
+
 # ── Data Loaders ──────────────────────────────────────────────────────────────
+
 
 @st.cache_data(ttl=60)
 def load_labelled_data() -> pd.DataFrame | None:

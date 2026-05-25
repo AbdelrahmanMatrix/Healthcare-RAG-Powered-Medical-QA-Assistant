@@ -8,7 +8,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.rag.bm25_retriever import BM25Retriever
+from src.rag.bm25_retriever import BM25Retriever  # noqa: E402
 
 # Load chunk mapping
 mapping_path = 'data/embeddings/faiss_index/chunk_mapping.pkl'

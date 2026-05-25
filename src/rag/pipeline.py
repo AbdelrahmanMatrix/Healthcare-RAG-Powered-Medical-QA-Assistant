@@ -249,7 +249,11 @@ class RAGPipeline:
         if category_expansion is not None:
             try:
                 import json
-                overrides = json.loads(category_expansion) if isinstance(category_expansion, str) else category_expansion
+                overrides = (
+                    json.loads(category_expansion)
+                    if isinstance(category_expansion, str)
+                    else category_expansion
+                )
                 self._category_expansion.update(overrides)
             except Exception:
                 pass
@@ -452,7 +456,7 @@ class RAGPipeline:
             )[:k]
         else:
             # Fallback: binary matched/unmatched split (backward-compatible)
-            matched   = [c for c in merged if c["category"] == category]
+            matched = [c for c in merged if c["category"] == category]
             unmatched = [c for c in merged if c["category"] != category]
             pool = (matched + unmatched)[:k]
 

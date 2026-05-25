@@ -496,7 +496,6 @@ class TestRAGPipelineCategoryExpansion:
         import os
         import numpy as np
         import pandas as pd
-        import sys
         import importlib as _il
 
         # Build all mocks
@@ -596,7 +595,6 @@ class _HybridPipelineBuilder:
     def __init__(self, mock_df=None, use_bm25=True, use_reranker=False, top_k=15, bm25_threshold=12.0):
         import os
         import numpy as np
-        import sys
         import importlib as _il
 
         self._np = np
@@ -773,8 +771,8 @@ class TestHybridRetrievalBasic:
 
     def test_mixed_bm25_scores(self):
         """Mix of above/below threshold: only above-threshold BM25 results are prepended."""
-        bm25_scores = [15.0, 8.0, 14.0, 5.0, 13.0]
-        builder = self._make_builder(bm25_scores=bm25_scores, bm25_threshold=12.0, top_k=10)
+        scores = [15.0, 8.0, 14.0, 5.0, 13.0]
+        builder = self._make_builder(bm25_scores=scores, bm25_threshold=12.0, top_k=10)
         pipeline = builder.pipeline
 
         results = pipeline.retrieve("test query", top_k=10)
@@ -786,7 +784,6 @@ class TestHybridRetrievalBasic:
 
     def test_deduplication(self):
         """Same chunk_id from BM25 and FAISS is not duplicated."""
-        bm25_scores = [15.0, 14.0]
         builder = _HybridPipelineBuilder(
             use_bm25=True, top_k=10, bm25_threshold=12.0
         )
@@ -864,8 +861,8 @@ class TestHybridRetrievalBasic:
 
     def test_retrieve_structure_hybrid(self):
         """Hybrid results have the expected dict keys."""
-        bm25_scores = [15.0, 14.0]
-        builder = self._make_builder(bm25_scores=bm25_scores, bm25_threshold=12.0, top_k=5)
+        scores = [15.0, 14.0]
+        builder = self._make_builder(bm25_scores=scores, bm25_threshold=12.0, top_k=5)
         pipeline = builder.pipeline
 
         results = pipeline.retrieve("test query", top_k=5)
@@ -880,7 +877,6 @@ class TestHybridRetrievalBasic:
 
     def test_reranker_integration(self):
         """When reranker is enabled, results have reranker_score key."""
-        bm25_scores = [15.0]
         builder = _HybridPipelineBuilder(
             use_bm25=True, use_reranker=True, top_k=5, bm25_threshold=12.0
         )
@@ -1022,7 +1018,6 @@ class TestHybridRetrievalByCategory:
     def test_retrieve_by_category_continuous_scoring(self):
         """All_scores dict enables continuous category scoring."""
         import os
-        import sys
         import importlib as _il
         import numpy as np
         import pandas as pd
@@ -1057,7 +1052,11 @@ class TestHybridRetrievalByCategory:
             "answer": [f"a{i}" for i in range(100)],
             "context": [f"c{i}" for i in range(100)],
             "text_chunk": [f"t{i}" for i in range(100)],
-            "category": ["Symptoms"] * 20 + ["General"] * 20 + ["Treatment"] * 20 + ["Diagnosis"] * 20 + ["Medication"] * 20,
+            "category": (
+                ["Symptoms"] * 20 + ["General"] * 20
+                + ["Treatment"] * 20 + ["Diagnosis"] * 20
+                + ["Medication"] * 20
+            ),
         })
 
         with patch.dict("sys.modules", {

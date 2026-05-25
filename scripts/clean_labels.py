@@ -59,21 +59,21 @@ if SAMPLE_LIMIT > 0:
 # Build input text matching training format: "question [SEP] context"
 df["text"] = df["question"].astype(str) + " [SEP] " + df["context"].astype(str)
 
-print(f"\n  Category distribution:")
+print("\n  Category distribution:")
 for cat, count in df["category"].value_counts().items():
-    print(    f"    {cat:15s}: {count:>7,}")
+    print(f"    {cat:15s}: {count:>7,}")
 
 if DRY_RUN:
     OUTPUT_PATH = PROJECT_ROOT / "data" / "processed" / f"pubmedqa_labelled_sample{SAMPLE_LIMIT}.csv"
     print(f"\n  ⚠️  DRY RUN MODE — output will be saved to: {OUTPUT_PATH.name}")
-    print(f"      This is NOT the full cleaned dataset.")
+    print("      This is NOT the full cleaned dataset.")
 
 # ── Load Classifier ──────────────────────────────────────────────────────
 print("\n" + "=" * 60)
 print("STEP 2: Load BioBERT Classifier")
 print("=" * 60)
 
-from src.classification.classifier import MedicalClassifier
+from src.classification.classifier import MedicalClassifier  # noqa: E402
 
 clf = MedicalClassifier()
 original_counts = df["category"].value_counts().to_dict()
@@ -95,7 +95,7 @@ batch_count = (n + BATCH_SIZE - 1) // BATCH_SIZE
 start_time = time.time()
 
 for b in range(batch_count):
-    batch = texts[b * BATCH_SIZE : (b + 1) * BATCH_SIZE]
+    batch = texts[b * BATCH_SIZE: (b + 1) * BATCH_SIZE]
     batch_results = [clf.predict_with_confidence(t) for t in batch]
 
     for r in batch_results:
@@ -187,7 +187,7 @@ df_out = df.drop(columns=[c for c in cols_to_drop if c in df.columns])
 df_out.to_csv(OUTPUT_PATH, index=False)
 if DRY_RUN:
     print(f"  ⚠️  DRY RUN — sample saved to {OUTPUT_PATH.name} for inspection.")
-    print(f"      Delete this file after review; re-run with SAMPLE_LIMIT=0 for production.")
+    print("      Delete this file after review; re-run with SAMPLE_LIMIT=0 for production.")
 
 print(f"  Saved: {OUTPUT_PATH}")
 print(f"  Rows: {len(df_out):,}")
@@ -203,7 +203,7 @@ print(f"  Total rows:       {n:,}")
 print(f"  Rows re-labelled: {total_to_fix:,} "
       f"({100 * total_to_fix / n:.2f}%)")
 print(f"  Confidence min:   {CONFIDENCE_THRESHOLD}")
-print(f"  Classifier:       BioBERT (dmis-lab/biobert-v1.1)")
+print("  Classifier:       BioBERT (dmis-lab/biobert-v1.1)")
 print(f"  Time:             {total_time:.1f}s")
 print()
 print("  Next steps:")
