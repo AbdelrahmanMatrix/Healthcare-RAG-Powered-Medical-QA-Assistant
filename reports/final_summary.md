@@ -149,14 +149,15 @@ User Query
 
 | Commit | Workflow | Conclusion | Details |
 |--------|----------|------------|---------|
-| `0f10dc5` (latest, local) | **CI** | — ⏳ Not yet pushed | Flake8 E501 line-length fix for dashboard |
+| `1046847` (latest) | **CI** | ⏳ Pending | docs: update final_summary.md with latest commits and CI status |
+| `0f10dc5` | **CI** | ⏳ Pending | Flake8 E501 line-length fix for dashboard (pushed) |
 | `adc4d94` | **CI** | ❌ **Failure** | E501 violations in dashboard (fixed in `0f10dc5`) |
 | `adc4d94` | **Azure Deploy** | 🟡 In progress | Blocked on CI success |
 | `aa543c5` | **CI** | ✅ **Success** | Flake8 E402 fix for `scripts/fix_milestone_plan.py` |
 | `aa543c5` | **Azure Deploy** | ✅ **Success** | Docker build + smoke test passed |
 | `9678c9a` | **CI** | ❌ Failure | Flake8 E402 in `scripts/fix_milestone_plan.py` |
 
-> **Status:** Commit `adc4d94` (dashboard KPI update) failed CI due to 2 E501 line-length violations — fixed locally in `0f10dc5`. Push the latest commit to trigger a clean CI run.
+> **Status:** Commit `adc4d94` (dashboard KPI update) failed CI due to 2 E501 line-length violations — fixed in `0f10dc5` and now pushed to `main`. Commit `1046847` follows with this documentation update. Both commits are pushed and pending CI verification.
 
 ---
 
@@ -209,7 +210,7 @@ User Query
 | **Code** | ✅ All modifications complete and committed |
 | **Tests** | ✅ 150/150 passing |
 | **Lint** | ✅ Clean (0 flake8 errors) |
-| **CI** | 🟡 `adc4d94` failed (E501 lint); fixed in local commit `0f10dc5` |
+| **CI** | 🟡 `adc4d94` failed (E501 lint); fixed in `0f10dc5` and `1046847` — pushed, pending CI |
 | **All cross-references** | ✅ Consistent across 16 report files |
 | **Stale artifacts** | ✅ 7 stale files removed from git tracking |
 | **Stale artifacts gitignored** | ✅ `*.zip`, HTML export patterns added |
@@ -220,11 +221,11 @@ User Query
 ### Latest Git History
 
 ```
+1046847 - docs: update final_summary.md with latest commits and CI status
 0f10dc5 - style: fix flake8 E501 line-length violations in dashboard/app.py
 adc4d94 - feat(dashboard): add Key KPIs at a Glance section with final evaluation results
 74f4de6 - docs: add final project summary document with all KPIs, test results, and submission status
 aa543c5 - fix: resolve flake8 E402 import-ordering in scripts/fix_milestone_plan.py
-9678c9a - fix: resolve cross-project inconsistencies and clean stale artifacts
 ```
 
 ---
