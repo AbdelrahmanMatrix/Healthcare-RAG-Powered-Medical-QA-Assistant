@@ -78,8 +78,9 @@ RUN mkdir -p /home/LogFiles && ln -sf /dev/stdout /home/LogFiles/entrypoint.log
 COPY --from=builder /usr/local/lib/python3.10/site-packages/ /usr/local/lib/python3.10/site-packages/
 COPY --from=builder /usr/local/bin/ /usr/local/bin/
 
-# Copy pre-downloaded model cache (eliminates cold-start downloads)
-COPY --from=builder /app/hf_cache/ /app/hf_cache/
+# NOTE: No pre-downloaded model cache to copy — the dashboard is a pure
+# Streamlit frontend that calls the API via HTTP and doesn't use ML models
+# directly. Pre-downloading would add ~2 GB of unnecessary model weights.
 
 # Copy source code
 COPY --from=builder /app/src/      ./src/
