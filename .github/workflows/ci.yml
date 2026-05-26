@@ -59,6 +59,7 @@ jobs:
 
   docker-build:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     needs: lint-and-test
     if: github.ref == 'refs/heads/main'
     steps:

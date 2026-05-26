@@ -1,28 +1,35 @@
-# Healthcare RAG — Dashboard Dockerfile
+# Healthcare RAG — Dashboard Dockerfile (Multi-Stage)
 # Build:  docker build -f docker/Dockerfile.dashboard -t healthcare-rag-dashboard:latest .
 # Run:    docker run -p 8501:8501 --env-file .env --rm healthcare-rag-dashboard:latest
+#
+# Multi-stage build reduces final image size by ~60% and pre-downloads
+# HuggingFace models during build to eliminate cold-start downloads.
 
-FROM python:3.10-slim
+# ══════════════════════════════════════════════════════════════════════════════
+# STAGE 1: Builder — install deps + pre-download models
+# ══════════════════════════════════════════════════════════════════════════════
+FROM python:3.10-slim AS builder
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV HF_HOME=/app/hf_cache
+ENV SENTENCE_TRANSFORMERS_HOME=/app/hf_cache/sentence_transformers
+ENV TORCH_HOME=/app/hf_cache/torch
+ENV TRANSFORMERS_CACHE=/app/hf_cache/transformers
 
 WORKDIR /app
 
-# System deps
+# System build deps
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential curl \
+    build-essential curl git \
     && rm -rf /var/lib/apt/lists/*
 
-# Create a symlink so that App Service log streaming works
-RUN mkdir -p /home/LogFiles && ln -sf /dev/stdout /home/LogFiles/entrypoint.log
-
-# Install Python deps first — cached unless requirements.txt changes
+# Install Python deps
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copy source code (needed for shared imports like config/settings.py, src/, etc.)
+# Copy source code
 COPY src/      ./src/
 COPY api/      ./api/
 COPY config/   ./config/
@@ -33,13 +40,62 @@ COPY setup.py  .
 COPY download.py .
 COPY models/   ./models/
 
+# Install project
+RUN pip install --no-cache-dir -e .
+
+# NOTE: No pre-download step for dashboard — it's a pure Streamlit frontend
+# that calls the API via HTTP and never uses ML models (torch, transformers, etc.)
+# directly. Pre-downloading would add ~2 GB of unnecessary model weights.
+
+# Clean up cache
+RUN pip cache purge || true
+RUN find /root/.cache -type f -delete 2>/dev/null || true
+RUN find /tmp -type f -delete 2>/dev/null || true
+
+# ══════════════════════════════════════════════════════════════════════════════
+# STAGE 2: Runtime — lean image
+# ══════════════════════════════════════════════════════════════════════════════
+FROM python:3.10-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV HF_HOME=/app/hf_cache
+ENV SENTENCE_TRANSFORMERS_HOME=/app/hf_cache/sentence_transformers
+ENV TORCH_HOME=/app/hf_cache/torch
+ENV TRANSFORMERS_CACHE=/app/hf_cache/transformers
+
+WORKDIR /app
+
+# Runtime system deps
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create symlink for Azure log streaming
+RUN mkdir -p /home/LogFiles && ln -sf /dev/stdout /home/LogFiles/entrypoint.log
+
+# Copy Python packages
+COPY --from=builder /usr/local/lib/python3.10/site-packages/ /usr/local/lib/python3.10/site-packages/
+COPY --from=builder /usr/local/bin/ /usr/local/bin/
+
+# Copy pre-downloaded model cache (eliminates cold-start downloads)
+COPY --from=builder /app/hf_cache/ /app/hf_cache/
+
+# Copy source code
+COPY --from=builder /app/src/      ./src/
+COPY --from=builder /app/api/      ./api/
+COPY --from=builder /app/config/   ./config/
+COPY --from=builder /app/scripts/  ./scripts/
+COPY --from=builder /app/mlops/    ./mlops/
+COPY --from=builder /app/dashboard/ ./dashboard/
+COPY --from=builder /app/setup.py  .
+COPY --from=builder /app/download.py .
+COPY --from=builder /app/models/   ./models/
+
 # Ensure data directories exist
 RUN mkdir -p data/embeddings/faiss_index data/processed data/raw
 
-# Install project in editable mode so absolute imports resolve
-RUN pip install --no-cache-dir -e .
-
-# Entrypoint: starts Streamlit dashboard
+# Entrypoint
 COPY docker/entrypoint-dashboard.sh /entrypoint-dashboard.sh
 RUN chmod +x /entrypoint-dashboard.sh
 

@@ -348,8 +348,9 @@ class TestHealthCheckShell:
 
     def test_api_smoke_test_parses_json(self, jobs):
         """The API smoke test parses JSON responses for answer/category/sources."""
-        # Smoke test step is index 2 in post-deploy-health-check
-        run = jobs["post-deploy-health-check"]["steps"][2]["run"]
+        # Smoke test step is index 3 in post-deploy-health-check
+        # (0=setup-python, 1=api-health, 2=dashboard-health, 3=smoke, 4=summary)
+        run = jobs["post-deploy-health-check"]["steps"][3]["run"]
         assert "json.load" in run, "Smoke test should parse JSON response"
         assert "answer" in run, "Should check for answer field"
         assert "category" in run, "Should check for category field"
@@ -357,7 +358,7 @@ class TestHealthCheckShell:
 
     def test_api_smoke_test_curl_command(self, jobs):
         """The smoke test POSTs a medical question to /query."""
-        run = jobs["post-deploy-health-check"]["steps"][2]["run"]
+        run = jobs["post-deploy-health-check"]["steps"][3]["run"]
         assert "POST" in run, "Should use POST method"
         assert "/query" in run, "Should POST to /query endpoint"
         assert "Does aspirin reduce cardiovascular risk" in run, (
@@ -413,7 +414,7 @@ class TestPostDeploySummaryShell:
     def test_post_deploy_summary_echo_is_single_line(self, jobs):
         """The post-deployment summary echo for API query status should be a
         single echo statement (no YAML continuation lines that could break)."""
-        run = jobs["post-deploy-health-check"]["steps"][3]["run"]
+        run = jobs["post-deploy-health-check"]["steps"][4]["run"]
         lines = [line.strip() for line in run.split("\n")]
         query_lines = [line for line in lines if "API query" in line and "answer=" in line]
         assert len(query_lines) == 1, (
@@ -424,7 +425,7 @@ class TestPostDeploySummaryShell:
 
     def test_post_deploy_summary_echo_has_all_fields(self, jobs):
         """The single echo line contains answer, category, and sources fields."""
-        run = jobs["post-deploy-health-check"]["steps"][3]["run"]
+        run = jobs["post-deploy-health-check"]["steps"][4]["run"]
         lines = [line.strip() for line in run.split("\n")]
         query_line = next((line for line in lines if "API query" in line and "answer=" in line), "")
         assert "answer=" in query_line, "Missing answer field in echo"
@@ -434,7 +435,7 @@ class TestPostDeploySummaryShell:
     def test_post_deploy_summary_echo_no_trailing_backslash_quote(self, jobs):
         """The echo line does not contain trailing escaped quotes from a
         broken multi-line continuation (the original bug)."""
-        run = jobs["post-deploy-health-check"]["steps"][3]["run"]
+        run = jobs["post-deploy-health-check"]["steps"][4]["run"]
         lines = [line.strip() for line in run.split("\n")]
         query_line = next((line for line in lines if "API query" in line and "answer=" in line), "")
         assert not query_line.rstrip().endswith('\\"'), (
@@ -444,7 +445,7 @@ class TestPostDeploySummaryShell:
 
     def test_post_deploy_summary_echo_uses_if_then_else(self, jobs):
         """The echo is inside an if/elif/else block that handles ok, connection-failed, and fallback."""
-        run = jobs["post-deploy-health-check"]["steps"][3]["run"]
+        run = jobs["post-deploy-health-check"]["steps"][4]["run"]
         assert 'if' in run and 'then' in run and 'elif' in run and 'else' in run, (
             "Expected if/elif/else branching for API query status"
         )

@@ -74,6 +74,8 @@ webapp_logs_*/
 *.tmp
 *.bak
 *.orig
+tmp/
+temp/
 
 # ─── Build Artifacts (archives, exports) ──────────────────────────────────────
 *.zip

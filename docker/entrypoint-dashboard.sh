@@ -15,4 +15,8 @@ exec streamlit run dashboard/app.py \
     --server.port "${PORT}" \
     --server.address 0.0.0.0 \
     --server.headless true \
+    --server.fileWatcherType none \
+    --runner.fastReruns false \
+    --global.developmentMode false \
+    --server.maxUploadSize 1 \
     --browser.gatherUsageStats false

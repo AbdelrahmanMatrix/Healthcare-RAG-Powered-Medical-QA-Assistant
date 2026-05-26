@@ -103,6 +103,8 @@ jobs:
   build-and-push-dashboard:
     needs: test
     runs-on: ubuntu-latest
+    outputs:
+      acr-login-server: ${{ steps.acr-login-dash.outputs.login-server }}
     steps:
       - uses: actions/checkout@v4
 
@@ -112,12 +114,15 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: ACR login
+        id: acr-login-dash
         run: |
+          SERVER=$(az acr show --name $ACR_NAME --query loginServer -o tsv)
+          echo "login-server=$SERVER" >> $GITHUB_OUTPUT
           az acr login --name $ACR_NAME
 
       - name: Build and push Dashboard image
         run: |
-          SERVER=$(az acr show --name $ACR_NAME --query loginServer -o tsv)
+          SERVER=${{ steps.acr-login-dash.outputs.login-server }}
           IMAGE="${SERVER}/healthcare-rag-dashboard:${{ github.sha }}"
           LATEST="${SERVER}/healthcare-rag-dashboard:latest"
 
@@ -212,7 +217,7 @@ jobs:
 
       - name: Update Dashboard App Service image
         run: |
-          SERVER=$(az acr show --name $ACR_NAME --query loginServer -o tsv)
+          SERVER=${{ needs.build-and-push-dashboard.outputs.acr-login-server }}
           az webapp config container set \
             --name $DASHBOARD_NAME \
             --resource-group $RESOURCE_GROUP \
@@ -254,6 +259,11 @@ jobs:
     runs-on: ubuntu-latest
     if: always()  # run even if dashboard deploy had warnings
     steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
       - name: Check API health endpoint
         id: api-health
         run: |

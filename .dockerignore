@@ -70,6 +70,10 @@ venv/
 *.swo
 *~
 
+# ── Temp files ────────────────────────────────────────────────
+tmp/
+temp/
+
 # ── Testing & coverage ──────────────────────────────────────────
 .pytest_cache/
 .coverage

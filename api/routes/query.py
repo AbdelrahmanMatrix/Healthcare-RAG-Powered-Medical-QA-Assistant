@@ -1,4 +1,8 @@
 import logging
+import time
+from collections import OrderedDict
+from hashlib import sha256
+
 from fastapi import APIRouter, HTTPException, Depends
 from starlette.concurrency import run_in_threadpool
 from api.schemas.request import QueryRequest, QueryResponse, HealthResponse, SourceCitation
@@ -9,6 +13,42 @@ from api.middleware.auth import verify_api_key
 logger = logging.getLogger("healthcare_rag.routes")
 router = APIRouter()
 
+# ── Response Cache ───────────────────────────────────────────────────────────
+# Simple in-memory LRU cache for duplicate queries.
+# Reduces redundant Groq LLM API calls and FAISS retrievals.
+# Cache entries expire after CACHE_TTL seconds.
+
+CACHE_SIZE = 64          # max cached queries
+CACHE_TTL = 300          # seconds (5 min)
+
+_cache = OrderedDict()   # {query_hash: (timestamp, result_dict)}
+
+
+def _hash_query(question: str, top_k: int, category: str | None) -> str:
+    """Hash the query parameters for cache key."""
+    key = f"{question}||{top_k}||{category}"
+    return sha256(key.encode()).hexdigest()
+
+
+def _cache_get(key: str) -> dict | None:
+    """Get cached result if fresh."""
+    if key not in _cache:
+        return None
+    ts, result = _cache[key]
+    if time.monotonic() - ts > CACHE_TTL:
+        del _cache[key]
+        return None
+    # Move to end (LRU: most recently used)
+    _cache.move_to_end(key)
+    return result
+
+
+def _cache_set(key: str, result: dict):
+    """Cache a result, evicting oldest if at capacity."""
+    if len(_cache) >= CACHE_SIZE:
+        _cache.popitem(last=False)  # evict least recently used
+    _cache[key] = (time.monotonic(), result)
+
 
 @router.post("/query", response_model=QueryResponse, dependencies=[Depends(verify_api_key)])
 async def handle_query(request: QueryRequest) -> QueryResponse:
@@ -16,8 +56,27 @@ async def handle_query(request: QueryRequest) -> QueryResponse:
     Run the RAG pipeline.
     ML inference is synchronous — offloaded to threadpool so the event loop
     is never blocked. Supports optional top_k and category overrides.
+
+    Responses are cached in-memory (LRU, 64 entries, 5 min TTL) to reduce
+    redundant Groq LLM API calls for identical questions.
     """
     logger.info(f"Query received: {request.question[:80]!r} | top_k={request.top_k} | category={request.category}")
+
+    # Check cache first
+    cache_key = _hash_query(request.question, request.top_k, request.category)
+    cached = _cache_get(cache_key)
+    if cached is not None:
+        logger.info(f"Cache HIT for query: {request.question[:60]!r}")
+        return QueryResponse(
+            answer=cached["answer"],
+            category=cached["category"],
+            retrieved_sources=cached["sources"],
+            source_citations=cached["source_citations"],
+            disclaimer=cached["disclaimer"],
+        )
+
+    logger.info(f"Cache MISS for query: {request.question[:60]!r}")
+
     try:
         result = await run_in_threadpool(
             run_pipeline,
@@ -40,13 +99,24 @@ async def handle_query(request: QueryRequest) -> QueryResponse:
             for s in raw_details
         ]
 
-        return QueryResponse(
+        response = QueryResponse(
             answer=result.get("answer", "Unable to generate a response."),
             category=result.get("category", "General"),
             retrieved_sources=result.get("sources", []),
             source_citations=source_citations,
             disclaimer=settings.disclaimer,
         )
+
+        # Cache the response
+        _cache_set(cache_key, {
+            "answer": response.answer,
+            "category": response.category,
+            "sources": response.retrieved_sources,
+            "source_citations": [s.model_dump() for s in response.source_citations],
+            "disclaimer": response.disclaimer,
+        })
+
+        return response
     except Exception as e:
         logger.error(f"Pipeline error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Pipeline error: {str(e)}")
