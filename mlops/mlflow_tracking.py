@@ -261,7 +261,6 @@ def register_best_model(run_ids: list[str], experiment_name: str) -> None:
     model_uri = str(CLASSIFIER_PATH)
     if not CLASSIFIER_PATH.exists():
         print(f"⚠️  Classifier weights not at {model_uri} — skipping registry step.")
-        print("    Upload weights first: python scripts/upload_classifier_to_hub.py")
         return
 
     registered_name = "healthcare-rag-classifier"

@@ -88,15 +88,15 @@ with col_g1:
             </div>
             <div class="metric-group-item">
                 <span class="mgi-label">BERTScore F1</span>
-                <span class="mgi-value">0.8047<span class="mgi-delta">≥ 0.80 ✅</span></span>
+                <span class="mgi-value">0.8061<span class="mgi-delta">≥ 0.80 ✅</span></span>
             </div>
             <div class="metric-group-item">
                 <span class="mgi-label">ROUGE-L</span>
-                <span class="mgi-value">0.1887<span class="mgi-delta">≥ 0.15 ✅</span></span>
+                <span class="mgi-value">0.1911<span class="mgi-delta">≥ 0.15 ✅</span></span>
             </div>
             <div class="metric-group-item">
                 <span class="mgi-label">Faithfulness</span>
-                <span class="mgi-value">92.0%<span class="mgi-delta">≥ 70% ✅</span></span>
+                <span class="mgi-value">86.0%<span class="mgi-delta">≥ 70% ✅</span></span>
             </div>
             <div class="metric-group-item">
                 <span class="mgi-label">Hallucination Rate</span>
@@ -204,7 +204,7 @@ with col_left:
                 "BLEU (RAG)", "BLEU (Plain LLM)",
                 "Faithfulness", "Hallucination Rate",
             ],
-            "Result": ["0.8047", "0.1887", "0.0239", "0.0276", "92.0%", "10.0%"],
+            "Result": ["0.8061", "0.1911", "0.0274", "0.0274", "86.0%", "10.0%"],
             "Target": [
                 "≥ 0.80", "≥ 0.15",
                 "≥ +6% vs baseline (secondary)", "baseline",
