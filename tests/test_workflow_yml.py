@@ -414,8 +414,8 @@ class TestPostDeploySummaryShell:
         """The post-deployment summary echo for API query status should be a
         single echo statement (no YAML continuation lines that could break)."""
         run = jobs["post-deploy-health-check"]["steps"][3]["run"]
-        lines = [l.strip() for l in run.split("\n")]
-        query_lines = [l for l in lines if "API query" in l and "answer=" in l]
+        lines = [line.strip() for line in run.split("\n")]
+        query_lines = [line for line in lines if "API query" in line and "answer=" in line]
         assert len(query_lines) == 1, (
             f"Expected exactly 1 echo line for API query status, got {len(query_lines)}.\n"
             f"This would indicate the YAML continuation-line bug regressed.\n"
@@ -425,8 +425,8 @@ class TestPostDeploySummaryShell:
     def test_post_deploy_summary_echo_has_all_fields(self, jobs):
         """The single echo line contains answer, category, and sources fields."""
         run = jobs["post-deploy-health-check"]["steps"][3]["run"]
-        lines = [l.strip() for l in run.split("\n")]
-        query_line = next((l for l in lines if "API query" in l and "answer=" in l), "")
+        lines = [line.strip() for line in run.split("\n")]
+        query_line = next((line for line in lines if "API query" in line and "answer=" in line), "")
         assert "answer=" in query_line, "Missing answer field in echo"
         assert "category=" in query_line, "Missing category field in echo"
         assert "sources=" in query_line, "Missing sources field in echo"
@@ -435,8 +435,8 @@ class TestPostDeploySummaryShell:
         """The echo line does not contain trailing escaped quotes from a
         broken multi-line continuation (the original bug)."""
         run = jobs["post-deploy-health-check"]["steps"][3]["run"]
-        lines = [l.strip() for l in run.split("\n")]
-        query_line = next((l for l in lines if "API query" in l and "answer=" in l), "")
+        lines = [line.strip() for line in run.split("\n")]
+        query_line = next((line for line in lines if "API query" in line and "answer=" in line), "")
         assert not query_line.rstrip().endswith('\\"'), (
             f"Echo line ends with trailing \\\" — this is the old continuation-line bug:\n"
             f"  {query_line}"
@@ -606,18 +606,19 @@ class TestWorkflowCoverage:
         untested = discovered - self.COVERED
         assert not untested, (
             f"Found {len(untested)} untested workflow file(s):\n"
-            + "\n".join(f"  - {name}" for name in sorted(untested)) + "\n"
-            f"Add tests for them and include their name(s) in "
-            f"TestWorkflowCoverage.COVERED."
+            + "\n".join(f"  - {name}" for name in sorted(untested))
+            + "\n"
+            "Add tests for them and include their name(s) in "
+            "TestWorkflowCoverage.COVERED."
         )
 
         # Warn if a covered file has been deleted
         missing = self.COVERED - discovered
         if missing:
             pytest.fail(
-                f"Covered workflow file(s) no longer exist:\n"
+                "Covered workflow file(s) no longer exist:\n"
                 + "\n".join(f"  - {name}" for name in sorted(missing)) + "\n"
-                f"Remove them from COVERED if intentionally deleted."
+                "Remove them from COVERED if intentionally deleted."
             )
 
 
@@ -880,5 +881,3 @@ class TestActionlint:
             header = f"❌ actionlint found issues in {workflow_file}"
             details = result.stdout.strip() or result.stderr.strip() or "(no output)"
             pytest.fail(f"{header}:\n{details}")
-
-
