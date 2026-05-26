@@ -240,3 +240,85 @@ jobs:
           done
           echo "⚠️ Dashboard health check did not return 200; may still be starting."
           echo "   Check at: https://${DASHBOARD_NAME}.azurewebsites.net"
+
+  # ── 4. Post-Deployment Health Check ──────────────────────────────────────────
+  # Runs after both App Services are deployed. Pings endpoints, runs a
+  # smoke-test query, and reports comprehensive status. This does NOT block
+  # the deployment — the environment url is set in the deploy jobs above.
+  post-deploy-health-check:
+    needs: [deploy-api, deploy-dashboard]
+    runs-on: ubuntu-latest
+    if: always()  # run even if dashboard deploy had warnings
+    steps:
+      - name: Check API health endpoint
+        id: api-health
+        run: |
+          URL="https://${APP_NAME}.azurewebsites.net"
+          echo "── Checking API health ──"
+          HTTP=$(curl -so /dev/null -w "%{http_code}" "${URL}/health" 2>&1) || HTTP="000"
+          echo "API /health → HTTP ${HTTP}"
+          echo "api-http=${HTTP}" >> $GITHUB_OUTPUT
+
+      - name: Check Dashboard health endpoint
+        id: dashboard-health
+        run: |
+          URL="https://${DASHBOARD_NAME}.azurewebsites.net"
+          echo "── Checking Dashboard health ──"
+          HTTP=$(curl -so /dev/null -w "%{http_code}" "${URL}/_stcore/health" 2>&1) || HTTP="000"
+          echo "Dashboard /_stcore/health → HTTP ${HTTP}"
+          echo "dashboard-http=${HTTP}" >> $GITHUB_OUTPUT
+
+      - name: Smoke test — API query
+        id: api-query
+        run: |
+          URL="https://${APP_NAME}.azurewebsites.net"
+          echo "── Smoke-testing API query ──"
+          RESPONSE=$(curl -s -X POST "${URL}/query" \
+            -H "Content-Type: application/json" \
+            -d '{"question": "Does aspirin reduce cardiovascular risk?"}' 2>&1) || RESPONSE="curl-failed"
+          if [ "$RESPONSE" = "curl-failed" ]; then
+            echo "Query: ❌ Connection failed"
+            echo "query-status=connection-failed" >> $GITHUB_OUTPUT
+          else
+            HAS_ANSWER=$(echo "$RESPONSE" | python -c "import sys,json; d=json.load(sys.stdin); print('yes' if d.get('answer') else 'no')" 2>/dev/null || echo "parse-failed")
+            HAS_CATEGORY=$(echo "$RESPONSE" | python -c "import sys,json; d=json.load(sys.stdin); print('yes' if d.get('category') else 'no')" 2>/dev/null || echo "parse-failed")
+            HAS_SOURCES=$(echo "$RESPONSE" | python -c "import sys,json; d=json.load(sys.stdin); print('yes' if d.get('source_citations') else 'no')" 2>/dev/null || echo "parse-failed")
+            echo "Query: answer=${HAS_ANSWER}, category=${HAS_CATEGORY}, sources=${HAS_SOURCES}"
+            echo "query-status=ok" >> $GITHUB_OUTPUT
+            echo "query-answer=${HAS_ANSWER}" >> $GITHUB_OUTPUT
+            echo "query-category=${HAS_CATEGORY}" >> $GITHUB_OUTPUT
+            echo "query-sources=${HAS_SOURCES}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Post-deployment summary
+        run: |
+          API="${{ steps.api-health.outputs.api-http }}"
+          DASH="${{ steps.dashboard-health.outputs.dashboard-http }}"
+          QRY="${{ steps.api-query.outputs.query-status }}"
+
+          echo "═══════════════════════════════════════════════════════"
+          echo "  🌐 Post-Deployment Health Check"
+          echo "  ────────────────────────────────────────────"
+
+          echo "  API /health:    HTTP ${API} $([ "$API" = "200" ] && echo '✅' || echo '❌')"
+          echo "  Dashboard:      HTTP ${DASH} $([ "$DASH" = "200" ] || [ "$DASH" = "302" ] && echo '✅' || echo '❌')"
+
+          if [ "$QRY" = "ok" ]; then
+            echo "  API query:      ✅ (answer=${{ steps.api-query.outputs.query-answer }}, \
+category=${{ steps.api-query.outputs.query-category }}, \
+sources=${{ steps.api-query.outputs.query-sources }})"
+          elif [ "$QRY" = "connection-failed" ]; then
+            echo "  API query:      ❌ Connection failed"
+          else
+            echo "  API query:      ⚠️ Not run"
+          fi
+
+          echo "  ────────────────────────────────────────────"
+          if [ "$API" = "200" ] && ( [ "$DASH" = "200" ] || [ "$DASH" = "302" ] ) && [ "$QRY" = "ok" ]; then
+            echo "  ✅ All endpoints healthy!"
+          else
+            echo "  ⚠️ Some checks failed. Review the logs above."
+            echo "  API:     https://${APP_NAME}.azurewebsites.net/health"
+            echo "  Dash:    https://${DASHBOARD_NAME}.azurewebsites.net"
+          fi
+          echo "═══════════════════════════════════════════════════════"
