@@ -1,0 +1,47 @@
+# Healthcare RAG — Dashboard Dockerfile
+# Build:  docker build -f docker/Dockerfile.dashboard -t healthcare-rag-dashboard:latest .
+# Run:    docker run -p 8501:8501 --env-file .env --rm healthcare-rag-dashboard:latest
+
+FROM python:3.10-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+# System deps
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create a symlink so that App Service log streaming works
+RUN mkdir -p /home/LogFiles && ln -sf /dev/stdout /home/LogFiles/entrypoint.log
+
+# Install Python deps first — cached unless requirements.txt changes
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Copy source code (needed for shared imports like config/settings.py, src/, etc.)
+COPY src/      ./src/
+COPY api/      ./api/
+COPY config/   ./config/
+COPY scripts/  ./scripts/
+COPY mlops/    ./mlops/
+COPY dashboard/ ./dashboard/
+COPY setup.py  .
+COPY download.py .
+COPY models/   ./models/
+
+# Ensure data directories exist
+RUN mkdir -p data/embeddings/faiss_index data/processed data/raw
+
+# Install project in editable mode so absolute imports resolve
+RUN pip install --no-cache-dir -e .
+
+# Entrypoint: starts Streamlit dashboard
+COPY docker/entrypoint-dashboard.sh /entrypoint-dashboard.sh
+RUN chmod +x /entrypoint-dashboard.sh
+
+EXPOSE 8501
+CMD ["/entrypoint-dashboard.sh"]

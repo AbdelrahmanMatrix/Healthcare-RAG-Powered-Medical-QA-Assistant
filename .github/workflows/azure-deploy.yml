@@ -1,5 +1,9 @@
 # .github/workflows/azure-deploy.yml
-# CI/CD: push to main → run tests → build Docker → deploy to Azure
+# CI/CD: push to main → run tests → build & push Docker images → deploy to Azure
+#
+# Deploys two Azure App Services:
+#   1. healthcare-rag-app       — FastAPI backend
+#   2. healthcare-rag-dashboard — Streamlit frontend
 #
 # Secrets required (set in GitHub repo Settings > Secrets):
 #   GROQ_API_KEY      — Groq LLM API key
@@ -21,6 +25,7 @@ on:
 env:
   RESOURCE_GROUP: healthcare-rag-rg
   APP_NAME: healthcare-rag-app
+  DASHBOARD_NAME: healthcare-rag-dashboard
   ACR_NAME: ${{ secrets.AZURE_ACR_NAME }}
 
 jobs:
@@ -58,8 +63,8 @@ jobs:
             --ignore=tests/test_rag_pipeline.py \
             --tb=short -q
 
-  # ── 2. Build & Push Docker image to ACR ─────────────────────────────────────
-  build-and-push:
+  # ── 2a. Build & Push API Docker image to ACR ────────────────────────────────
+  build-and-push-api:
     needs: test
     runs-on: ubuntu-latest
     outputs:
@@ -79,7 +84,7 @@ jobs:
           echo "login-server=$SERVER" >> $GITHUB_OUTPUT
           az acr login --name $ACR_NAME
 
-      - name: Build and push image
+      - name: Build and push API image
         run: |
           SERVER=${{ steps.acr-login.outputs.login-server }}
           IMAGE="${SERVER}/healthcare-rag:${{ github.sha }}"
@@ -94,9 +99,40 @@ jobs:
           docker push $IMAGE
           docker push $LATEST
 
-  # ── 3. Deploy to Azure App Service ──────────────────────────────────────────
-  deploy:
-    needs: build-and-push
+  # ── 2b. Build & Push Dashboard Docker image to ACR ───────────────────────────
+  build-and-push-dashboard:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: ACR login
+        run: |
+          az acr login --name $ACR_NAME
+
+      - name: Build and push Dashboard image
+        run: |
+          SERVER=$(az acr show --name $ACR_NAME --query loginServer -o tsv)
+          IMAGE="${SERVER}/healthcare-rag-dashboard:${{ github.sha }}"
+          LATEST="${SERVER}/healthcare-rag-dashboard:latest"
+
+          docker build \
+            -f docker/Dockerfile.dashboard \
+            -t $IMAGE \
+            -t $LATEST \
+            .
+
+          docker push $IMAGE
+          docker push $LATEST
+
+  # ── 3a. Deploy API to Azure App Service ──────────────────────────────────────
+  deploy-api:
+    needs: build-and-push-api
     runs-on: ubuntu-latest
     environment:
       name: production
@@ -109,7 +145,7 @@ jobs:
 
       - name: Update App Service image
         run: |
-          SERVER=${{ needs.build-and-push.outputs.acr-login-server }}
+          SERVER=${{ needs.build-and-push-api.outputs.acr-login-server }}
           az webapp config container set \
             --name $APP_NAME \
             --resource-group $RESOURCE_GROUP \
@@ -135,10 +171,72 @@ jobs:
             STATUS=$(curl -so /dev/null -w "%{http_code}" "${URL}/health" || echo "000")
             echo "Health check attempt ${attempt}/12: HTTP ${STATUS}"
             if [ "$STATUS" = "200" ]; then
-              echo "✅ Deployment healthy: ${URL}"
+              echo "✅ API deployment healthy: ${URL}"
               exit 0
             fi
             sleep 30
           done
-          echo "❌ Deployment did not become healthy within 6 minutes."
+          echo "❌ API deployment did not become healthy within 6 minutes."
           exit 1
+
+  # ── 3b. Deploy Dashboard to Azure App Service ────────────────────────────────
+  # Waits for the API to be healthy first so env vars are in sync on first start.
+  deploy-dashboard:
+    needs: [build-and-push-dashboard, deploy-api]
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://${{ env.DASHBOARD_NAME }}.azurewebsites.net
+    steps:
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Create Dashboard App Service (if not exists)
+        run: |
+          az webapp show \
+            --name $DASHBOARD_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --output table 2>/dev/null || \
+          az webapp create \
+            --resource-group $RESOURCE_GROUP \
+            --plan healthcare-rag-plan \
+            --name $DASHBOARD_NAME \
+            --deployment-container-image-name nginx:alpine \
+            --output table
+
+      - name: Update Dashboard App Service image
+        run: |
+          SERVER=$(az acr show --name $ACR_NAME --query loginServer -o tsv)
+          az webapp config container set \
+            --name $DASHBOARD_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --docker-custom-image-name "${SERVER}/healthcare-rag-dashboard:${{ github.sha }}"
+
+      - name: Update Dashboard environment variables
+        run: |
+          az webapp config appsettings set \
+            --name $DASHBOARD_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --settings \
+              DEPLOY_DATE="$(date +%Y-%m-%d)" \
+              DEPLOY_ENV="azure" \
+              AZURE_APP_URL="https://${APP_NAME}.azurewebsites.net" \
+              DASHBOARD_URL="https://${DASHBOARD_NAME}.azurewebsites.net" \
+              WEBSITES_PORT="8501"
+
+      - name: Wait for dashboard deployment
+        run: |
+          URL="https://${DASHBOARD_NAME}.azurewebsites.net"
+          for attempt in {1..12}; do
+            STATUS=$(curl -so /dev/null -w "%{http_code}" "${URL}/_stcore/health" || echo "000")
+            echo "Health check attempt ${attempt}/12: HTTP ${STATUS}"
+            if [ "$STATUS" = "200" ] || [ "$STATUS" = "302" ]; then
+              echo "✅ Dashboard deployment healthy: ${URL}"
+              exit 0
+            fi
+            sleep 30
+          done
+          echo "⚠️ Dashboard health check did not return 200; may still be starting."
+          echo "   Check at: https://${DASHBOARD_NAME}.azurewebsites.net"

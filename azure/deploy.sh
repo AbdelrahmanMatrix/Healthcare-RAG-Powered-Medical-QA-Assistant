@@ -29,6 +29,7 @@ LOCATION="germanywestcentral"
 # Resource group already exists here from previous deployment
 ACR_NAME="healthcareragacr"          # must be globally unique, lowercase, 5-50 chars
 APP_NAME="healthcare-rag-app"        # must be globally unique
+DASHBOARD_NAME="healthcare-rag-dashboard"
 APP_SERVICE_PLAN="healthcare-rag-plan"
 SKU="B2"                             # B2: 2 vCPUs, 3.5 GB RAM (~$0.10/hr)
                                      # Upgrade to P1v3 for production
@@ -132,24 +133,78 @@ az webapp config container set \
     --output table
 
 DEPLOY_URL="https://${APP_NAME}.azurewebsites.net"
+DASHBOARD_URL="https://${DASHBOARD_NAME}.azurewebsites.net"
+
+# ── Deploy Dashboard App Service ──────────────────────────────────────────────
+echo ""
+echo "────────────────────────────────────────────────────────────────"
+echo "  Deploying Dashboard to App Service..."
+echo "────────────────────────────────────────────────────────────────"
+
+echo "▶ Building Dashboard Docker image..."
+docker build \
+    -f docker/Dockerfile.dashboard \
+    -t "${ACR_LOGIN_SERVER}/healthcare-rag-dashboard:latest" \
+    .
+
+docker push "${ACR_LOGIN_SERVER}/healthcare-rag-dashboard:latest"
+
+echo "▶ Creating Dashboard App Service (if not exists)..."
+az webapp show --name "$DASHBOARD_NAME" --resource-group "$RESOURCE_GROUP" --output table 2>/dev/null || \
+az webapp create \
+    --resource-group "$RESOURCE_GROUP" \
+    --plan "$APP_SERVICE_PLAN" \
+    --name "$DASHBOARD_NAME" \
+    --deployment-container-image-name "${ACR_LOGIN_SERVER}/healthcare-rag-dashboard:latest" \
+    --output table
+
+echo "▶ Configuring Dashboard environment variables..."
+az webapp config appsettings set \
+    --resource-group "$RESOURCE_GROUP" \
+    --name "$DASHBOARD_NAME" \
+    --settings \
+        DEPLOY_ENV="azure" \
+        DEPLOY_DATE="$(date +%Y-%m-%d)" \
+        AZURE_APP_URL="${DEPLOY_URL}" \
+        DASHBOARD_URL="${DASHBOARD_URL}" \
+        WEBSITES_PORT="8501" \
+    --output table
+
+echo "▶ Configuring Dashboard container registry..."
+az webapp config container set \
+    --name "$DASHBOARD_NAME" \
+    --resource-group "$RESOURCE_GROUP" \
+    --docker-custom-image-name "${ACR_LOGIN_SERVER}/healthcare-rag-dashboard:latest" \
+    --docker-registry-server-url "https://${ACR_LOGIN_SERVER}" \
+    --docker-registry-server-user "$ACR_NAME" \
+    --docker-registry-server-password "$ACR_PASSWORD" \
+    --output table
 
 echo ""
 echo "════════════════════════════════════════════════════════════════"
 echo "  ✅ Deployment complete!"
 echo ""
-echo "  API URL:    ${DEPLOY_URL}"
+echo "  API:        ${DEPLOY_URL}"
+echo "  Dashboard:  ${DASHBOARD_URL}"
 echo "  Health:     ${DEPLOY_URL}/health"
 echo "  Swagger:    ${DEPLOY_URL}/docs"
-echo "  Query:      POST ${DEPLOY_URL}/query"
 echo ""
 echo "  ⏳ First startup takes 2–5 minutes (downloading FAISS index)."
-echo "  Watch logs: az webapp log tail --name $APP_NAME --resource-group $RESOURCE_GROUP"
+echo "  Watch logs:"
+echo "    API:       az webapp log tail --name $APP_NAME --resource-group $RESOURCE_GROUP"
+echo "    Dashboard: az webapp log tail --name $DASHBOARD_NAME --resource-group $RESOURCE_GROUP"
 echo "════════════════════════════════════════════════════════════════"
 
-# Update AZURE_APP_URL in .env
+# Update AZURE_APP_URL and DASHBOARD_URL in .env
 if grep -q "^AZURE_APP_URL=" .env; then
     sed -i "s|^AZURE_APP_URL=.*|AZURE_APP_URL=${DEPLOY_URL}|" .env
 else
     echo "AZURE_APP_URL=${DEPLOY_URL}" >> .env
 fi
+if grep -q "^DASHBOARD_URL=" .env; then
+    sed -i "s|^DASHBOARD_URL=.*|DASHBOARD_URL=${DASHBOARD_URL}|" .env
+else
+    echo "DASHBOARD_URL=${DASHBOARD_URL}" >> .env
+fi
 echo "  .env updated with AZURE_APP_URL=${DEPLOY_URL}"
+echo "  .env updated with DASHBOARD_URL=${DASHBOARD_URL}"
