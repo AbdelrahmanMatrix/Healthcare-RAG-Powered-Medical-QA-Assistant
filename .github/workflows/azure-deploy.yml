@@ -308,9 +308,7 @@ jobs:
           echo "  Dashboard:      HTTP ${DASH} $([ "$DASH" = "200" ] || [ "$DASH" = "302" ] && echo '✅' || echo '❌')"
 
           if [ "$QRY" = "ok" ]; then
-            echo "  API query:      ✅ (answer=${{ steps.api-query.outputs.query-answer }}, \"
-            echo "category=${{ steps.api-query.outputs.query-category }}, \"
-            echo "sources=${{ steps.api-query.outputs.query-sources }})"
+            echo "  API query:      ✅ (answer=${{ steps.api-query.outputs.query-answer }}, category=${{ steps.api-query.outputs.query-category }}, sources=${{ steps.api-query.outputs.query-sources }})"
           elif [ "$QRY" = "connection-failed" ]; then
             echo "  API query:      ❌ Connection failed"
           else
