@@ -339,8 +339,35 @@ The `Dockerfile` (`docker/Dockerfile`) produces a `python:3.10-slim`-based image
 - Installs production dependencies from `requirements.txt`
 - Copies application source (`src/`, `api/`, `config/`, `scripts/`, `mlops/`, `dashboard/`)
 - Classifier config files included; model weights downloaded at runtime from HuggingFace
-- FAISS vector index downloaded at container start via `download.py`
+- FAISS vector index + CSVs downloaded inside the **FastAPI lifespan** — see [Startup Sequence](#startup-sequence)
 - Exposes port `8000` with `uvicorn` as the entrypoint
+
+### Startup Sequence
+
+The entrypoint (`docker/entrypoint.sh`) starts **uvicorn immediately** without
+blocking on data download:
+
+```
+entrypoint.sh
+    │
+    ▼  (immediate)
+exec uvicorn api.main:app  →  port 8000 is listening
+    │
+    ▼  (lifespan in api/main.py)
+  1. Download missing data artifacts from HuggingFace (~1-2 min)
+  2. Pre-load RAG pipeline + BioBERT classifier (~30s)
+    │
+    ▼
+  /health returns 200 ✅
+```
+
+This design ensures the container port is open from the first second, so
+Azure App Service health probes succeed once the lifespan completes —
+preventing the 503 timeouts that occurred with the old sequential startup.
+
+> **Local development:** Use `python download.py` directly to fetch data
+> before running notebooks (data persists across container restarts via a
+> Docker volume). The lifespan download only runs when artifacts are missing.
 
 ### `.dockerignore`
 

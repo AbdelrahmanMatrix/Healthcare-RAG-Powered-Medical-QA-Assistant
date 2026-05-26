@@ -98,6 +98,24 @@ curl http://localhost:8000/health
 # Expected: {"status":"ok","model_loaded":true}
 ```
 
+### Startup Sequence
+
+The container entrypoint (`docker/entrypoint.sh`) starts **uvicorn immediately**
+— no blocking download. The actual data download (FAISS index, CSVs) and
+model pre-loading happen inside FastAPI's **lifespan** (`api/main.py`):
+
+1. `entrypoint.sh` → `exec uvicorn` (port binds immediately)
+2. FastAPI lifespan starts:
+   - Downloads missing data artifacts from HuggingFace (~1-2 min)
+   - Pre-loads RAG pipeline + BioBERT classifier (~30s)
+3. `/health` returns 200 once lifespan completes
+
+This design ensures the container port is listening immediately, which prevents
+Azure App Service health probes from timing out with 503.
+
+For local development, the first request after `docker-compose up` may take a
+few seconds while the lifespan completes behind the scenes.
+
 ---
 
 ## Step 8 — Azure Deployment (Eman)

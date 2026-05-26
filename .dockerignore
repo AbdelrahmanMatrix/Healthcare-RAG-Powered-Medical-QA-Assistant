@@ -21,9 +21,10 @@ mlruns/
 mlartifacts/
 LogFiles/
 
-# ── Docker build files (keep only entrypoint) ───────────────────
+# ── Docker build files (keep only entrypoint scripts) ────────────
 docker/*
 !docker/entrypoint.sh
+!docker/entrypoint-dashboard.sh
 
 # ── Markup & config files ───────────────────────────────────────
 *.md

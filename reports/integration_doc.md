@@ -62,7 +62,11 @@ curl -X POST https://healthcare-rag-app.azurewebsites.net/query \
 Client (HTTP/JSON)
     │
     ▼
-FastAPI (api/main.py)
+FastAPI (api/main.py) — lifespan startup:
+    │  ├─ Step 1: Download missing data artifacts (FAISS, CSVs) from HuggingFace
+    │  ├─ Step 2: Pre-load RAG pipeline + BioBERT classifier
+    │  └─ Then: start accepting requests
+    │  │
     │  ├─ CORS middleware
     │  ├─ Latency middleware (X-Response-Time-Ms header)
     │  └─ Auth middleware (X-API-Key, disabled in dev)
@@ -89,7 +93,8 @@ QueryResponse  →  disclaimer injected from config.settings.disclaimer
     │
     ▼
 Docker Container (docker/Dockerfile)
-    │  └─ python:3.10-slim, port 8000, uvicorn 1 worker
+    │  ├─ entrypoint.sh starts uvicorn immediately (port 8000 open)
+    │  └─ Data download + model pre-load runs in FastAPI lifespan
     │
     ▼
 Azure Container Registry (healthcareragacr.azurecr.io)

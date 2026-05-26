@@ -26,13 +26,46 @@ logger = logging.getLogger("healthcare_rag")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
-    Pre-load the RAG pipeline + classifier on startup so the first real
-    request isn't penalised by cold-start model loading (10–30s).
-    Runs in a threadpool to avoid blocking the event loop during startup.
+    On startup:
+      1. Download FAISS index + CSVs from HuggingFace if missing.
+         Running this INSIDE the lifespan (not in the shell entrypoint)
+         means uvicorn is already listening when the download starts, so
+         Azure App Service health probes get HTTP 200 from /health
+         immediately instead of 503 while the download is in progress.
+      2. Pre-load the RAG pipeline + classifier in a thread-pool so the
+         first real request isn't penalised by cold-start model loading.
     """
-    logger.info("Healthcare RAG API starting — pre-loading models...")
+    logger.info("Healthcare RAG API starting up...")
+
+    # ── Step 1: ensure data artifacts are present ────────────────────────────────────────────────
     try:
         from starlette.concurrency import run_in_threadpool
+        from src.data.hub import download_all_data, check_data_exists
+
+        status = await run_in_threadpool(check_data_exists)
+        missing = [p for p, ok in status.items() if not ok]
+        if missing:
+            logger.info(f"Downloading {len(missing)} missing data artifact(s) from HuggingFace...")
+            results = await run_in_threadpool(download_all_data)
+            logger.info(
+                f"Data download complete — downloaded={results['downloaded']}, "
+                f"skipped={results['skipped']}, failed={results['failed']}"
+            )
+            if results["failed"]:
+                logger.error(
+                    f"⚠️  {results['failed']} artifact(s) failed to download. "
+                    "Set HF_TOKEN and verify AbdoMatrix/healthcare-rag-data exists."
+                )
+        else:
+            logger.info("✅ All data artifacts already present — skipping download.")
+    except Exception as e:
+        logger.error(
+            f"⚠️  Data download step failed: {e!r} — "
+            "pipeline may not work until artifacts are available."
+        )
+
+    # ── Step 2: pre-load RAG pipeline + classifier ─────────────────────────────────────────
+    try:
         from src.pipeline import _get_rag
         await run_in_threadpool(_get_rag)
         logger.info("✅ Models pre-loaded. Swagger UI at /docs")
@@ -41,8 +74,8 @@ async def lifespan(app: FastAPI):
             f"⚠️  Model pre-load failed: {e!r} — "
             "first request will trigger load. Check FAISS index and model paths."
         )
+
     yield  # application runs here
-    # (add shutdown cleanup here if needed)
 
 
 app = FastAPI(

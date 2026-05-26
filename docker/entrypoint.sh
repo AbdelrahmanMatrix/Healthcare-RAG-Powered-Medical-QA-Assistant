@@ -5,19 +5,11 @@
 #   - Azure uses WEBSITES_PORT (plural, with S), set by deploy scripts
 #   - Local Docker uses WEBSITE_PORT
 #   - Falls back to 8000 if neither is set
+#
+# NOTE: Data download (FAISS index, CSVs) is handled inside the FastAPI
+# lifespan on startup, NOT here. This lets uvicorn bind the port immediately
+# so Azure App Service health checks pass instead of timing out with 503.
 set -e
-
-INDEX_PATH="data/embeddings/faiss_index/pubmedqa_index_flatip.faiss"
-MAPPING_PATH="data/embeddings/faiss_index/chunk_mapping.pkl"
-
-echo "Checking required Healthcare RAG data artifacts..."
-python download.py
-
-if [ ! -f "$INDEX_PATH" ] || [ ! -f "$MAPPING_PATH" ]; then
-    echo "Download failed. Set HF_TOKEN and check AbdoMatrix/healthcare-rag-data exists."
-    exit 1
-fi
-echo "Data ready."
 
 # Azure App Service uses WEBSITES_PORT; local Docker uses WEBSITE_PORT
 PORT="${WEBSITES_PORT:-${WEBSITE_PORT:-8000}}"

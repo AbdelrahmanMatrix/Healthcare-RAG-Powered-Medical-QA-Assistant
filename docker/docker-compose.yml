@@ -42,7 +42,7 @@ services:
   dashboard:
     build:
       context: ..
-      dockerfile: docker/Dockerfile
+      dockerfile: docker/Dockerfile.dashboard
     container_name: healthcare-rag-dashboard
     command: streamlit run dashboard/app.py --server.port 8501 --server.address 0.0.0.0
     ports:
