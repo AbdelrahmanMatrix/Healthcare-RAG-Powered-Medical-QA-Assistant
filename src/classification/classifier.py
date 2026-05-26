@@ -20,8 +20,15 @@ Usage:
 """
 
 import os
+import sys
 import threading
 from pathlib import Path
+
+# Fix stdout encoding so emoji don't crash on Windows cp1252 terminals
+try:
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+except (AttributeError, ValueError):
+    pass
 
 # ── Config ────────────────────────────────────────────────────────────────────
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent

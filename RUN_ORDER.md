@@ -62,7 +62,7 @@ cp .env.example .env
 **Then upload weights:**
 ```bash
 huggingface-cli login
-python scripts/upload_classifier_to_hub.py
+python -c "from src.data.hub import upload_file; upload_file('models/classifier/biobert_classifier', 'classifier/biobert_classifier')"
 ```
 
 ---
@@ -130,5 +130,5 @@ Fill results in `reports/deployment_test_report.md`.
 | `notebooks/05_embeddings_vectorstore.ipynb` | PubMedBERT, holdout=2000, saves eval_holdout.csv |
 | `notebooks/07_classification_model.ipynb` | dmis-lab/biobert-v1.1, updated repo ID |
 | `notebooks/08_evaluation.ipynb` | Loads holdout CSV, BERTScore, Faithfulness, honest report |
-| `scripts/upload_classifier_to_hub.py` | Updated for BioBERT repo |
+| `src/data/hub.py` | `upload_file()` for HuggingFace uploads |
 | `reports/evaluation_report.md` | Honest ROUGE-L note, BERTScore as primary metric |

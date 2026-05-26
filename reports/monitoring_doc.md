@@ -51,7 +51,8 @@ in MLflow experiment run `baseline_topk5`.
 ### 3b. Classifier retraining
 1. Re-run fine-tuning on updated labelled data (notebook 07)
 2. Evaluate on held-out test set — target macro F1 >= 0.78. If retraining yields F1 >= 0.72 but < 0.78, re-deploy as a provisional update and flag for a follow-up training cycle. Only promote to production (and upload to HuggingFace) if F1 >= 0.78.
-3. If improved, upload new weights: `python scripts/upload_classifier_to_hub.py`
+3. If improved, upload new weights: `python -c "from src.data.hub import upload_file; upload_file('models/classifier/biobert_classifier', 'classifier/biobert_classifier')"`
+   (or use `huggingface-cli upload AbdoMatrix/biobert-medical-classifier models/classifier/biobert_classifier/ .`)
 4. Register new model version in MLflow registry
 
 ---
