@@ -84,12 +84,15 @@ mlartifacts/
 # ─── Docker ───────────────────────────────────────────────────────────────────
 docker/.env
 
-# ─── Testing ──────────────────────────────────────────────────────────────────
+# ─── Testing & Linting Tools ───────────────────────────────────────────────────
 .pytest_cache/
+.bin/
+
 .coverage
 htmlcov/
 reports/coverage_html/
 .tox/
+tests/.github_workflow_schema.json
 
 # ─── HuggingFace / Transformers Cache ─────────────────────────────────────────
 .cache/

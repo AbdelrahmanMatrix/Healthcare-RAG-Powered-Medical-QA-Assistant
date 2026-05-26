@@ -168,19 +168,19 @@ jobs:
         # Startup timeline: uvicorn binds port immediately, then lifespan
         # downloads data (~1-2 min) and pre-loads models (~30s). The /health
         # endpoint returns 503 until lifespan completes, then returns 200.
-        # 15 retries × 30s = 7.5 min gives ample time even on cold starts.
+        # 20 retries × 30s = 10 min gives ample time even on cold starts.
         run: |
           URL="https://${APP_NAME}.azurewebsites.net"
-          for attempt in {1..15}; do
+          for attempt in {1..20}; do
             STATUS=$(curl -so /dev/null -w "%{http_code}" "${URL}/health" || echo "000")
-            echo "Health check attempt ${attempt}/15: HTTP ${STATUS}"
+            echo "Health check attempt ${attempt}/20: HTTP ${STATUS}"
             if [ "$STATUS" = "200" ]; then
               echo "✅ API deployment healthy: ${URL}"
               exit 0
             fi
             sleep 30
           done
-          echo "❌ API deployment did not become healthy within 7.5 minutes."
+          echo "❌ API deployment did not become healthy within 10 minutes."
           exit 1
 
   # ── 3b. Deploy Dashboard to Azure App Service ────────────────────────────────

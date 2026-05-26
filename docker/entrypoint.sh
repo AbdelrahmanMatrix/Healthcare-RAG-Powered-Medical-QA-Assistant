@@ -6,9 +6,11 @@
 #   - Local Docker uses WEBSITE_PORT
 #   - Falls back to 8000 if neither is set
 #
-# NOTE: Data download (FAISS index, CSVs) is handled inside the FastAPI
-# lifespan on startup, NOT here. This lets uvicorn bind the port immediately
-# so Azure App Service health checks pass instead of timing out with 503.
+# NOTE: Data download (FAISS index, CSVs) and model pre-loading happen
+# in a BACKGROUND TASK spawned by the FastAPI lifespan, NOT here.
+# The lifespan yields immediately so uvicorn serves HTTP requests (including
+# /health probes from Azure) while initialization runs asynchronously.
+# See api/main.py lifespan() for the background task implementation.
 set -e
 
 # Azure App Service uses WEBSITES_PORT; local Docker uses WEBSITE_PORT

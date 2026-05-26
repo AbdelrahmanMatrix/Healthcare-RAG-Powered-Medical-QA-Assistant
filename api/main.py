@@ -1,6 +1,7 @@
 """Healthcare RAG — FastAPI application entry point."""
 import sys
 import time
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 
@@ -27,17 +28,38 @@ logger = logging.getLogger("healthcare_rag")
 async def lifespan(app: FastAPI):
     """
     On startup:
-      1. Download FAISS index + CSVs from HuggingFace if missing.
-         Running this INSIDE the lifespan (not in the shell entrypoint)
-         means uvicorn is already listening when the download starts, so
-         Azure App Service health probes get HTTP 200 from /health
-         immediately instead of 503 while the download is in progress.
-      2. Pre-load the RAG pipeline + classifier in a thread-pool so the
-         first real request isn't penalised by cold-start model loading.
+      Spawn a background task to:
+        1. Download FAISS index + CSVs from HuggingFace if missing
+        2. Pre-load the RAG pipeline + classifier
+
+      The lifespan yields IMMEDIATELY so uvicorn can serve HTTP requests
+      (including /health probes from Azure) while initialization runs in
+      the background.  The /health endpoint returns HTTP 200 right away
+      with model_loaded=false, then switches to model_loaded=true once
+      the background task completes.
+
+      NOTE: The entrypoint.sh starts uvicorn immediately (no blocking
+      download).  See docker/entrypoint.sh for details.
     """
     logger.info("Healthcare RAG API starting up...")
 
-    # ── Step 1: ensure data artifacts are present ────────────────────────────────────────────────
+    # Spawn background initialization — yield immediately so uvicorn
+    # can start serving HTTP requests (health probes, etc.)
+    asyncio.create_task(_background_init())
+
+    yield  # application runs here — uvicorn can process HTTP requests
+
+
+async def _background_init():
+    """
+    Download data artifacts and pre-load models in the background.
+
+    This runs as an asyncio task after the lifespan has yielded, which
+    lets uvicorn serve /health immediately while initialization completes.
+    The /health endpoint returns status="ok" regardless, so Azure health
+    probes see HTTP 200 right away.
+    """
+    # ── Step 1: ensure data artifacts are present ───────────────────────────────────────────
     try:
         from starlette.concurrency import run_in_threadpool
         from src.data.hub import download_all_data, check_data_exists
@@ -64,7 +86,7 @@ async def lifespan(app: FastAPI):
             "pipeline may not work until artifacts are available."
         )
 
-    # ── Step 2: pre-load RAG pipeline + classifier ─────────────────────────────────────────
+    # ── Step 2: pre-load RAG pipeline + classifier ────────────────────────────────────────
     try:
         from src.pipeline import _get_rag
         await run_in_threadpool(_get_rag)
@@ -74,8 +96,6 @@ async def lifespan(app: FastAPI):
             f"⚠️  Model pre-load failed: {e!r} — "
             "first request will trigger load. Check FAISS index and model paths."
         )
-
-    yield  # application runs here
 
 
 app = FastAPI(
