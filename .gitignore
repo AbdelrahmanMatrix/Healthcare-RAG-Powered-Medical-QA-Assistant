@@ -69,6 +69,8 @@ data;C/
 # ─── Logs & Temp Files ────────────────────────────────────────────────────────
 *.log
 LogFiles/
+webapp_logs/
+webapp_logs_*/
 *.tmp
 *.bak
 *.orig
