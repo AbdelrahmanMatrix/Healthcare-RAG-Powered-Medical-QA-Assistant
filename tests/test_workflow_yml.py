@@ -282,7 +282,9 @@ class TestStepNames:
         steps = jobs["deploy-api"]["steps"]
         step_names = [s["name"] for s in steps]
         assert "Azure login" in step_names
-        assert "Update App Service image" in step_names
+        assert "Ensure App Service Plan exists" in step_names
+        assert "Create API App Service (if not exists)" in step_names
+        assert "Enable ACR admin and update App Service image" in step_names
         assert "Update environment variables" in step_names
         assert "Wait for deployment and smoke test" in step_names
 
@@ -319,6 +321,13 @@ class TestEnvironmentVariables:
             f"ACR_NAME should reference AZURE_ACR_NAME secret, got: {acr}"
         )
 
+    def test_workflow_level_has_node24_env_var(self, workflow):
+        """FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 is set for Node.js 24 migration (Bug 4 fix)."""
+        env = workflow.get("env", {})
+        assert env.get("FORCE_JAVASCRIPT_ACTIONS_TO_NODE24") is True, (
+            "Missing FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 env var (Bug 4 fix)"
+        )
+
 
 # ==============================================================================
 # ── Health check shell commands ───────────────────────────────────────────────
@@ -330,19 +339,22 @@ class TestHealthCheckShell:
 
     def test_api_health_check_retry_count(self, jobs):
         """The API health check uses 30 retries (15 min window)."""
-        run = jobs["deploy-api"]["steps"][5]["run"]
+        # Step index shifted by +1 due to new "Ensure App Service Plan exists" step
+        run = jobs["deploy-api"]["steps"][6]["run"]
         assert "{1..30}" in run, "Expected 30 retries in API health check for-loop"
 
     def test_dashboard_health_check_retry_count(self, jobs):
         """The dashboard health check uses 12 retries (6 min window)."""
-        run = jobs["deploy-dashboard"]["steps"][5]["run"]
+        # Step index shifted by +1 due to new "Ensure App Service Plan exists" step
+        run = jobs["deploy-dashboard"]["steps"][6]["run"]
         assert "{1..12}" in run, (
             "Expected 12 retries in dashboard health check for-loop"
         )
 
     def test_api_health_check_sleep_and_exit(self, jobs):
         """API health check sleeps 30s between retries and exits 1 on failure."""
-        run = jobs["deploy-api"]["steps"][5]["run"]
+        # Step index shifted by +1 due to new "Ensure App Service Plan exists" step
+        run = jobs["deploy-api"]["steps"][6]["run"]
         assert "sleep 30" in run
         assert "exit 1" in run
 
@@ -376,14 +388,16 @@ class TestDockerCommands:
 
     def test_api_dockerfile(self, jobs):
         """API image uses Dockerfile (not Dockerfile.dashboard)."""
-        run = jobs["build-and-push-api"]["steps"][3]["run"]
+        # Step index changed from 3→2: removed the separate ACR login step
+        run = jobs["build-and-push-api"]["steps"][2]["run"]
         assert "docker/Dockerfile" in run
         assert "healthcare-rag" in run
         assert "docker/Dockerfile.dashboard" not in run
 
     def test_dashboard_dockerfile(self, jobs):
         """Dashboard image uses Dockerfile.dashboard."""
-        run = jobs["build-and-push-dashboard"]["steps"][3]["run"]
+        # Step index changed from 3→2: removed the separate ACR login step
+        run = jobs["build-and-push-dashboard"]["steps"][2]["run"]
         assert "docker/Dockerfile.dashboard" in run
         assert "healthcare-rag-dashboard" in run
 
@@ -393,7 +407,8 @@ class TestDockerPushCommands:
 
     def test_api_docker_push(self, jobs):
         """API build step pushes both :sha and :latest tags."""
-        run = jobs["build-and-push-api"]["steps"][3]["run"]
+        # Step index changed from 3→2: removed the separate ACR login step
+        run = jobs["build-and-push-api"]["steps"][2]["run"]
         assert "docker push" in run
         assert "latest" in run
         assert "github.sha" in run or "${{ github.sha }}" in run
@@ -478,7 +493,8 @@ class TestAzureAppSettings:
 
     def test_api_has_required_app_settings(self, jobs):
         """API App Service config has the required environment variables."""
-        run = jobs["deploy-api"]["steps"][3]["run"]
+        # Step index shifted by +1 due to new "Ensure App Service Plan exists" step
+        run = jobs["deploy-api"]["steps"][4]["run"]
         assert "GROQ_API_KEY" in run
         assert "HF_TOKEN" in run
         assert "AZURE_APP_URL" in run
@@ -487,7 +503,8 @@ class TestAzureAppSettings:
 
     def test_dashboard_has_required_app_settings(self, jobs):
         """Dashboard App Service config has the required environment variables."""
-        run = jobs["deploy-dashboard"]["steps"][3]["run"]
+        # Step index shifted by +1 due to new "Ensure App Service Plan exists" step
+        run = jobs["deploy-dashboard"]["steps"][4]["run"]
         assert "AZURE_APP_URL" in run
         assert "DASHBOARD_URL" in run
         assert "WEBSITES_PORT" in run
@@ -500,20 +517,35 @@ class TestAzureAppSettings:
 
 
 class TestBuildOutputs:
-    """build-and-push-api outputs the ACR login server for use by deploy-api."""
+    """Job outputs have been removed to avoid secret masking (Bug 1 fix).
 
-    def test_api_build_outputs_login_server(self, jobs):
-        """build-and-push-api defines an output 'acr-login-server'."""
+    The acr-login-server output was silently masked to "" by GitHub Actions
+    because its value contained a secret. The server is now computed inline
+    in every job that needs it.
+    """
+
+    def test_no_build_outputs_defined(self, jobs):
+        """build-and-push-api no longer defines job outputs (Bug 1 fix)."""
         outputs = jobs["build-and-push-api"].get("outputs", {})
-        assert "acr-login-server" in outputs, (
-            "Missing acr-login-server output needed by deploy-api"
+        assert not outputs, (
+            f"Expected no outputs (Bug 1 fix), got: {outputs}"
         )
 
-    def test_deploy_api_uses_acr_output(self, jobs):
-        """deploy-api references the acr-login-server output from build-and-push-api."""
-        run = jobs["deploy-api"]["steps"][2]["run"]
-        assert "acr-login-server" in run, (
-            "deploy-api should reference needs.build-and-push-api.outputs.acr-login-server"
+    def test_no_dashboard_build_outputs_defined(self, jobs):
+        """build-and-push-dashboard no longer defines job outputs (Bug 1 fix)."""
+        outputs = jobs["build-and-push-dashboard"].get("outputs", {})
+        assert not outputs, (
+            f"Expected no outputs (Bug 1 fix), got: {outputs}"
+        )
+
+    def test_deploy_api_uses_inline_server(self, jobs):
+        """deploy-api computes the server inline with ACR_NAME env var instead of using a job output."""
+        run = jobs["deploy-api"]["steps"][3]["run"]
+        assert "${ACR_NAME}.azurecr.io" in run, (
+            "deploy-api should compute server inline with ACR_NAME, not use a job output"
+        )
+        assert "acr-login-server" not in run, (
+            "deploy-api should NOT reference a job output (Bug 1 fix)"
         )
 
 

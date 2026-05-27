@@ -89,7 +89,11 @@ docker login "$ACR_LOGIN_SERVER" \
 docker push "${ACR_LOGIN_SERVER}/healthcare-rag:latest"
 
 echo ""
-echo "▶ Step 4/7 — Creating App Service Plan: $APP_SERVICE_PLAN ($SKU)"
+echo "▶ Step 4/7 — Ensuring App Service Plan: $APP_SERVICE_PLAN ($SKU)"
+az appservice plan show \
+    --name "$APP_SERVICE_PLAN" \
+    --resource-group "$RESOURCE_GROUP" \
+    --output table 2>/dev/null || \
 az appservice plan create \
     --name "$APP_SERVICE_PLAN" \
     --resource-group "$RESOURCE_GROUP" \

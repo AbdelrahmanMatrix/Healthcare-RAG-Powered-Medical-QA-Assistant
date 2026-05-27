@@ -59,13 +59,6 @@ echo ""
 echo "▶ Test 3/4 — Medical query (POST /query)"
 QUERY_BODY='{"question":"Does aspirin reduce the risk of cardiovascular events in high-risk patients?"}'
 
-# Add API key header if set
-if [ -n "$API_KEY" ]; then
-    AUTH_HEADER='-H "X-API-Key: '"$API_KEY"'"'
-else
-    AUTH_HEADER=""
-fi
-
 QUERY_RESP=$(curl -sf \
     -X POST \
     -H "Content-Type: application/json" \
