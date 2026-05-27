@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="dark" dir="ltr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +8,7 @@
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -68,6 +68,31 @@ body{
   min-height:100vh;
   -webkit-font-smoothing:antialiased;
 }
+
+/* ── Arabic RTL ──────────────────────────────── */
+html[lang="ar"] body{font-family:'Cairo','Inter',-apple-system,system-ui,sans-serif}
+html[lang="ar"] .top-nav-brand span,
+html[lang="ar"] .hero h1,
+html[lang="ar"] h1,h2,h3,h4{font-family:'Cairo','Playfair Display',Georgia,serif}
+html[lang="ar"] .stat-value{font-family:'Cairo','Playfair Display',serif}
+html[lang="ar"] .metric-value{
+  font-family:'Cairo','JetBrains Mono',monospace;
+  letter-spacing:0;
+  text-align:left;
+}
+html[lang="ar"] .mono{font-family:'Cairo','JetBrains Mono',monospace}
+html[lang="ar"] .hero-badge{font-family:'Cairo','JetBrains Mono',monospace}
+html[lang="ar"] .source-card{border-left:none;border-right:3px solid var(--accent);border-radius:8px 0 0 8px}
+html[lang="ar"] .data-table th{text-align:right}
+html[lang="ar"] .data-table td{text-align:right}
+html[lang="ar"] .metric-item{flex-direction:row-reverse}
+html[lang="ar"] .section-header span{margin-left:0;margin-right:auto}
+html[lang="ar"] .chat-input-row input{direction:rtl}
+html[lang="ar"] .bubble-footer{flex-direction:row-reverse}
+html[lang="ar"] .bubble-category{font-family:'Cairo','JetBrains Mono',monospace}
+html[lang="ar"] .chat-input-row input::placeholder{text-align:right}
+html[lang="ar"] #exportMenu{right:auto;left:0}
+html[lang="ar"] #exportMenu button{text-align:right}
 
 /* ═══════════════════════════════════════════════
    TYPOGRAPHY
@@ -547,18 +572,19 @@ window.APP_CONFIG = {
 <header class="top-nav">
   <div class="top-nav-brand">
     <div class="brand-icon">⎈</div>
-    <span>HEALTHCARE // RAG</span>
+    <span data-i18n="nav.brand">HEALTHCARE // RAG</span>
   </div>
   <div class="top-nav-links">
-    <button class="active" data-view="hub" onclick="switchView('hub')">⎈ Hub</button>
-    <button data-view="query" onclick="switchView('query')">⚡ Query</button>
-    <button data-view="kpi" onclick="switchView('kpi')">◱ Telemetry</button>
+    <button class="active" data-view="hub" onclick="switchView('hub')" data-i18n="nav.hub">⎈ Hub</button>
+    <button data-view="query" onclick="switchView('query')" data-i18n="nav.query">⚡ Query</button>
+    <button data-view="kpi" onclick="switchView('kpi')" data-i18n="nav.telemetry">◱ Telemetry</button>
   </div>
   <div class="nav-controls">
     <div class="api-status" id="apiStatus">
       <span class="dot off" id="apiDot"></span>
       <span id="apiLabel">API</span>
     </div>
+    <button class="theme-toggle" onclick="toggleLang()" title="Toggle language" id="langBtn" style="font-size:14px;width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:none;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:'Inter',sans-serif;font-weight:600">EN</button>
     <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" id="themeBtn">◑</button>
   </div>
 </header>
@@ -571,13 +597,13 @@ window.APP_CONFIG = {
 <div id="view-hub" class="view active">
 
   <div class="hero">
-    <h1>Healthcare <span>RAG</span> System</h1>
-    <p>Enterprise Medical Question Answering — Grounded in <strong>PubMedQA</strong> peer-reviewed literature, powered by Groq Llama 4 and FAISS vector retrieval.</p>
+    <h1><span data-i18n="hero.title.prefix">Healthcare</span> <span data-i18n="hero.title.highlight">RAG</span> <span data-i18n="hero.title.suffix">System</span></h1>
+    <p data-i18n="hero.desc">Enterprise Medical Question Answering — Grounded in <strong>PubMedQA</strong> peer-reviewed literature, powered by Groq Llama 4 and FAISS vector retrieval.</p>
     <div class="hero-badges">
-      <span class="hero-badge">🔬 6 Core Medical Categories</span>
-      <span class="hero-badge">🦙 Llama 4 Scout Engine</span>
-      <span class="hero-badge">📚 200K+ Vector Embeddings</span>
-      <span class="hero-badge">⚡ Groq Inference</span>
+      <span class="hero-badge" data-i18n="hero.badge.1">🔬 6 Core Medical Categories</span>
+      <span class="hero-badge" data-i18n="hero.badge.2">🦙 Llama 4 Scout Engine</span>
+      <span class="hero-badge" data-i18n="hero.badge.3">📚 200K+ Vector Embeddings</span>
+      <span class="hero-badge" data-i18n="hero.badge.4">⚡ Groq Inference</span>
     </div>
   </div>
 
@@ -585,19 +611,19 @@ window.APP_CONFIG = {
   <div class="status-row" id="hubStatus">
     <div class="stat-item">
       <div class="stat-value" id="statModel">—</div>
-      <div class="stat-label">Model Status</div>
+      <div class="stat-label" data-i18n="status.model">Model Status</div>
     </div>
     <div class="stat-item">
       <div class="stat-value" id="statClassifier">—</div>
-      <div class="stat-label">Classifier</div>
+      <div class="stat-label" data-i18n="status.classifier">Classifier</div>
     </div>
     <div class="stat-item">
       <div class="stat-value" id="statVectors">—</div>
-      <div class="stat-label">Vector Index</div>
+      <div class="stat-label" data-i18n="status.vectors">Vector Index</div>
     </div>
     <div class="stat-item">
       <div class="stat-value" id="statGroq">—</div>
-      <div class="stat-label">Groq API</div>
+      <div class="stat-label" data-i18n="status.groq">Groq API</div>
     </div>
   </div>
 
@@ -605,38 +631,38 @@ window.APP_CONFIG = {
   <div class="grid-2">
     <div class="card">
       <div class="card-icon">⚡</div>
-      <h3 class="card-title">Clinical Research Portal</h3>
-      <p class="card-desc">Query the live vector store pipeline, track logical generation paths, and dissect context citations retrieved directly from authoritative clinical research records.</p>
-      <button class="card-btn" onclick="switchView('query')">Launch Pipeline →</button>
+      <h3 class="card-title" data-i18n="card.portal.title">Clinical Research Portal</h3>
+      <p class="card-desc" data-i18n="card.portal.desc">Query the live vector store pipeline, track logical generation paths, and dissect context citations retrieved directly from authoritative clinical research records.</p>
+      <button class="card-btn" onclick="switchView('query')" data-i18n="card.portal.btn">Launch Pipeline →</button>
     </div>
     <div class="card">
       <div class="card-icon">◱</div>
-      <h3 class="card-title">Analytics & Evaluation Hub</h3>
-      <p class="card-desc">Audit deployment validation metrics, inspect data label balances, system latencies, and MLflow experiment tracking across all pipeline components.</p>
-      <button class="card-btn" onclick="switchView('kpi')">Open Telemetry →</button>
+      <h3 class="card-title" data-i18n="card.analytics.title">Analytics &amp; Evaluation Hub</h3>
+      <p class="card-desc" data-i18n="card.analytics.desc">Audit deployment validation metrics, inspect data label balances, system latencies, and MLflow experiment tracking across all pipeline components.</p>
+      <button class="card-btn" onclick="switchView('kpi')" data-i18n="card.analytics.btn">Open Telemetry →</button>
     </div>
   </div>
 
   <div class="section-header">
-    <h2>System Topology</h2>
-    <span>Deployment: <span id="hubEnv" class="mono">local</span></span>
+    <h2 data-i18n="section.topology">System Topology</h2>
+    <span data-i18n="section.topology.deployment">Deployment: <span id="hubEnv" class="mono">local</span></span>
   </div>
   <div class="grid-4" id="hubTopology">
     <div class="stat-item">
       <div class="stat-value" style="font-size:1.2rem">FastAPI</div>
-      <div class="stat-label">API Server · Port 8000</div>
+      <div class="stat-label" data-i18n="topology.api">API Server · Port 8000</div>
     </div>
     <div class="stat-item">
       <div class="stat-value" style="font-size:1.2rem">FAISS</div>
-      <div class="stat-label">Vector Store · FlatIP</div>
+      <div class="stat-label" data-i18n="topology.faiss">Vector Store · FlatIP</div>
     </div>
     <div class="stat-item">
       <div class="stat-value" style="font-size:1.2rem">Groq</div>
-      <div class="stat-label">LLM Provider · Llama 4</div>
+      <div class="stat-label" data-i18n="topology.groq">LLM Provider · Llama 4</div>
     </div>
     <div class="stat-item">
       <div class="stat-value" style="font-size:1.2rem">BioBERT</div>
-      <div class="stat-label">Classifier · 6 Categories</div>
+      <div class="stat-label" data-i18n="topology.biobert">Classifier · 6 Categories</div>
     </div>
   </div>
 </div>
@@ -647,34 +673,42 @@ window.APP_CONFIG = {
 <div id="view-query" class="view">
 
   <div class="section-header">
-    <h2>⚡ Clinical Research Query</h2>
-    <span>Groq Llama 4 · PubMedQA evidence retrieval</span>
+    <h2 data-i18n="section.query.header">⚡ Clinical Research Query</h2>
+    <span data-i18n="section.query.subtitle">Groq Llama 4 · PubMedQA evidence retrieval</span>
   </div>
 
   <div class="chat-container">
     <!-- Input -->
     <div class="chat-input-row">
-      <input type="text" id="queryInput" placeholder="e.g., What are the symptoms of type 2 diabetes?" autocomplete="off" aria-label="Enter your medical question">
-      <button id="queryBtn" onclick="submitQuery()">Ask</button>
+      <input type="text" id="queryInput" placeholder="e.g., What are the symptoms of type 2 diabetes?" autocomplete="off" aria-label="Enter your medical question" data-i18n-placeholder="query.placeholder">
+      <button id="queryBtn" onclick="submitQuery()" data-i18n="query.btn">Ask</button>
+      <button onclick="clearChatHistory()" title="Clear chat history" style="padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);cursor:pointer;font-size:0.85rem;transition:all .2s;font-family:'Inter',sans-serif" onmouseover="this.style.borderColor='var(--error)'" onmouseout="this.style.borderColor='var(--border)'">🗑️</button>
+      <div style="position:relative;display:inline-block">
+        <button onclick="toggleExportMenu()" id="exportBtn" title="Export chat history" style="padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);cursor:pointer;font-size:0.85rem;transition:all .2s;font-family:'Inter',sans-serif" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'" data-i18n="export.btn">📥 Export</button>
+        <div id="exportMenu" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:4px;z-index:100;min-width:120px;box-shadow:0 8px 24px rgba(0,0,0,0.3)">
+          <button onclick="exportChatHistory('json')" style="display:block;width:100%;padding:8px 16px;background:none;border:none;color:var(--text);font-size:0.82rem;cursor:pointer;border-radius:6px;text-align:left;font-family:'Inter',sans-serif;transition:background .15s" onmouseover="this.style.background='var(--accent-dim)'" onmouseout="this.style.background='none'" data-i18n="export.json">📋 JSON</button>
+          <button onclick="exportChatHistory('txt')" style="display:block;width:100%;padding:8px 16px;background:none;border:none;color:var(--text);font-size:0.82rem;cursor:pointer;border-radius:6px;text-align:left;font-family:'Inter',sans-serif;transition:background .15s" onmouseover="this.style.background='var(--accent-dim)'" onmouseout="this.style.background='none'" data-i18n="export.txt">📄 Text</button>
+        </div>
+      </div>
     </div>
 
     <!-- Optional category filter -->
     <div style="margin-bottom:20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-      <label for="categorySelect" style="font-size:0.78rem;color:var(--text-muted)">Category filter:</label>
+      <label for="categorySelect" style="font-size:0.78rem;color:var(--text-muted)" data-i18n="query.label.category">Category filter:</label>
       <select id="categorySelect" aria-label="Category filter" style="
         padding:6px 12px;border-radius:8px;border:1px solid var(--border);
         background:var(--surface);color:var(--text);font-size:0.8rem;
         font-family:'Inter',sans-serif;outline:none;
       ">
-        <option value="">Auto-detect</option>
-        <option value="Symptoms">Symptoms</option>
-        <option value="Diagnosis">Diagnosis</option>
-        <option value="Treatment">Treatment</option>
-        <option value="Medication">Medication</option>
-        <option value="Prevention">Prevention</option>
-        <option value="General">General</option>
+        <option value="" data-i18n="query.option.auto">Auto-detect</option>
+        <option value="Symptoms" data-i18n="cat.symptoms">Symptoms</option>
+        <option value="Diagnosis" data-i18n="cat.diagnosis">Diagnosis</option>
+        <option value="Treatment" data-i18n="cat.treatment">Treatment</option>
+        <option value="Medication" data-i18n="cat.medication">Medication</option>
+        <option value="Prevention" data-i18n="cat.prevention">Prevention</option>
+        <option value="General" data-i18n="cat.general">General</option>
       </select>
-      <label for="topKSelect" style="font-size:0.78rem;color:var(--text-muted)">Sources:</label>
+      <label for="topKSelect" style="font-size:0.78rem;color:var(--text-muted)" data-i18n="query.label.sources">Sources:</label>
       <select id="topKSelect" aria-label="Number of sources to retrieve" style="
         padding:6px 12px;border-radius:8px;border:1px solid var(--border);
         background:var(--surface);color:var(--text);font-size:0.8rem;
@@ -691,13 +725,13 @@ window.APP_CONFIG = {
     <div id="chatHistory" class="chat-history">
       <div class="empty-state" id="chatEmpty">
         <div class="empty-icon">💬</div>
-        <p>Enter a medical question above to query the RAG pipeline.<br>Responses include cited sources from PubMedQA literature.</p>
+        <p data-i18n="query.empty.desc">Enter a medical question above to query the RAG pipeline.<br>Responses include cited sources from PubMedQA literature.</p>
       </div>
     </div>
 
     <!-- Disclaimer -->
     <div class="disclaimer-banner">
-      ⚕️ This is an informational assistant only. Always consult a qualified healthcare professional for medical decisions.
+      <span data-i18n="query.disclaimer">⚕️ This is an informational assistant only. Always consult a qualified healthcare professional for medical decisions.</span>
     </div>
   </div>
 </div>
@@ -708,89 +742,88 @@ window.APP_CONFIG = {
 <div id="view-kpi" class="view">
 
   <div class="section-header">
-    <h2>◱ System Verification Telemetry</h2>
-    <span>Pipeline metrics · Classification · Data quality</span>
+    <h2 data-i18n="section.kpi.header">◱ System Verification Telemetry</h2>
+    <span data-i18n="section.kpi.subtitle">Pipeline metrics · Classification · Data quality</span>
   </div>
 
   <!-- RAG Disclaimer Metrics -->
   <div class="section-header" style="margin-top:0">
-    <h3 style="font-size:1rem">🧠 Model Accuracy</h3>
+    <h3 style="font-size:1rem" data-i18n="kpi.accuracy.header">🧠 Model Accuracy</h3>
   </div>
   <div class="grid-3">
     <div class="metric-group">
-      <div class="metric-group-header">🎯 Model Accuracy</div>
-      <div class="metric-item"><span class="metric-label">Classification Macro F1</span><span class="metric-value">90.66%<span class="metric-delta">≥ 78% ✅</span></span></div>
-      <div class="metric-item"><span class="metric-label">BERTScore F1</span><span class="metric-value">0.8061<span class="metric-delta">≥ 0.80 ✅</span></span></div>
-      <div class="metric-item"><span class="metric-label">ROUGE-L</span><span class="metric-value">0.1911<span class="metric-delta">≥ 0.15 ✅</span></span></div>
-      <div class="metric-item"><span class="metric-label">Faithfulness</span><span class="metric-value">86.0%<span class="metric-delta">≥ 70% ✅</span></span></div>
-      <div class="metric-item"><span class="metric-label">Hallucination Rate</span><span class="metric-value">10.0%<span class="metric-delta warn">≤ 15% ✅</span></span></div>
+      <div class="metric-group-header" data-i18n="kpi.accuracy">🎯 Model Accuracy</div>
+      <div class="metric-item">  <span class="metric-label" data-i18n="metric.macro_f1">Classification Macro F1</span><span class="metric-value">90.66%<span class="metric-delta">≥ 78% ✅</span></span></div>
+      <div class="metric-item">  <span class="metric-label" data-i18n="metric.bertscore">BERTScore F1</span><span class="metric-value">0.8061<span class="metric-delta">≥ 0.80 ✅</span></span></div>
+      <div class="metric-item">  <span class="metric-label" data-i18n="metric.rouge">ROUGE-L</span><span class="metric-value">0.1911<span class="metric-delta">≥ 0.15 ✅</span></span></div>
+      <div class="metric-item">  <span class="metric-label" data-i18n="metric.faithfulness">Faithfulness</span><span class="metric-value">86.0%<span class="metric-delta">≥ 70% ✅</span></span></div>
+      <div class="metric-item">  <span class="metric-label" data-i18n="metric.hallucination">Hallucination Rate</span><span class="metric-value">10.0%<span class="metric-delta warn">≤ 15% ✅</span></span></div>
     </div>
 
     <div class="metric-group">
-      <div class="metric-group-header">⚡ System Performance</div>
-      <div class="metric-item"><span class="metric-label">Pipeline Latency P95</span><span class="metric-value">264 ms<span class="metric-delta">Optimal</span></span></div>
-      <div class="metric-item"><span class="metric-label">Avg Warm Latency</span><span class="metric-value">2,227 ms<span class="metric-delta">≤ 5,000 ms ✅</span></span></div>
-      <div class="metric-item"><span class="metric-label">FAISS Retrieval</span><span class="metric-value">&lt; 500 ms<span class="metric-delta">✅ Fast</span></span></div>
-      <div class="metric-item"><span class="metric-label">Retrieval Precision Mean</span><span class="metric-value">94.2%<span class="metric-delta">+1.1% Baseline</span></span></div>
-      <div class="metric-item"><span class="metric-label">Context Extraction Recall</span><span class="metric-value">89.7%<span class="metric-delta">Normal</span></span></div>
+      <div class="metric-group-header" data-i18n="kpi.performance">⚡ System Performance</div>
+      <div class="metric-item">  <span class="metric-label" data-i18n="metric.pipeline_latency">Pipeline Latency P95</span><span class="metric-value">264 ms<span class="metric-delta">Optimal</span></span></div>
+      <div class="metric-item">  <span class="metric-label" data-i18n="metric.avg_latency">Avg Warm Latency</span><span class="metric-value">2,227 ms<span class="metric-delta">≤ 5,000 ms ✅</span></span></div>
+      <div class="metric-item">  <span class="metric-label" data-i18n="metric.faiss_retrieval">FAISS Retrieval</span><span class="metric-value">&lt; 500 ms<span class="metric-delta">✅ Fast</span></span></div>
+      <div class="metric-item">  <span class="metric-label" data-i18n="metric.retrieval_precision">Retrieval Precision Mean</span><span class="metric-value">94.2%<span class="metric-delta">+1.1% Baseline</span></span></div>
+      <div class="metric-item">  <span class="metric-label" data-i18n="metric.context_recall">Context Extraction Recall</span><span class="metric-value">89.7%<span class="metric-delta">Normal</span></span></div>
     </div>
 
     <div class="metric-group">
-      <div class="metric-group-header">🧹 Data Pipeline</div>
-      <div class="metric-item"><span class="metric-label">Disclaimer Compliance</span><span class="metric-value">10/10<span class="metric-delta">✅ 100%</span></span></div>
-      <div class="metric-item"><span class="metric-label">Corpus Rows (Labelled)</span><span class="metric-value">1,238<span class="metric-delta">Labelled dataset</span></span></div>
-      <div class="metric-item"><span class="metric-label">% Retained (Cleaned)</span><span class="metric-value">72.3%<span class="metric-delta">After dedup</span></span></div>
-      <div class="metric-item"><span class="metric-label">Deployment Env</span><span class="metric-value" id="kpiEnv">local</span></div>
+      <div class="metric-group-header" data-i18n="kpi.data">🧹 Data Pipeline</div>
+      <div class="metric-item">  <span class="metric-label" data-i18n="metric.disclaimer">Disclaimer Compliance</span><span class="metric-value">10/10<span class="metric-delta">✅ 100%</span></span></div>
+      <div class="metric-item">  <span class="metric-label" data-i18n="metric.corpus_rows">Corpus Rows (Labelled)</span><span class="metric-value">1,238<span class="metric-delta">Labelled dataset</span></span></div>
+      <div class="metric-item">  <span class="metric-label" data-i18n="metric.retained">% Retained (Cleaned)</span><span class="metric-value">72.3%<span class="metric-delta">After dedup</span></span></div>
+      <div class="metric-item">  <span class="metric-label" data-i18n="metric.deployment_env">Deployment Env</span><span class="metric-value" id="kpiEnv">local</span></div>
     </div>
   </div>
 
   <!-- Charts Row 1 -->
   <div class="kpi-grid">
     <div class="chart-box">
-      <h4>Category Distribution</h4>
+      <h4 data-i18n="kpi.chart.category">Category Distribution</h4>
       <div class="chart-wrapper"><canvas id="chartCategory"></canvas></div>
     </div>
     <div class="chart-box">
-      <h4>Avg Latency per Category (Test Queries)</h4>
+      <h4 data-i18n="kpi.chart.latency">Avg Latency per Category (Test Queries)</h4>
       <div class="chart-wrapper"><canvas id="chartLatency"></canvas></div>
     </div>
   </div>
 
   <!-- Evaluation Targets Table -->
   <div class="section-header">
-    <h3 style="font-size:1rem">📊 Evaluation Targets</h3>
+    <h3 style="font-size:1rem" data-i18n="kpi.eval.header">📊 Evaluation Targets</h3>
   </div>
   <div class="card" style="overflow-x:auto;padding:16px">
     <table class="data-table" id="evalTable">
       <thead>
-        <tr><th>Metric</th><th>Result</th><th>Target</th><th>Status</th></tr>
+        <tr><th data-i18n="eval.metric">Metric</th><th data-i18n="eval.result">Result</th><th data-i18n="eval.target">Target</th><th data-i18n="eval.status">Status</th></tr>
       </thead>
       <tbody>
-        <tr><td>BERTScore F1 (primary)</td><td>0.8061</td><td>≥ 0.80</td><td class="pass">✅ Pass</td></tr>
-        <tr><td>ROUGE-L (abstractive)</td><td>0.1911</td><td>≥ 0.15</td><td class="pass">✅ Pass</td></tr>
-        <tr><td>BLEU (RAG)</td><td>0.0274</td><td>≥ +6% vs baseline</td><td class="warn">⚠️ See note</td></tr>
+        <tr><td>BERTScore F1 (primary)</td><td>0.8061</td><td>≥ 0.80</td><td class="pass"><span class="i18n-dynamic" data-i18n-key="table.pass">✅ Pass</span></td></tr>
+        <tr><td>ROUGE-L (abstractive)</td><td>0.1911</td><td>≥ 0.15</td><td class="pass"><span class="i18n-dynamic" data-i18n-key="table.pass">✅ Pass</span></td></tr>
+        <tr><td>BLEU (RAG)</td><td>0.0274</td><td>≥ +6% vs baseline</td><td class="warn"><span class="i18n-dynamic" data-i18n-key="table.see_note">⚠️ See note</span></td></tr>
         <tr><td>BLEU (Plain LLM)</td><td>0.0274</td><td>baseline</td><td>—</td></tr>
-        <tr><td>Faithfulness</td><td>86.0%</td><td>≥ 70%</td><td class="pass">✅ Pass</td></tr>
-        <tr><td>Hallucination Rate</td><td>10.0%</td><td>≤ 15%</td><td class="pass">✅ Met</td></tr>
-        <tr><td>Classification Macro F1</td><td>90.66%</td><td>≥ 78%</td><td class="pass">✅ Pass</td></tr>
+        <tr><td>Faithfulness</td><td>86.0%</td><td>≥ 70%</td><td class="pass"><span class="i18n-dynamic" data-i18n-key="table.pass">✅ Pass</span></td></tr>
+        <tr><td>Hallucination Rate</td><td>10.0%</td><td>≤ 15%</td><td class="pass"><span class="i18n-dynamic" data-i18n-key="table.met">✅ Met</span></td></tr>
+        <tr><td>Classification Macro F1</td><td>90.66%</td><td>≥ 78%</td><td class="pass"><span class="i18n-dynamic" data-i18n-key="table.pass">✅ Pass</span></td></tr>
       </tbody>
     </table>
   </div>
 
   <!-- Category Coverage Table -->
   <div class="section-header">
-    <h3 style="font-size:1rem">📈 Category Coverage (KPI: each ≥ 1%)</h3>
+    <h3 style="font-size:1rem" data-i18n="kpi.coverage.header">📈 Category Coverage (KPI: each ≥ 1%)</h3>
   </div>
   <div class="card" style="overflow-x:auto;padding:16px">
-    <table class="data-table" id="covTable">
-      <thead><tr><th>Category</th><th>% of Dataset</th><th>KPI Pass</th></tr></thead>
+    <table class="data-table" id="covTable">        <thead><tr><th data-i18n="cov.category">Category</th><th data-i18n="cov.percent">% of Dataset</th><th data-i18n="cov.kpi">KPI Pass</th></tr></thead>
       <tbody>
-        <tr><td>Symptoms</td><td>32.4%</td><td class="pass">✅</td></tr>
-        <tr><td>Treatment</td><td>24.8%</td><td class="pass">✅</td></tr>
-        <tr><td>Diagnosis</td><td>18.2%</td><td class="pass">✅</td></tr>
-        <tr><td>Medication</td><td>12.1%</td><td class="pass">✅</td></tr>
-        <tr><td>Prevention</td><td>8.5%</td><td class="pass">✅</td></tr>
-        <tr><td>General</td><td>4.0%</td><td class="pass">✅</td></tr>
+        <tr><td data-i18n="cat.symptoms">Symptoms</td><td>32.4%</td><td class="pass">✅</td></tr>
+        <tr><td data-i18n="cat.treatment">Treatment</td><td>24.8%</td><td class="pass">✅</td></tr>
+        <tr><td data-i18n="cat.diagnosis">Diagnosis</td><td>18.2%</td><td class="pass">✅</td></tr>
+        <tr><td data-i18n="cat.medication">Medication</td><td>12.1%</td><td class="pass">✅</td></tr>
+        <tr><td data-i18n="cat.prevention">Prevention</td><td>8.5%</td><td class="pass">✅</td></tr>
+        <tr><td data-i18n="cat.general">General</td><td>4.0%</td><td class="pass">✅</td></tr>
       </tbody>
     </table>
   </div>
@@ -802,20 +835,292 @@ window.APP_CONFIG = {
      FOOTER
      ═══════════════════════════════════════════════ -->
 <footer class="footer" style="max-width:1280px;margin:0 auto;padding:32px 24px 16px">
-  <p>Healthcare RAG-Powered Medical Q&A Assistant · eyouth × DEPI 2026</p>
-  <p class="team">Team: Abdelrahman · Ziad · Youssef · Doha · Eman</p>
+  <p data-i18n="footer.title">Healthcare RAG-Powered Medical Q&A Assistant · eyouth × DEPI 2026</p>
+  <p class="team" data-i18n="footer.team">Team: Abdelrahman · Ziad · Youssef · Doha · Eman</p>
 </footer>
 
 <!-- ════════════════════════════════════════════════
      JAVASCRIPT
      ═══════════════════════════════════════════════ -->
 <script>
+/* ═══════════════════════════════════════════════
+   TRANSLATION SYSTEM (EN ↔ AR)
+   ═══════════════════════════════════════════════ */
+const TRANSLATIONS = {
+  ar: {
+    'nav.brand': 'الرعاية الصحية // RAG',
+    'nav.hub': '⎈ المركز',
+    'nav.query': '⚡ استعلام',
+    'nav.telemetry': '◱ القياسات',
+    'hero.title.prefix': 'نظام',
+    'hero.title.highlight': 'RAG',
+    'hero.title.suffix': 'الاسترجاع الطبي',
+    'hero.desc': 'إجابة الأسئلة الطبية المؤسسية — مدعومة بأدبيات PubMedQA المحكّمة، ومدعومة من Groq Llama 4 واسترجاع المتجهات FAISS.',
+    'hero.badge.1': '🔬 6 فئات طبية رئيسية',
+    'hero.badge.2': '🦙 محرك Llama 4 Scout',
+    'hero.badge.3': '📚 أكثر من 200 ألف تضمين',
+    'hero.badge.4': '⚡ استدلال Groq',
+    'status.model': 'حالة النموذج',
+    'status.classifier': 'المصنف',
+    'status.vectors': 'فهرس المتجهات',
+    'status.groq': 'API Groq',
+    'card.portal.title': 'بوابة الأبحاث السريرية',
+    'card.portal.desc': 'استعلم عن خط أنابيب متجر المتجهات المباشر، وتتبع مسارات التوليد المنطقية، وافحص الاستشهادات السياقية المسترجعة من سجلات الأبحاث السريرية الموثوقة.',
+    'card.portal.btn': 'تشغيل الخط →',
+    'card.analytics.title': 'مركز التحليلات والتقييم',
+    'card.analytics.desc': 'دقق مقاييس التحقق من النشر، وافحص توازن تسميات البيانات، وتأخيرات النظام، وتتبع تجارب MLflow عبر جميع مكونات الخط.',
+    'card.analytics.btn': 'فتح القياسات →',
+    'section.topology': 'طوبولوجيا النظام',
+    'section.topology.deployment': 'النشر:',
+    'section.query.header': '⚡ استعلام الأبحاث السريرية',
+    'section.query.subtitle': 'Groq Llama 4 · استرجاع أدبيات PubMedQA',
+    'section.kpi.header': '◱ قياسات التحقق من النظام',
+    'section.kpi.subtitle': 'مقاييس الخط · التصنيف · جودة البيانات',
+    'topology.api': 'خادم API · المنفذ 8000',
+    'topology.faiss': 'مخزن المتجهات · FlatIP',
+    'topology.groq': 'موفر LLM · Llama 4',
+    'topology.biobert': 'مصنف · 6 فئات',
+    'query.placeholder': 'مثال: ما هي أعراض مرض السكري من النوع 2؟',
+    'query.btn': 'اسأل',
+    'query.label.category': 'تصفية الفئة:',
+    'query.label.sources': 'المصادر:',
+    'query.option.auto': 'تلقائي',
+    'query.empty.desc': 'أدخل سؤالاً طبياً أعلاه للاستعلام عن خط RAG.<br>تتضمن الردود مصادر مستشهد بها من أدبيات PubMedQA.',
+    'query.disclaimer': '⚕️ هذا مجرد مساعد معلوماتي. استشر دائماً أخصائي رعاية صحية مؤهل للقرارات الطبية.',
+    'kpi.accuracy.header': '🧠 دقة النموذج',
+    'kpi.accuracy': '🎯 دقة التصنيف',
+    'kpi.performance': '⚡ أداء النظام',
+    'kpi.data': '🧹 خط البيانات',
+    'kpi.chart.category': 'توزيع الفئات',
+    'kpi.chart.latency': 'متوسط التأخير لكل فئة',
+    'kpi.eval.header': '📊 أهداف التقييم',
+    'kpi.coverage.header': '📈 تغطية الفئات',
+    'metric.macro_f1': 'التصنيف Macro F1',
+    'metric.bertscore': 'BERTScore F1',
+    'metric.rouge': 'ROUGE-L',
+    'metric.faithfulness': 'الدقة',
+    'metric.hallucination': 'معدل التخيل',
+    'metric.pipeline_latency': 'زمن استجابة الخط P95',
+    'metric.avg_latency': 'متوسط زمن الاستجابة',
+    'metric.faiss_retrieval': 'استرجاع FAISS',
+    'metric.retrieval_precision': 'متوسط دقة الاسترجاع',
+    'metric.context_recall': 'استدعاء استخراج السياق',
+    'metric.disclaimer': 'الامتثال للإخلاء',
+    'metric.corpus_rows': 'صفوف المجموعة (مصنفة)',
+    'metric.retained': 'النسبة المحتفظة (منظفة)',
+    'metric.deployment_env': 'بيئة النشر',
+    'eval.metric': 'المقياس',
+    'eval.result': 'النتيجة',
+    'eval.target': 'الهدف',
+    'eval.status': 'الحالة',
+    'cov.category': 'الفئة',
+    'cov.percent': '% من البيانات',
+    'cov.kpi': 'اجتياز KPI',
+    'footer.title': 'مساعد الأسئلة والأجوبة الطبية · eyouth × DEPI 2026',
+    'footer.team': 'الفريق: عبدالرحمن · زياد · يوسف · ضحى · إيمان',
+    'status.loaded': '✅ تم التحميل',
+    'status.loading': '🔄 جارٍ التحميل',
+    'status.ready': '✅ جاهز',
+    'status.configured': '✅ تم التكوين',
+    'status.missing_key': '⚠️ المفتاح مفقود',
+    'status.offline': '⚠️ غير متصل',
+    'status.connecting': 'جارٍ الاتصال...',
+    'status.api_live': 'API نشط',
+    'status.api_offline': 'API غير متصل',
+    'bubble.you': 'أنت',
+    'bubble.rag': 'الاسترجاع الطبي',
+    'spinner.retrieving': 'جارٍ استرجاع الأدلة...',
+    'system.error': 'النظام',
+    'asking': 'يسأل...',
+    'btn.ask': 'اسأل',
+    'lang.en': 'EN',
+    'lang.ar': 'AR',
+
+    'cat.symptoms': 'الأعراض',
+    'cat.diagnosis': 'التشخيص',
+    'cat.treatment': 'العلاج',
+    'cat.medication': 'الأدوية',
+    'cat.prevention': 'الوقاية',
+    'cat.general': 'عام',
+
+    'source.label': 'المصدر',
+    'source.relevance': 'الصلة:',
+    'source.distance': 'المسافة:',
+    'source.show': 'عرض المصادر',
+    'source.hide': 'إخفاء المصادر',
+    'source.sources': 'مصادر',
+    'source.na': 'غير متاح',
+
+    'source.show_count': 'عرض {n} مصادر',
+    'source.hide_count': 'إخفاء المصادر',
+    'source.num': 'المصدر {n}',
+
+    'footer.sources': 'مصادر',
+    'footer.sources_count': '{n} مصادر',
+    'footer.disclaimer_applies': '⚕️ ينطبق إخلاء المسؤولية',
+    'query.unable': 'عذراً، تعذر إنشاء رد.',
+    'query.translating': 'جارٍ الترجمة...',
+
+    'chart.avg_latency': 'متوسط زمن الاستجابة (مللي)',
+    'table.pass': '✅ ناجح',
+    'table.fail': '❌ راسب',
+    'table.met': '✅ مستوفي',
+    'table.see_note': '⚠️ انظر الملاحظة',
+
+    'vectors.label': '{n} متجه',
+
+    'export.btn': '📥 تصدير',
+    'export.json': 'JSON',
+    'export.txt': 'نص',
+    'export.error': 'لا توجد رسائل للتصدير.',
+  }
+};
+
+let currentLang = localStorage.getItem('rag_lang') || 'en';
+
+// Chart references — hoisted here to avoid TDZ (let hoisting issues)
+let chartsInitialized = false;
+let chartInstances = {};
+
+function t(key) {
+  if (currentLang === 'ar' && TRANSLATIONS.ar[key]) return TRANSLATIONS.ar[key];
+  return null;
+}
+
+/** Helper: replace {n} in translated string with a number */
+function tn(key, num) {
+  const str = t(key);
+  if (!str) return null;
+  return str.replace('{n}', num);
+}
+
+/** Detect Arabic script in a text string */
+function isArabic(text) {
+  return /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/.test(text);
+}
+
+function applyLanguage() {
+  const lang = currentLang;
+  const root = document.documentElement;
+
+  // Set lang and dir
+  root.setAttribute('lang', lang);
+  root.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+
+  // Update lang button
+  const langBtn = document.getElementById('langBtn');
+  if (langBtn) {
+    langBtn.textContent = t('lang.' + lang) || lang.toUpperCase();
+    langBtn.title = lang === 'ar' ? 'تبديل اللغة' : 'Toggle language';
+  }
+
+  // Translate static elements with data-i18n
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    if (!el.hasAttribute('data-original')) {
+      el.setAttribute('data-original', el.innerHTML);
+    }
+    const key = el.getAttribute('data-i18n');
+    const translation = t(key);
+    if (translation) {
+      el.innerHTML = translation;
+    } else if (lang === 'en') {
+      const orig = el.getAttribute('data-original');
+      if (orig) el.innerHTML = orig;
+    }
+  });
+
+  // Translate dynamic elements with class="i18n-dynamic"
+  document.querySelectorAll('.i18n-dynamic').forEach(el => {
+    const key = el.getAttribute('data-i18n-key');
+    if (!key) return;
+    if (lang === 'ar') {
+      const translation = t(key);
+      if (translation) el.textContent = translation;
+    } else {
+      const orig = el.getAttribute('data-original');
+      if (orig) el.textContent = orig;
+    }
+  });
+
+  // Translate placeholders
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    if (!el.hasAttribute('data-original-placeholder')) {
+      el.setAttribute('data-original-placeholder', el.placeholder);
+    }
+    const key = el.getAttribute('data-i18n-placeholder');
+    const translation = t(key);
+    if (translation) {
+      el.placeholder = translation;
+    } else if (lang === 'en') {
+      const orig = el.getAttribute('data-original-placeholder');
+      if (orig) el.placeholder = orig;
+    }
+  });
+
+  // Update API label
+  const apiLabel = document.getElementById('apiLabel');
+  if (apiLabel && !apiLabel.textContent.includes('Connecting') && !apiLabel.textContent.includes('جار')) {
+    if (apiLabel.textContent === 'API Live' || apiLabel.textContent === 'API نشط') {
+      apiLabel.textContent = t('status.api_live') || 'API Live';
+    } else if (apiLabel.textContent === 'API Offline' || apiLabel.textContent === 'API غير متصل') {
+      apiLabel.textContent = t('status.api_offline') || 'API Offline';
+    }
+  }
+
+  // Destroy charts so they re-init on next KPI view
+  if (typeof chartInstances !== 'undefined') {
+    Object.values(chartInstances).forEach(c => c.destroy());
+    chartInstances = {};
+    chartsInitialized = false;
+  }
+}
+
+function toggleLang() {
+  currentLang = currentLang === 'en' ? 'ar' : 'en';
+  localStorage.setItem('rag_lang', currentLang);
+  applyLanguage();
+  checkHealth();
+  // Re-init charts if on KPI view
+  if (document.getElementById('view-kpi').classList.contains('active')) initCharts();
+}
+
+// Translate a text string via MyMemory API
+async function translateText(text, sourceLang, targetLang) {
+  if (!text) return text;
+  try {
+    const langpair = sourceLang + '|' + targetLang;
+    const res = await fetch(
+      'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(text.slice(0, 500)) + '&langpair=' + langpair,
+      { signal: AbortSignal.timeout(8000) }
+    );
+    const data = await res.json();
+    if (data && data.responseData && data.responseData.translatedText) {
+      return data.responseData.translatedText;
+    }
+    return text;
+  } catch(e) {
+    console.warn('Translation failed:', e.message);
+    return text;
+  }
+}
+
+// Translate a longer text by splitting into chunks
+async function translateLongText(text, sourceLang, targetLang) {
+  if (!text) return text;
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+  const results = await Promise.all(sentences.map(s =>
+    translateText(s.trim(), sourceLang, targetLang)
+  ));
+  return results.map((t, i) => t || sentences[i]).join(' ');
+}
+
 /* ── Navigation ─────────────────────────────────── */
 function switchView(view) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById('view-' + view).classList.add('active');
   document.querySelectorAll('.top-nav-links button').forEach(b => b.classList.remove('active'));
-  document.querySelector(`.top-nav-links button[data-view="${view}"]`).classList.add('active');
+  var btn = document.querySelector('.top-nav-links button[data-view="' + view + '"]');
+  if (btn) btn.classList.add('active');
   if (view === 'kpi') initCharts();
   if (view === 'hub') checkHealth();
 }
@@ -829,15 +1134,16 @@ function toggleTheme() {
   localStorage.setItem('rag_theme', isDark ? 'light' : 'dark');
 }
 
-// Load saved theme
 const savedTheme = localStorage.getItem('rag_theme') || 'dark';
 document.documentElement.setAttribute('data-theme', savedTheme);
 document.getElementById('themeBtn').textContent = savedTheme === 'dark' ? '◑' : '◐';
 
+applyLanguage();
+
 /* ── API Client ─────────────────────────────────── */
 async function apiGet(path) {
   const res = await fetch(window.APP_CONFIG.apiBase + path, {signal: AbortSignal.timeout(5000)});
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) throw new Error('HTTP ' + res.status);
   return res.json();
 }
 
@@ -847,8 +1153,8 @@ async function apiPost(path, body) {
     body:JSON.stringify(body), signal: AbortSignal.timeout(60000),
   });
   if (!res.ok) {
-    const detail = await res.json().catch(() => ({}));
-    throw new Error(detail.detail || `HTTP ${res.status}`);
+    const detail = await res.json().catch(function() { return {}; });
+    throw new Error(detail.detail || 'HTTP ' + res.status);
   }
   return res.json();
 }
@@ -858,45 +1164,52 @@ async function checkHealth() {
   const dot = document.getElementById('apiDot');
   const label = document.getElementById('apiLabel');
   dot.className = 'dot off';
-  label.textContent = 'Connecting...';
+  label.textContent = t('status.connecting') || 'Connecting...';
 
   try {
     const h = await apiGet('/health');
     dot.className = 'dot on';
-    label.textContent = 'API Live';
+    label.textContent = t('status.api_live') || 'API Live';
 
-    // Update hub status
-    document.getElementById('statModel').textContent = h.model_loaded ? '✅ Loaded' : '🔄 Loading';
-    document.getElementById('statClassifier').textContent = h.classifier_ready ? '✅ Ready' : '🔄 Loading';
-    document.getElementById('statVectors').textContent = h.index_vectors ? h.index_vectors.toLocaleString() + ' vectors' : '—';
-    document.getElementById('statGroq').textContent = h.groq_configured ? '✅ Configured' : '⚠️ Missing Key';
+    document.getElementById('statModel').textContent = h.model_loaded ? (t('status.loaded') || 'Loaded') : (t('status.loading') || 'Loading');
+    document.getElementById('statClassifier').textContent = h.classifier_ready ? (t('status.ready') || 'Ready') : (t('status.loading') || 'Loading');
+    var vectorsStr = h.index_vectors ? h.index_vectors.toLocaleString() : '0';
+    var vectorsLabel = tn('vectors.label', vectorsStr);
+    document.getElementById('statVectors').textContent = vectorsLabel || (vectorsStr + ' vectors');
+    document.getElementById('statGroq').textContent = h.groq_configured ? (t('status.configured') || 'Configured') : (t('status.missing_key') || 'Missing Key');
 
     document.getElementById('hubEnv').textContent = h.status;
   } catch(e) {
     dot.className = 'dot off';
-    label.textContent = 'API Offline';
-    document.getElementById('statModel').textContent = '⚠️ Offline';
-    document.getElementById('statClassifier').textContent = '⚠️ Offline';
+    label.textContent = t('status.api_offline') || 'API Offline';
+    document.getElementById('statModel').textContent = t('status.offline') || 'Offline';
+    document.getElementById('statClassifier').textContent = t('status.offline') || 'Offline';
     document.getElementById('statVectors').textContent = '—';
     document.getElementById('statGroq').textContent = '—';
   }
 
-  // KPI env
   document.getElementById('kpiEnv').textContent = 'local';
 }
 
-// Health check on load
 checkHealth();
+loadChatHistory();
 
-// Poll health every 30s on hub
-setInterval(() => {
+setInterval(function() {
   if (document.getElementById('view-hub').classList.contains('active')) checkHealth();
 }, 30000);
 
 /* ── Query / Chat ───────────────────────────────── */
-let chatHistory = [];
+var chatHistory = [];
+var CHAT_HISTORY_LIMIT = 50;
 
-function addMessage(html, cls) {
+function saveChatHistory() {
+  try {
+    localStorage.setItem('rag_chat_history', JSON.stringify(chatHistory));
+  } catch(e) { /* quota exceeded, ignore */ }
+}
+
+function addMessage(html, cls, save) {
+  if (save === undefined) save = true;
   const container = document.getElementById('chatHistory');
   const empty = document.getElementById('chatEmpty');
   if (empty) empty.style.display = 'none';
@@ -905,25 +1218,150 @@ function addMessage(html, cls) {
   div.innerHTML = html;
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
+  if (save) {
+    chatHistory.push({html: html, cls: cls});
+    // Auto-prune old entries when over the limit
+    while (chatHistory.length > CHAT_HISTORY_LIMIT) {
+      chatHistory.shift();
+      var firstMsg = container.querySelector('.message');
+      if (firstMsg) firstMsg.remove();
+    }
+    saveChatHistory();
+  }
+}
+
+function loadChatHistory() {
+  try {
+    const saved = localStorage.getItem('rag_chat_history');
+    if (!saved) return;
+    const messages = JSON.parse(saved);
+    if (!Array.isArray(messages) || messages.length === 0) return;
+    // Enforce limit — keep only the newest messages
+    if (messages.length > CHAT_HISTORY_LIMIT) {
+      chatHistory = messages.slice(messages.length - CHAT_HISTORY_LIMIT);
+    } else {
+      chatHistory = messages;
+    }
+    const container = document.getElementById('chatHistory');
+    const empty = document.getElementById('chatEmpty');
+    if (empty) empty.style.display = 'none';
+    chatHistory.forEach(function(msg) {
+      const div = document.createElement('div');
+      div.className = 'message ' + msg.cls;
+      div.innerHTML = msg.html;
+      container.appendChild(div);
+    });
+    container.scrollTop = container.scrollHeight;
+  } catch(e) {
+    localStorage.removeItem('rag_chat_history');
+    chatHistory = [];
+  }
+}
+
+function clearChatHistory() {
+  if (chatHistory.length === 0) return;
+  if (!confirm('Clear all chat messages? This cannot be undone.')) return;
+  chatHistory = [];
+  localStorage.removeItem('rag_chat_history');
+  const container = document.getElementById('chatHistory');
+  container.innerHTML = '';
+  const empty = document.getElementById('chatEmpty');
+  if (empty) empty.style.display = '';
+}
+
+function toggleExportMenu() {
+  const menu = document.getElementById('exportMenu');
+  if (menu) menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
+// Close export menu when clicking outside
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById('exportMenu');
+  const btn = document.getElementById('exportBtn');
+  if (menu && menu.style.display !== 'none' && !menu.contains(e.target) && !btn.contains(e.target)) {
+    menu.style.display = 'none';
+  }
+});
+
+function exportChatHistory(format) {
+  const menu = document.getElementById('exportMenu');
+  if (menu) menu.style.display = 'none';
+
+  if (!chatHistory || chatHistory.length === 0) {
+    alert(t('export.error') || 'No messages to export.');
+    return;
+  }
+
+  if (format === 'json') {
+    // Strip HTML from messages for a cleaner export
+    var exportData = chatHistory.map(function(msg) {
+      var div = document.createElement('div');
+      div.innerHTML = msg.html;
+      var text = div.textContent || div.innerText || '';
+      return {role: msg.cls === 'user' ? 'user' : 'assistant', text: text.trim()};
+    });
+    var blob = new Blob([JSON.stringify(exportData, null, 2)], {type: 'application/json'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'rag_chat_history_' + new Date().toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } else if (format === 'txt') {
+    var lines = [];
+    lines.push('=== Healthcare RAG Chat Export ===');
+    lines.push('Date: ' + new Date().toLocaleString());
+    lines.push('');
+    chatHistory.forEach(function(msg) {
+      var div = document.createElement('div');
+      div.innerHTML = msg.html;
+      var text = div.textContent || div.innerText || '';
+      var role = msg.cls === 'user' ? 'YOU' : 'HEALTHCARE RAG';
+      lines.push('[' + role + ']');
+      lines.push(text.trim());
+      lines.push('');
+    });
+    lines.push('=== End of Export ===');
+    var blob = new Blob([lines.join('\r\n')], {type: 'text/plain;charset=utf-8'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'rag_chat_history_' + new Date().toISOString().slice(0, 10) + '.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
 }
 
 function formatSources(sources) {
   if (!sources || sources.length === 0) return '';
-  const items = sources.slice(0, 10).map((s, i) => `
-    <div class="source-card">
-      <div class="src-title">Source ${i+1}: ${s.question || s.chunk_id || 'N/A'}</div>
-      <div class="src-meta">${s.category || '—'} · Relevance: ${typeof s.relevance_score === 'number' ? s.relevance_score.toFixed(3) : '—'} · Distance: ${typeof s.distance === 'number' ? s.distance.toFixed(4) : '—'}</div>
-      ${s.excerpt ? '<div class="src-excerpt">"' + s.excerpt.slice(0,200) + (s.excerpt.length > 200 ? '…' : '') + '"</div>' : ''}
-    </div>
-  `).join('');
-  return `<button class="source-toggle" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'flex':'none';this.textContent=this.nextElementSibling.style.display==='flex'?'Hide Sources':'Show ${sources.length} Sources'">Show ${sources.length} Sources</button>
-  <div class="source-list" style="display:none">${items}</div>`;
+  const items = sources.slice(0, 10).map(function(s, i) {
+    var numLabel = tn('source.num', i + 1) || ('Source ' + (i + 1));
+    var title = numLabel + ': ' + (s.question || s.chunk_id || (t('source.na') || 'N/A'));
+    var relevance = t('source.relevance') || 'Relevance:';
+    var distance = t('source.distance') || 'Distance:';
+    var relVal = typeof s.relevance_score === 'number' ? s.relevance_score.toFixed(3) : (t('source.na') || 'N/A');
+    var distVal = typeof s.distance === 'number' ? s.distance.toFixed(4) : (t('source.na') || 'N/A');
+    var excerpt = '';
+    if (s.excerpt) {
+      var excerptText = s.excerpt.slice(0, 200) + (s.excerpt.length > 200 ? '...' : '');
+      excerpt = '<div class="src-excerpt">"' + excerptText.replace(/</g, '&lt;') + '"</div>';
+    }
+    return '<div class="source-card"><div class="src-title">' + title + '</div><div class="src-meta">' + (s.category || '—') + ' &middot; ' + relevance + ' ' + relVal + ' &middot; ' + distance + ' ' + distVal + '</div>' + excerpt + '</div>';
+  }).join('');
+
+  var showText = tn('source.show_count', sources.length) || ('Show ' + sources.length + ' Sources');
+  var hideText = t('source.hide_count') || 'Hide Sources';
+  return '<button class="source-toggle" onclick="var list=this.nextElementSibling;var isHidden=list.style.display===\'none\';list.style.display=isHidden?\'flex\':\'none\';this.textContent=isHidden?\'' + hideText + '\':\'' + showText + '\'">' + showText + '</button><div class="source-list" style="display:none">' + items + '</div>';
 }
 
 async function submitQuery() {
   const input = document.getElementById('queryInput');
   const btn = document.getElementById('queryBtn');
-  const question = input.value.trim();
+  var question = input.value.trim();
   if (!question || question.length < 5) return;
 
   const category = document.getElementById('categorySelect').value || null;
@@ -931,107 +1369,109 @@ async function submitQuery() {
 
   input.value = '';
   btn.disabled = true;
-  btn.innerHTML = '<span class="btn-spinner"><span class="spinner"></span>Asking…</span>';
+  btn.innerHTML = '<span class="btn-spinner"><span class="spinner"></span>' + (t('asking') || 'Asking...') + '</span>';
 
-  // User message
-  addMessage(`
-    <div class="bubble">
-      <div class="bubble-header"><span class="bubble-author">You</span></div>
-      <p class="bubble-text">${question.replace(/</g,'&lt;')}</p>
-    </div>
-  `, 'user');
+  // Auto-detect Arabic query and translate to English
+  var queryIsArabic = isArabic(question);
+  var sentQuestion = question;
 
-  // Typing indicator
+  if (queryIsArabic && currentLang === 'ar') {
+    // Show translating indicator
+    addMessage('<div class="bubble"><div class="bubble-header"><span class="bubble-author">' + (t('bubble.you') || 'You') + '</span></div><p class="bubble-text">' + question.replace(/</g, '&lt;') + ' <span style="font-size:0.7rem;color:var(--text-muted)">(' + (t('query.translating') || 'Translating...') + ')</span></p></div>', 'user');
+    sentQuestion = await translateText(question, 'ar', 'en');
+    if (!sentQuestion) sentQuestion = question;
+  } else {
+    // User message (English / any language)
+    addMessage('<div class="bubble"><div class="bubble-header"><span class="bubble-author">' + (t('bubble.you') || 'You') + '</span></div><p class="bubble-text">' + question.replace(/</g, '&lt;') + '</p></div>', 'user');
+  }
+
+  // Spinner
   const spinnerDiv = document.createElement('div');
   spinnerDiv.className = 'message bot';
-  spinnerDiv.innerHTML = `
-    <div class="bubble">
-      <div class="bubble-header"><span class="bubble-author">Healthcare RAG</span></div>
-      <div class="spinner-ring"><div class="spinner"></div><span>Retrieving evidence…</span></div>
-    </div>
-  `;
+  spinnerDiv.innerHTML = '<div class="bubble"><div class="bubble-header"><span class="bubble-author">' + (t('bubble.rag') || 'Healthcare RAG') + '</span></div><div class="spinner-ring"><div class="spinner"></div><span>' + (t('spinner.retrieving') || 'Retrieving evidence...') + '</span></div></div>';
   document.getElementById('chatHistory').appendChild(spinnerDiv);
 
   try {
-    const payload = {question};
+    var payload = {question: sentQuestion};
     if (category) payload.category = category;
     if (topK) payload.top_k = topK;
 
     const data = await apiPost('/query', payload);
     spinnerDiv.remove();
 
+    // Translate answer back if original query was Arabic
+    var finalAnswer = data.answer || (t('query.unable') || 'Unable to generate a response.');
+    if (queryIsArabic && data.answer) {
+      finalAnswer = await translateLongText(data.answer, 'en', 'ar');
+    }
+
     const catColor = window.APP_CONFIG.categoryColors[data.category] || '#78909C';
     const sourcesHtml = formatSources(data.source_citations);
     const rawSources = data.retrieved_sources || [];
+    var sourcesCount = data.source_citations ? data.source_citations.length : rawSources.length;
+    var footerSources = tn('footer.sources_count', sourcesCount) || (sourcesCount + ' sources');
+    var footerDisclaimer = data.disclaimer ? (t('footer.disclaimer_applies') || 'Disclaimer applies') : '';
 
-    addMessage(`
-      <div class="bubble">
-        <div class="bubble-header">
-          <span class="bubble-author">Healthcare RAG</span>
-          ${data.category ? `<span class="bubble-category" style="background:${catColor}">${data.category}</span>` : ''}
-        </div>
-        <p class="bubble-text">${data.answer || 'Unable to generate a response.'}</p>
-        <div class="bubble-footer">
-          <span>📚 ${data.source_citations ? data.source_citations.length : rawSources.length} sources</span>
-          <span>${data.disclaimer ? '⚕️ Disclaimer applies' : ''}</span>
-        </div>
-        ${sourcesHtml}
-      </div>
-    `, 'bot');
+    addMessage('<div class="bubble"><div class="bubble-header"><span class="bubble-author">' + (t('bubble.rag') || 'Healthcare RAG') + '</span>' + (data.category ? '<span class="bubble-category" style="background:' + catColor + '">' + data.category + '</span>' : '') + '</div><p class="bubble-text">' + finalAnswer + '</p><div class="bubble-footer"><span> ' + footerSources + '</span><span>' + footerDisclaimer + '</span></div>' + sourcesHtml + '</div>', 'bot');
 
   } catch(e) {
     spinnerDiv.remove();
-    addMessage(`
-      <div class="bubble">
-        <div class="bubble-header"><span class="bubble-author" style="color:var(--error)">System</span></div>
-        <p class="bubble-text" style="color:var(--error)">❌ ${e.message}</p>
-      </div>
-    `, 'bot');
+    addMessage('<div class="bubble"><div class="bubble-header"><span class="bubble-author" style="color:var(--error)">' + (t('system.error') || 'System') + '</span></div><p class="bubble-text" style="color:var(--error)"> ' + e.message + '</p></div>', 'bot');
   }
 
   btn.disabled = false;
-  btn.innerHTML = 'Ask';
+  btn.innerHTML = t('btn.ask') || 'Ask';
   input.focus();
 }
 
-// Enter key to submit
-document.getElementById('queryInput').addEventListener('keydown', e => {
+document.getElementById('queryInput').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') submitQuery();
 });
 
 /* ── Charts ─────────────────────────────────────── */
-let chartsInitialized = false;
-let chartInstances = {};
-
 function initCharts() {
   if (chartsInitialized) return;
 
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   const textColor = isDark ? '#8895AA' : '#5A6577';
   const gridColor = isDark ? '#1E2A3F' : '#E2E6ED';
-  const font = {family:"'Inter',sans-serif", size:11};
+  const chartFontFamily = currentLang === 'ar' ? 'Cairo,sans-serif' : 'Inter,sans-serif';
+  const font = {family:chartFontFamily, size:11};
+
+  // Translated labels
+  var catLabels = [
+    t('cat.symptoms') || 'Symptoms',
+    t('cat.treatment') || 'Treatment',
+    t('cat.diagnosis') || 'Diagnosis',
+    t('cat.medication') || 'Medication',
+    t('cat.prevention') || 'Prevention',
+    t('cat.general') || 'General'
+  ];
+  var latencyDatasetLabel = t('chart.avg_latency') || 'Avg Latency (ms)';
+  var tooltipMs = function(ctx) { return ' ' + ctx.parsed.y.toLocaleString() + ' ms'; };
+  var yTickCb = function(v) { return v + ' ms'; };
 
   const chartDefaults = {
     responsive: true,
     maintainAspectRatio: true,
     plugins: {
       legend: {
-        labels: {color: textColor, font, boxWidth: 12, padding: 12},
+        labels: {color: textColor, font: font, boxWidth: 12, padding: 12},
         position: 'bottom',
       },
     },
     scales: {
-      x: {grid:{color:gridColor}, ticks:{color:textColor, font}},
-      y: {grid:{color:gridColor}, ticks:{color:textColor, font}},
+      x: {grid:{color:gridColor}, ticks:{color:textColor, font: font}},
+      y: {grid:{color:gridColor}, ticks:{color:textColor, font: font}},
     },
   };
 
-  // ── Category Distribution (Doughnut) ──────────────
-  const catCtx = document.getElementById('chartCategory').getContext('2d');
+  // Category Distribution (Doughnut)
+  var catCtx = document.getElementById('chartCategory').getContext('2d');
   chartInstances.category = new Chart(catCtx, {
     type: 'doughnut',
     data: {
-      labels: ['Symptoms','Treatment','Diagnosis','Medication','Prevention','General'],
+      labels: catLabels,
       datasets: [{
         data: [32.4, 24.8, 18.2, 12.1, 8.5, 4.0],
         backgroundColor: ['#4FC3F7','#4CAF50','#7C4DFF','#FF4081','#00BCD4','#78909C'],
@@ -1040,10 +1480,14 @@ function initCharts() {
       }]
     },
     options: {
-      ...chartDefaults,
       cutout: '55%',
+      responsive: true,
+      maintainAspectRatio: true,
       plugins: {
-        ...chartDefaults.plugins,
+        legend: {
+          labels: {color: textColor, font: font, boxWidth: 12, padding: 12},
+          position: 'bottom',
+        },
         tooltip: {
           backgroundColor: isDark ? '#141B2D' : '#fff',
           titleColor: isDark ? '#E8EAF0' : '#1A1D24',
@@ -1051,23 +1495,23 @@ function initCharts() {
           borderColor: isDark ? '#1E2A3F' : '#E2E6ED',
           borderWidth: 1,
           padding: 10,
-          bodyFont: {family:"'Inter',sans-serif", size:12},
+          bodyFont: {family:chartFontFamily, size:12},
           callbacks: {
-            label: ctx => ` ${ctx.label}: ${ctx.parsed}%`,
+            label: function(ctx) { return ' ' + ctx.label + ': ' + ctx.parsed + '%'; }
           }
         }
       }
     }
   });
 
-  // ── Latency per Category (Bar) ───────────────────
-  const latCtx = document.getElementById('chartLatency').getContext('2d');
+  // Latency per Category (Bar)
+  var latCtx = document.getElementById('chartLatency').getContext('2d');
   chartInstances.latency = new Chart(latCtx, {
     type: 'bar',
     data: {
-      labels: ['Symptoms','Diagnosis','Treatment','Medication','Prevention','General'],
+      labels: catLabels,
       datasets: [{
-        label: 'Avg Latency (ms)',
+        label: latencyDatasetLabel,
         data: [2100, 2450, 2200, 2350, 2050, 1900],
         backgroundColor: ['#4FC3F7','#7C4DFF','#4CAF50','#FF4081','#00BCD4','#78909C'],
         borderRadius: 6,
@@ -1075,11 +1519,10 @@ function initCharts() {
       }]
     },
     options: {
-      ...chartDefaults,
+      responsive: true,
+      maintainAspectRatio: true,
       plugins: {
-        ...chartDefaults.plugins,
         legend: {display: false},
-        annotation: undefined, // Chart.js annotation plugin not loaded
         tooltip: {
           backgroundColor: isDark ? '#141B2D' : '#fff',
           titleColor: isDark ? '#E8EAF0' : '#1A1D24',
@@ -1087,19 +1530,18 @@ function initCharts() {
           borderColor: isDark ? '#1E2A3F' : '#E2E6ED',
           borderWidth: 1,
           padding: 10,
-          bodyFont: {family:"'Inter',sans-serif", size:12},
+          bodyFont: {family:chartFontFamily, size:12},
           callbacks: {
-            label: ctx => ` ${ctx.parsed.y.toLocaleString()} ms`,
+            label: tooltipMs
           }
         }
       },
       scales: {
-        ...chartDefaults.scales,
+        x: {grid:{color:gridColor}, ticks:{color:textColor, font: font}},
         y: {
-          ...chartDefaults.scales.y,
+          grid:{color:gridColor},
+          ticks:{color:textColor, font: font, callback: yTickCb},
           beginAtZero: true,
-          grid: {...gridColor},
-          ticks: {callback: v => v + ' ms'},
         }
       }
     }
@@ -1109,11 +1551,10 @@ function initCharts() {
 }
 
 // Re-init charts on theme change
-const origToggle = toggleTheme;
+var origToggle = toggleTheme;
 toggleTheme = function() {
   origToggle();
-  // Destroy charts so they re-init with new colors on next view
-  Object.values(chartInstances).forEach(c => c.destroy());
+  Object.values(chartInstances).forEach(function(c) { c.destroy(); });
   chartInstances = {};
   chartsInitialized = false;
   if (document.getElementById('view-kpi').classList.contains('active')) initCharts();

@@ -120,14 +120,15 @@ _LEADING_PUNCT_RE = re.compile(r'^[\W_]+')
 # hedging variants observed in llama-4-scout on medical QA.
 
 _HEDGING_PATTERNS = [
+    # Hedging = LLM refuses to answer when evidence IS relevant.
+    # "Does not contain sufficient information" is now the CORRECT response
+    # when evidence is about a different disease/condition (see _build_prompt).
     re.compile(r'not directly (linked|address|answer|support|evidence)', re.IGNORECASE),
     re.compile(r'no (direct )?evidence', re.IGNORECASE),
     re.compile(r'(there is|there are) no', re.IGNORECASE),
-    re.compile(r'does not contain enough information', re.IGNORECASE),
     re.compile(r'does not (directly )?(address|answer|link|support|provide)', re.IGNORECASE),
     re.compile(r'cannot (answer|determine|say)', re.IGNORECASE),
     re.compile(r'unable to (answer|determine)', re.IGNORECASE),
-    re.compile(r'not (enough|sufficient) (evidence|information)', re.IGNORECASE),
     re.compile(r'does not provide (enough|sufficient|direct)', re.IGNORECASE),
 ]
 
@@ -495,17 +496,29 @@ class RAGPipeline:
         return (
             "Based on the medical research evidence below, "
             "answer the question concisely.\n\n"
-            "Rules:\n"
-            "- Synthesize findings from ALL evidence into one clear sentence\n"
-            "- If the evidence directly answers the question, state it plainly\n"
-            "- If the evidence does not perfectly match, still give the single most "
-            "relevant finding — do NOT list what is missing\n"
-            "- Stay grounded in the evidence — do not add external knowledge\n"
-            "- Do NOT start with hedging phrases such as 'The evidence does not "
+            "Rules - FOLLOW IN ORDER OF PRIORITY:\n"
+            "\n"
+            "[RULE 1 — DISEASE MISMATCH — HIGHEST PRIORITY]\n"
+            "If the evidence discusses a DIFFERENT disease, condition, or medication "
+            "than the question asks about, you MUST respond with exactly: "
+            "'The retrieved medical literature does not contain sufficient information "
+            "to answer this question.'\n"
+            "CRITICAL: Even if the evidence MENTIONS a symptom or word from the query, "
+            "do NOT answer if the MAIN TOPIC of the evidence is a different condition.\n"
+            "EXAMPLE:\n"
+            "  Question: 'What are the symptoms of fever?'\n"
+            "  Evidence: 'Fever is not a relevant symptom in chronic rhinosinusitis.'\n"
+            "  → The MAIN TOPIC is chronic rhinosinusitis, NOT fever. Respond with the "
+            "insufficient information message.\n"
+            "\n"
+            "[RULE 2] Synthesize findings from ALL evidence into one clear sentence\n"
+            "[RULE 3] If the evidence directly answers the question, state it plainly\n"
+            "[RULE 4] Stay grounded in the evidence — do not add external knowledge\n"
+            "[RULE 5] Do NOT start with hedging phrases such as 'The evidence does not "
             "directly address' or 'The provided research conclusions'\n"
-            "- Do NOT reference study numbers in your answer — just give the answer\n"
-            "- Use the same medical terminology as the evidence\n"
-            "- Be conclusive: end your answer with a period.\n"
+            "[RULE 6] Do NOT reference study numbers in your answer — just give the answer\n"
+            "[RULE 7] Use the same medical terminology as the evidence\n"
+            "[RULE 8] Be conclusive: end your answer with a period.\n"
             "\n"
             "Medical Research Evidence:\n"
             f"{evidence}\n\n"
@@ -627,12 +640,24 @@ class RAGPipeline:
                 "You are a medical research assistant. Synthesize research evidence into "
                 "concise, direct medical answers. Ground your answer in the evidence. "
                 "Do NOT start with hedging phrases. Be concise and direct.\n\n"
-                "Rules - FOLLOW CAREFULLY:\n"
-                "- State the answer directly. Do NOT use hedging language.\n"
-                "- Do NOT say 'the evidence does not directly address' or similar.\n"
-                "- Do NOT say 'there is no evidence' or 'not enough information'.\n"
-                "- If the evidence provides relevant findings, synthesize them.\n"
-                "- Answer must be one clear, definitive sentence.\n\n"
+                "Rules - FOLLOW IN ORDER OF PRIORITY:\n"
+                "\n"
+                "[RULE 1 — DISEASE MISMATCH — HIGHEST PRIORITY]\n"
+                "If the evidence discusses a DIFFERENT disease or condition than the "
+                "question asks about, you MUST respond with exactly: "
+                "'The retrieved medical literature does not contain sufficient information "
+                "to answer this question.'\n"
+                "CRITICAL: The evidence MENTIONING a symptom from the query does NOT "
+                "make it relevant. Check the MAIN TOPIC of the evidence.\n"
+                "EXAMPLE: Question='What are the symptoms of fever?' Evidence='Fever is "
+                "not a relevant symptom in chronic rhinosinusitis.' → MAIN TOPIC is "
+                "chronic rhinosinusitis, NOT fever. Respond with insufficient info.\n"
+                "\n"
+                "[RULE 2] State the answer directly. Do NOT use hedging language.\n"
+                "[RULE 3] Do NOT say 'the evidence does not directly address' or similar.\n"
+                "[RULE 4] If the evidence provides relevant findings, synthesize them.\n"
+                "[RULE 5] Answer must be one clear, definitive sentence.\n"
+                "\n"
                 "Medical Research Evidence:\n"
                 f"Finding: {best_first_answer}\n"
                 f"Context: {_truncate_words(best_chunk.get('context', ''), 200)}\n"

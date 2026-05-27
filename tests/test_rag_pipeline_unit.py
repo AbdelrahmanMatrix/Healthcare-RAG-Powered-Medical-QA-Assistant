@@ -161,10 +161,22 @@ class TestHedgingPatterns:
         text = "There is no direct evidence linking the two"
         assert any(p.search(text) for p in _HEDGING_PATTERNS)
 
-    def test_hedging_detected_not_enough_info(self):
+    def test_hedging_not_detected_not_enough_info(self):
         from src.rag.pipeline import _HEDGING_PATTERNS
         text = "does not contain enough information"
-        assert any(p.search(text) for p in _HEDGING_PATTERNS)
+        # This is now the HONEST correct response when evidence is about a
+        # different disease — NOT hedging. The prompt instructs the LLM to
+        # say this when evidence doesn't match the question.
+        assert not any(p.search(text) for p in _HEDGING_PATTERNS)
+
+    def test_hedging_not_detected_exact_prompt_mandated_text(self):
+        """The exact prompt-mandated insufficient-info sentence is NOT hedging."""
+        from src.rag.pipeline import _HEDGING_PATTERNS
+        text = (
+            "The retrieved medical literature does not contain sufficient "
+            "information to answer this question."
+        )
+        assert not any(p.search(text) for p in _HEDGING_PATTERNS)
 
     def test_hedging_detected_cannot_answer(self):
         from src.rag.pipeline import _HEDGING_PATTERNS
@@ -451,9 +463,13 @@ class TestIsHedgingMethod:
         pipeline = builder.pipeline
         assert pipeline._is_hedging("The evidence does not directly address this question") is True
         assert pipeline._is_hedging("There is no direct evidence for that") is True
-        assert pipeline._is_hedging("This does not contain enough information") is True
+        # "does not contain enough information" is now the HONEST correct
+        # response (not hedging) — the prompt tells the LLM to say this when
+        # evidence is about a different disease.
+        assert pipeline._is_hedging("This does not contain enough information") is False
         assert pipeline._is_hedging("I cannot answer this question") is True
-        assert pipeline._is_hedging("Not enough information to answer") is True
+        # "Not enough information" is the honest correct response now — not hedging
+        assert pipeline._is_hedging("Not enough information to answer") is False
 
     def test_non_hedging(self, builder):
         pipeline = builder.pipeline
@@ -739,6 +755,34 @@ class TestGenerate:
 
         # No retry - hedging is skipped for non-Groq models
         assert result == "The evidence does not directly address this."
+
+    def test_disease_mismatch_honest_response_passes_through(self, builder):
+        """The honest 'does not contain sufficient information' response passes
+        through generate() WITHOUT triggering hedging recovery."""
+        pipeline = builder.pipeline
+        honest_response = (
+            "The retrieved medical literature does not contain sufficient "
+            "information to answer this question."
+        )
+        pipeline._generate_once = MagicMock(return_value=honest_response)
+        pipeline._is_hedging = MagicMock(return_value=False)
+
+        chunks = [{"answer": "Some irrelevant answer.", "context": "c1"}]
+        result = pipeline.generate("test query", chunks)
+
+        # The honest response should be returned as-is
+        assert result == honest_response
+        # _is_hedging was checked but returned False — no retry
+        pipeline._is_hedging.assert_called_once_with(honest_response)
+
+    def test_disease_mismatch_not_flagged_as_hedging_in_is_hedging(self, builder):
+        """_is_hedging() explicitly returns False for the prompt-mandated text."""
+        pipeline = builder.pipeline
+        text = (
+            "The retrieved medical literature does not contain sufficient "
+            "information to answer this question."
+        )
+        assert pipeline._is_hedging(text) is False
 
     def test_hedging_retry_still_hedges_no_best_answer(self, builder):
         """Retry still hedges and no best chunk answer, returns retry result."""
