@@ -337,15 +337,8 @@ jobs:
               DEPLOY_ENV="azure" \
               AZURE_APP_URL="https://${APP_NAME}.azurewebsites.net" \
               DASHBOARD_URL="https://${DASHBOARD_NAME}.azurewebsites.net" \
-              WEBSITES_PORT="8501" \
-              WEBSITES_CONTAINER_START_TIME_LIMIT="1800"
-
-      - name: Enable WebSockets for Streamlit
-        run: |
-          az webapp config set \
-            --name $DASHBOARD_NAME \
-            --resource-group $RESOURCE_GROUP \
-            --web-sockets-enabled true
+              WEBSITES_PORT="80" \
+              WEBSITES_CONTAINER_START_TIME_LIMIT="180"
 
       - name: Restart and wait for image pull
         run: |
@@ -359,9 +352,9 @@ jobs:
         run: |
           URL="https://${DASHBOARD_NAME}.azurewebsites.net"
           for attempt in {1..12}; do
-            STATUS=$(curl -so /dev/null -w "%{http_code}" "${URL}/_stcore/health" || echo "000")
+            STATUS=$(curl -so /dev/null -w "%{http_code}" "${URL}/" || echo "000")
             echo "Health check attempt ${attempt}/12: HTTP ${STATUS}"
-            if [ "$STATUS" = "200" ] || [ "$STATUS" = "302" ]; then
+            if [ "$STATUS" = "200" ] || [ "$STATUS" = "304" ]; then
               echo "✅ Dashboard deployment healthy: ${URL}"
               exit 0
             fi
@@ -395,8 +388,8 @@ jobs:
         run: |
           URL="https://${DASHBOARD_NAME}.azurewebsites.net"
           echo "── Checking Dashboard health ──"
-          HTTP=$(curl -so /dev/null -w "%{http_code}" "${URL}/_stcore/health" 2>&1) || HTTP="000"
-          echo "Dashboard /_stcore/health → HTTP ${HTTP}"
+          HTTP=$(curl -so /dev/null -w "%{http_code}" "${URL}/" 2>&1) || HTTP="000"
+          echo "Dashboard / → HTTP ${HTTP}"
           echo "dashboard-http=${HTTP}" >> $GITHUB_OUTPUT
 
       - name: Smoke test — API query
@@ -438,7 +431,7 @@ jobs:
           echo "  ────────────────────────────────────────────"
 
           echo "  API /health:    HTTP ${API} $([ "$API" = "200" ] && echo '✅' || echo '❌')"
-          echo "  Dashboard:      HTTP ${DASH} $([ "$DASH" = "200" ] || [ "$DASH" = "302" ] && echo '✅' || echo '❌')"
+          echo "  Dashboard:      HTTP ${DASH} $([ "$DASH" = "200" ] || [ "$DASH" = "304" ] && echo '✅' || echo '❌')"
 
           if [ "$QRY" = "ok" ]; then
             ANS=${{ steps.api-query.outputs.query-answer }}

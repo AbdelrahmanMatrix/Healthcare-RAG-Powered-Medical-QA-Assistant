@@ -171,7 +171,7 @@ az webapp config appsettings set \
         DEPLOY_DATE="$(date +%Y-%m-%d)" \
         AZURE_APP_URL="${DEPLOY_URL}" \
         DASHBOARD_URL="${DASHBOARD_URL}" \
-        WEBSITES_PORT="8501" \
+        WEBSITES_PORT="80" \
     --output table
 
 echo "▶ Configuring Dashboard container registry..."

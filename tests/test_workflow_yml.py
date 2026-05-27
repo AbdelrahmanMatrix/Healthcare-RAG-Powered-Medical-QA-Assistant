@@ -348,8 +348,8 @@ class TestHealthCheckShell:
 
     def test_dashboard_health_check_retry_count(self, jobs):
         """The dashboard health check uses 12 retries (6 min window)."""
-        # Step index: 0=login, 1=plan, 2=create, 3=acr, 4=env, 5=websockets, 6=restart, 7=health
-        run = jobs["deploy-dashboard"]["steps"][7]["run"]
+        # Step index: 0=login, 1=plan, 2=create, 3=acr, 4=env, 5=restart, 6=health
+        run = jobs["deploy-dashboard"]["steps"][6]["run"]
         assert "{1..12}" in run, (
             "Expected 12 retries in dashboard health check for-loop"
         )
@@ -505,13 +505,16 @@ class TestAzureAppSettings:
         assert '8000' in run, "API must specify WEBSITES_PORT=8000"
 
     def test_dashboard_has_required_app_settings(self, jobs):
-        """Dashboard App Service config has the required environment variables."""
-        # Step index shifted by +1 due to new "Ensure App Service Plan exists" step
+        """Dashboard App Service config has the required environment variables.
+
+        Now serves static HTML via nginx on port 80 (replaced Streamlit on 8501).
+        """
+        # Step index: 0=login, 1=plan, 2=create, 3=acr, 4=env
         run = jobs["deploy-dashboard"]["steps"][4]["run"]
         assert "AZURE_APP_URL" in run
         assert "DASHBOARD_URL" in run
         assert "WEBSITES_PORT" in run
-        assert '8501' in run, "Dashboard must specify WEBSITES_PORT=8501"
+        assert '80' in run, "Dashboard must specify WEBSITES_PORT=80 (nginx)"
 
 
 # ==============================================================================

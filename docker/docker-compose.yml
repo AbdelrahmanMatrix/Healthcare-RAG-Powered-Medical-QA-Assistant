@@ -44,23 +44,20 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.dashboard
     container_name: healthcare-rag-dashboard
-    command: streamlit run dashboard/app.py --server.port 8501 --server.address 0.0.0.0
     ports:
-      - "8501:8501"
-    env_file:
-      - ../.env
-    volumes:
-      - rag-embeddings:/app/data/embeddings
+      - "8080:80"
+    environment:
+      - AZURE_APP_URL=http://healthcare-rag:8000
     depends_on:
       healthcare-rag:
         condition: service_healthy
     restart: on-failure
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:80/"]
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 60s
+      start_period: 10s
 
 volumes:
   rag-embeddings:

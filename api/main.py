@@ -5,6 +5,8 @@ import asyncio
 import logging
 from contextlib import asynccontextmanager
 
+from pathlib import Path
+
 from dotenv import load_dotenv
 
 load_dotenv()  # Must run before config.settings reads os.environ  # noqa: E402
@@ -12,6 +14,7 @@ load_dotenv()  # Must run before config.settings reads os.environ  # noqa: E402
 from fastapi import FastAPI, Request  # noqa: E402
 from fastapi.responses import JSONResponse  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
+from fastapi.staticfiles import StaticFiles  # noqa: E402
 
 from config.settings import settings  # noqa: E402
 from api.routes import query  # noqa: E402
@@ -133,6 +136,11 @@ async def latency_middleware(request: Request, call_next):
 async def global_exception_handler(request: Request, exc: Exception):
     logger.error(f"Unhandled exception on {request.url.path}: {exc}", exc_info=True)  # pragma: no cover — safety net
     return JSONResponse(status_code=500, content={"error": str(exc)})  # pragma: no cover
+
+
+# ── Serve Dashboard SPA ───────────────────────────────────────────────
+DASHBOARD_DIR = Path(__file__).resolve().parent.parent / "dashboard"
+app.mount("/dashboard", StaticFiles(directory=str(DASHBOARD_DIR), html=True), name="dashboard")
 
 
 app.include_router(query.router)

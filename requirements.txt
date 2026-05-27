@@ -70,8 +70,8 @@ openai>=1.35.3,<3.0.0
 mlflow==2.13.2
 
 # ─── Dashboard & Visualization ─────────────────────────────
-streamlit==1.35.0
-plotly==5.22.0
+# streamlit removed — replaced by standalone HTML SPA
+# plotly removed — no longer needed without Streamlit
 
 # ─── Data Visualization (EDA) ──────────────────────────────
 matplotlib==3.9.0

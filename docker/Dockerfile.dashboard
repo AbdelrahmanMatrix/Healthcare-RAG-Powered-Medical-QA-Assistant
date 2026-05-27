@@ -1,104 +1,27 @@
-# Healthcare RAG — Dashboard Dockerfile (Multi-Stage)
+# Healthcare RAG — Dashboard Dockerfile (Static HTML SPA)
 # Build:  docker build -f docker/Dockerfile.dashboard -t healthcare-rag-dashboard:latest .
-# Run:    docker run -p 8501:8501 --env-file .env --rm healthcare-rag-dashboard:latest
+# Run:    docker run -p 8080:80 --rm healthcare-rag-dashboard:latest
 #
-# Multi-stage build reduces final image size by ~60% and pre-downloads
-# HuggingFace models during build to eliminate cold-start downloads.
+# Serves the standalone HTML/JS dashboard that communicates with the
+# FastAPI backend via HTTP fetch(). No WebSockets, no Streamlit.
+# Use AZURE_APP_URL env var to point to the API server.
 
-# ══════════════════════════════════════════════════════════════════════════════
-# STAGE 1: Builder — install deps + pre-download models
-# ══════════════════════════════════════════════════════════════════════════════
-FROM python:3.10-slim AS builder
+FROM nginx:alpine
 
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV HF_HOME=/app/hf_cache
-ENV SENTENCE_TRANSFORMERS_HOME=/app/hf_cache/sentence_transformers
-ENV TORCH_HOME=/app/hf_cache/torch
-ENV TRANSFORMERS_CACHE=/app/hf_cache/transformers
+# Remove default nginx config
+RUN rm /etc/nginx/conf.d/default.conf
 
-WORKDIR /app
+# Custom nginx config with API proxy for /query and /health
+COPY docker/nginx-dashboard.conf /etc/nginx/conf.d/dashboard.conf
 
-# System build deps
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential curl git \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Python deps
-COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
-
-# Copy source code
-COPY src/      ./src/
-COPY api/      ./api/
-COPY config/   ./config/
-COPY scripts/  ./scripts/
-COPY mlops/    ./mlops/
-COPY dashboard/ ./dashboard/
-COPY setup.py  .
-COPY download.py .
-COPY models/   ./models/
-
-# Install project
-RUN pip install --no-cache-dir -e .
-
-# NOTE: No pre-download step for dashboard — it's a pure Streamlit frontend
-# that calls the API via HTTP and never uses ML models (torch, transformers, etc.)
-# directly. Pre-downloading would add ~2 GB of unnecessary model weights.
-
-# Clean up cache
-RUN pip cache purge || true
-RUN find /root/.cache -type f -delete 2>/dev/null || true
-RUN find /tmp -type f -delete 2>/dev/null || true
-
-# ══════════════════════════════════════════════════════════════════════════════
-# STAGE 2: Runtime — lean image
-# ══════════════════════════════════════════════════════════════════════════════
-FROM python:3.10-slim
-
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV HF_HOME=/app/hf_cache
-ENV SENTENCE_TRANSFORMERS_HOME=/app/hf_cache/sentence_transformers
-ENV TORCH_HOME=/app/hf_cache/torch
-ENV TRANSFORMERS_CACHE=/app/hf_cache/transformers
-
-WORKDIR /app
-
-# Runtime system deps
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Create symlink for Azure log streaming
-RUN mkdir -p /home/LogFiles && ln -sf /dev/stdout /home/LogFiles/entrypoint.log
-
-# Copy Python packages
-COPY --from=builder /usr/local/lib/python3.10/site-packages/ /usr/local/lib/python3.10/site-packages/
-COPY --from=builder /usr/local/bin/ /usr/local/bin/
-
-# NOTE: No pre-downloaded model cache to copy — the dashboard is a pure
-# Streamlit frontend that calls the API via HTTP and doesn't use ML models
-# directly. Pre-downloading would add ~2 GB of unnecessary model weights.
-
-# Copy source code
-COPY --from=builder /app/src/      ./src/
-COPY --from=builder /app/api/      ./api/
-COPY --from=builder /app/config/   ./config/
-COPY --from=builder /app/scripts/  ./scripts/
-COPY --from=builder /app/mlops/    ./mlops/
-COPY --from=builder /app/dashboard/ ./dashboard/
-COPY --from=builder /app/setup.py  .
-COPY --from=builder /app/download.py .
-COPY --from=builder /app/models/   ./models/
-
-# Ensure data directories exist
-RUN mkdir -p data/embeddings/faiss_index data/processed data/raw
-
-# Entrypoint
+# Copy static dashboard HTML and entrypoint script
+COPY dashboard/index.html /usr/share/nginx/html/index.html
 COPY docker/entrypoint-dashboard.sh /entrypoint-dashboard.sh
+
+# Make entrypoint executable
 RUN chmod +x /entrypoint-dashboard.sh
 
-EXPOSE 8501
-CMD ["/entrypoint-dashboard.sh"]
+# Expose port
+EXPOSE 80
+
+ENTRYPOINT ["/entrypoint-dashboard.sh"]

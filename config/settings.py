@@ -73,7 +73,7 @@ class Settings(BaseSettings):
     DEPLOY_ENV: str = "local"
     DEPLOY_DATE: str = ""
     AZURE_APP_URL: str = ""
-    DASHBOARD_URL: str = "http://localhost:8501"
+    DASHBOARD_URL: str = "/dashboard"
 
     disclaimer: str = (
         "This is an informational assistant only. "

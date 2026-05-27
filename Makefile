@@ -29,12 +29,8 @@ test-ci:       ## Run unit tests matching CI scope (excludes integration-heavy t
 test-e2e:      ## Run end-to-end integration tests (requires real models + FAISS index)
 	pytest tests/test_integration_full_pipeline.py -v --tb=long -m integration
 
-test-extra-coverage: ## Run extra coverage script for module-level code (coverage append mode)
-	coverage run --append --source=src,api tests/run_extra_coverage.py
-
-test-coverage: ## Run unit tests with coverage gate (85% min, matches CI)
+test-coverage: ## Run unit tests with coverage gate (100% min, matches CI)
 	pytest tests/ --ignore=tests/test_rag_pipeline.py --cov=src --cov=api --cov-report=term-missing --cov-fail-under=100
-	$(MAKE) test-extra-coverage
 
 run:           ## Start FastAPI with hot-reload
 	uvicorn api.main:app --reload --host 0.0.0.0 --port $(API_PORT)
@@ -116,8 +112,9 @@ latency-test:  ## Run 20-query latency test against live Azure API
 mlflow:        ## Start MLflow UI
 	mlflow ui --port 5000
 
-dashboard:     ## Start Streamlit KPI dashboard
-	streamlit run dashboard/app.py
+dashboard:     ## Open the dashboard (requires API running at /dashboard)
+	@echo "Dashboard is served by the FastAPI app at http://localhost:$(API_PORT)/dashboard"
+	@echo "Start the API with:  make run"
 
 validate:      ## Run CI-equivalent checks locally (lint + test-workflow + test-ci + test-coverage)
 	$(MAKE) lint
