@@ -14,6 +14,34 @@
 #                         --role contributor
 #                         --scopes /subscriptions/<sub-id>/resourceGroups/healthcare-rag-rg
 #                         --sdk-auth
+#
+# ── FIX SUMMARY ───────────────────────────────────────────────────────────────
+# Bug 1 (CRITICAL — root cause of 503): Job outputs that contain a secret value
+#   are silently masked to "" by GitHub Actions. The acr-login-server output
+#   contained the AZURE_ACR_NAME secret, so deploy-api and deploy-dashboard
+#   received an empty SERVER variable → App Services were configured with an
+#   invalid image name like "/healthcare-rag:sha" → image pull failed → 503.
+#   FIX: Compute the ACR login server inline in every job that needs it:
+#        SERVER="${ACR_NAME}.azurecr.io"   (no job outputs needed)
+#
+# Bug 2 (CRITICAL — 503): App Service had no credentials to pull from ACR.
+#   The old `az webapp config container set` call did not pass registry auth,
+#   so Azure could not authenticate against the private ACR registry.
+#   FIX: Enable ACR admin user and pass --docker-registry-server-{url,user,password}
+#        in every container-set call.
+#
+# Bug 3 (CRITICAL — 503): The App Service Plan "healthcare-rag-plan" is assumed
+#   to already exist; if it does not the `az webapp create` silently fails and
+#   the App Service ends up in a broken state.
+#   FIX: Add an explicit "ensure App Service Plan exists" step in both deploy jobs.
+#
+# Bug 4 (WARNING — imminently breaking): GitHub-hosted runners will force all
+#   actions to Node.js 24 starting June 2, 2026. The workflow uses
+#   actions/checkout@v4, actions/setup-python@v5, actions/cache@v4, and
+#   azure/login@v2, all of which run on Node.js 20.
+#   FIX: Add FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true to the workflow env so
+#        the existing action versions continue to work under Node.js 24.
+# ──────────────────────────────────────────────────────────────────────────────
 
 name: Azure Deploy
 
@@ -27,9 +55,11 @@ env:
   APP_NAME: healthcare-rag-app
   DASHBOARD_NAME: healthcare-rag-dashboard
   ACR_NAME: ${{ secrets.AZURE_ACR_NAME }}
+  # FIX (Bug 4): Force Node.js 24 for all actions before the June 2 deadline.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  # ── 1. Tests (same as ci.yml) ────────────────────────────────────────────────
+  # ── 1. Tests ─────────────────────────────────────────────────────────────────
   test:
     runs-on: ubuntu-latest
     steps:
@@ -63,12 +93,13 @@ jobs:
             --ignore=tests/test_rag_pipeline.py \
             --tb=short -q
 
-  # ── 2a. Build & Push API Docker image to ACR ────────────────────────────────
+  # ── 2a. Build & Push API Docker image to ACR ─────────────────────────────────
+  # NOTE: The outputs block has been removed. The acr-login-server output was
+  # being silently masked to "" because its value contained the AZURE_ACR_NAME
+  # secret. Every downstream job now computes the server inline instead.
   build-and-push-api:
     needs: test
     runs-on: ubuntu-latest
-    outputs:
-      acr-login-server: ${{ steps.acr-login.outputs.login-server }}
     steps:
       - uses: actions/checkout@v4
 
@@ -77,35 +108,30 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: ACR login
-        id: acr-login
-        run: |
-          SERVER=$(az acr show --name $ACR_NAME --query loginServer -o tsv)
-          echo "login-server=$SERVER" >> $GITHUB_OUTPUT
-          az acr login --name $ACR_NAME
-
       - name: Build and push API image
         run: |
-          SERVER=${{ steps.acr-login.outputs.login-server }}
+          # FIX (Bug 1): Compute server inline — never use a job output that
+          # contains a secret value, as GitHub Actions masks it to "".
+          SERVER="${ACR_NAME}.azurecr.io"
+          az acr login --name "$ACR_NAME"
+
           IMAGE="${SERVER}/healthcare-rag:${{ github.sha }}"
           LATEST="${SERVER}/healthcare-rag:latest"
 
           docker build \
             -f docker/Dockerfile \
             --build-arg HF_TOKEN=${{ secrets.HF_TOKEN }} \
-            -t $IMAGE \
-            -t $LATEST \
+            -t "$IMAGE" \
+            -t "$LATEST" \
             .
 
-          docker push $IMAGE
-          docker push $LATEST
+          docker push "$IMAGE"
+          docker push "$LATEST"
 
   # ── 2b. Build & Push Dashboard Docker image to ACR ───────────────────────────
   build-and-push-dashboard:
     needs: test
     runs-on: ubuntu-latest
-    outputs:
-      acr-login-server: ${{ steps.acr-login-dash.outputs.login-server }}
     steps:
       - uses: actions/checkout@v4
 
@@ -114,27 +140,23 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: ACR login
-        id: acr-login-dash
-        run: |
-          SERVER=$(az acr show --name $ACR_NAME --query loginServer -o tsv)
-          echo "login-server=$SERVER" >> $GITHUB_OUTPUT
-          az acr login --name $ACR_NAME
-
       - name: Build and push Dashboard image
         run: |
-          SERVER=${{ steps.acr-login-dash.outputs.login-server }}
+          # FIX (Bug 1): Same inline server computation as the API job.
+          SERVER="${ACR_NAME}.azurecr.io"
+          az acr login --name "$ACR_NAME"
+
           IMAGE="${SERVER}/healthcare-rag-dashboard:${{ github.sha }}"
           LATEST="${SERVER}/healthcare-rag-dashboard:latest"
 
           docker build \
             -f docker/Dockerfile.dashboard \
-            -t $IMAGE \
-            -t $LATEST \
+            -t "$IMAGE" \
+            -t "$LATEST" \
             .
 
-          docker push $IMAGE
-          docker push $LATEST
+          docker push "$IMAGE"
+          docker push "$LATEST"
 
   # ── 3a. Deploy API to Azure App Service ──────────────────────────────────────
   deploy-api:
@@ -149,6 +171,22 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      # FIX (Bug 3): Ensure the App Service Plan exists before creating the
+      # App Service. If the plan is missing, `az webapp create` fails and the
+      # App Service is left in a broken state with no container configured.
+      - name: Ensure App Service Plan exists
+        run: |
+          az appservice plan show \
+            --name healthcare-rag-plan \
+            --resource-group $RESOURCE_GROUP \
+            --output table 2>/dev/null || \
+          az appservice plan create \
+            --name healthcare-rag-plan \
+            --resource-group $RESOURCE_GROUP \
+            --is-linux \
+            --sku B2 \
+            --output table
+
       - name: Create API App Service (if not exists)
         run: |
           az webapp show \
@@ -162,13 +200,32 @@ jobs:
             --deployment-container-image-name nginx:alpine \
             --output table
 
-      - name: Update App Service image
+      # FIX (Bug 2): Enable the ACR admin user so the App Service can
+      # authenticate when pulling the image. Admin credentials are fetched
+      # at deploy time — they are never stored in source control.
+      - name: Enable ACR admin and update App Service image
         run: |
-          SERVER=${{ needs.build-and-push-api.outputs.acr-login-server }}
+          SERVER="${ACR_NAME}.azurecr.io"
+
+          # Enable admin user on ACR (idempotent — safe to run every deploy)
+          az acr update --name "$ACR_NAME" --admin-enabled true
+
+          # Retrieve admin password at runtime
+          ACR_PASSWORD=$(az acr credential show \
+            --name "$ACR_NAME" \
+            --query "passwords[0].value" \
+            --output tsv)
+
+          # FIX (Bug 1 + Bug 2): Pass the full image name AND registry credentials.
+          # Without --docker-registry-server-{url,user,password}, Azure App Service
+          # cannot authenticate against the private ACR and the container pull fails.
           az webapp config container set \
             --name $APP_NAME \
             --resource-group $RESOURCE_GROUP \
-            --docker-custom-image-name "${SERVER}/healthcare-rag:${{ github.sha }}"
+            --docker-custom-image-name "${SERVER}/healthcare-rag:${{ github.sha }}" \
+            --docker-registry-server-url "https://${SERVER}" \
+            --docker-registry-server-user "$ACR_NAME" \
+            --docker-registry-server-password "$ACR_PASSWORD"
 
       - name: Update environment variables
         run: |
@@ -216,7 +273,6 @@ jobs:
           exit 1
 
   # ── 3b. Deploy Dashboard to Azure App Service ────────────────────────────────
-  # Waits for the API to be healthy first so env vars are in sync on first start.
   deploy-dashboard:
     needs: [build-and-push-dashboard, deploy-api]
     runs-on: ubuntu-latest
@@ -228,6 +284,20 @@ jobs:
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # FIX (Bug 3): Same plan-existence guard as the API deploy job.
+      - name: Ensure App Service Plan exists
+        run: |
+          az appservice plan show \
+            --name healthcare-rag-plan \
+            --resource-group $RESOURCE_GROUP \
+            --output table 2>/dev/null || \
+          az appservice plan create \
+            --name healthcare-rag-plan \
+            --resource-group $RESOURCE_GROUP \
+            --is-linux \
+            --sku B2 \
+            --output table
 
       - name: Create Dashboard App Service (if not exists)
         run: |
@@ -242,13 +312,25 @@ jobs:
             --deployment-container-image-name nginx:alpine \
             --output table
 
-      - name: Update Dashboard App Service image
+      # FIX (Bug 1 + Bug 2): Same inline server + ACR credentials fix as API.
+      - name: Enable ACR admin and update Dashboard App Service image
         run: |
-          SERVER=${{ needs.build-and-push-dashboard.outputs.acr-login-server }}
+          SERVER="${ACR_NAME}.azurecr.io"
+
+          az acr update --name "$ACR_NAME" --admin-enabled true
+
+          ACR_PASSWORD=$(az acr credential show \
+            --name "$ACR_NAME" \
+            --query "passwords[0].value" \
+            --output tsv)
+
           az webapp config container set \
             --name $DASHBOARD_NAME \
             --resource-group $RESOURCE_GROUP \
-            --docker-custom-image-name "${SERVER}/healthcare-rag-dashboard:${{ github.sha }}"
+            --docker-custom-image-name "${SERVER}/healthcare-rag-dashboard:${{ github.sha }}" \
+            --docker-registry-server-url "https://${SERVER}" \
+            --docker-registry-server-user "$ACR_NAME" \
+            --docker-registry-server-password "$ACR_PASSWORD"
 
       - name: Update Dashboard environment variables
         run: |
@@ -264,9 +346,6 @@ jobs:
               WEBSITES_CONTAINER_START_TIME_LIMIT="1800"
 
       - name: Restart and wait for image pull
-        # az webapp config container set updates the image tag but does NOT
-        # restart the container. An explicit restart is required. The 2-minute
-        # wait gives Azure time to pull the image before probing.
         run: |
           az webapp restart \
             --name $DASHBOARD_NAME \
@@ -290,13 +369,10 @@ jobs:
           echo "   Check at: https://${DASHBOARD_NAME}.azurewebsites.net"
 
   # ── 4. Post-Deployment Health Check ──────────────────────────────────────────
-  # Runs after both App Services are deployed. Pings endpoints, runs a
-  # smoke-test query, and reports comprehensive status. This does NOT block
-  # the deployment — the environment url is set in the deploy jobs above.
   post-deploy-health-check:
     needs: [deploy-api, deploy-dashboard]
     runs-on: ubuntu-latest
-    if: always()  # run even if dashboard deploy had warnings
+    if: always()
     steps:
       - name: Set up Python
         uses: actions/setup-python@v5
