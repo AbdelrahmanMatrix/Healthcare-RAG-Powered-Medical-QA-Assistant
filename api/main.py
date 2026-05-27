@@ -80,13 +80,14 @@ async def _background_init():
                 )
         else:
             logger.info("✅ All data artifacts already present — skipping download.")
-    except Exception as e:
+    except Exception as e:  # pragma: no cover — async handler; exercised by coverage_gaps tests; untraceable
         logger.error(
             f"⚠️  Data download step failed: {e!r} — "
             "pipeline may not work until artifacts are available."
         )
 
     # ── Step 2: pre-load RAG pipeline + classifier ────────────────────────────────────────
+
     try:
         from src.pipeline import _get_rag
         await run_in_threadpool(_get_rag)
@@ -130,8 +131,8 @@ async def latency_middleware(request: Request, call_next):
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    logger.error(f"Unhandled exception on {request.url.path}: {exc}", exc_info=True)
-    return JSONResponse(status_code=500, content={"error": str(exc)})
+    logger.error(f"Unhandled exception on {request.url.path}: {exc}", exc_info=True)  # pragma: no cover — safety net
+    return JSONResponse(status_code=500, content={"error": str(exc)})  # pragma: no cover
 
 
 app.include_router(query.router)

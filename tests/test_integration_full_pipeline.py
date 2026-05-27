@@ -288,11 +288,17 @@ class TestFullPipelineIntegration:
         assert len(result["answer_raw"]) > 0
 
     def test_answer_retrieval_quality_is_float(self, rag_pipeline):
-        """retrieval_quality and mean_cosine_similarity are valid floats [0, 1]."""
+        """retrieval_quality (mean reranker logit) and mean_cosine_similarity are floats.
+
+        Note: reranker scores are CrossEncoder raw logits, NOT probabilities,
+        so retrieval_quality can be negative for low-relevance results.
+        mean_cosine_similarity uses FAISS IP distances which ARE in [0, 1].
+        """
         result = rag_pipeline.answer("What is the treatment for hypertension?")
         assert isinstance(result["retrieval_quality"], float)
-        assert 0.0 <= result["retrieval_quality"] <= 1.0
+        # Reranker scores are raw logits — can be negative for non-relevant chunks
         assert isinstance(result["mean_cosine_similarity"], float)
+        # Cosine similarity (FAISS IP distance on normalised vectors) is in [0, 1]
         assert 0.0 <= result["mean_cosine_similarity"] <= 1.0
 
     def test_answer_top_k_matches_retrieved_count(self, rag_pipeline):

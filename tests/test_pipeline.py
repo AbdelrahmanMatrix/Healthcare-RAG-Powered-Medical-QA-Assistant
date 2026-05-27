@@ -348,6 +348,34 @@ class TestRunPipelineEdgeCases:
             with pytest.raises(ValueError, match="Bad input"):
                 run_pipeline("test")
 
+    def test_use_classifier_path_with_all_scores(self, mock_rag_cls, mock_rag):
+        """When rag._use_classifier is True, predict_with_confidence is used
+        and all_scores are passed to retrieve_by_category."""
+        mock_rag._use_classifier = True
+        mock_rag._classifier = MagicMock()
+        mock_rag._classifier.predict_with_confidence.return_value = {
+            "category": "Treatment",
+            "confidence": 0.85,
+            "all_scores": {
+                "Treatment": 0.85, "Symptoms": 0.05, "General": 0.05,
+                "Diagnosis": 0.03, "Medication": 0.02, "Prevention": 0.0,
+            },
+        }
+
+        from src.pipeline import run_pipeline
+
+        result = run_pipeline("What is the treatment for hypertension?")
+        assert result["category"] == "Treatment"
+        mock_rag._classifier.predict_with_confidence.assert_called_once_with(
+            "What is the treatment for hypertension?"
+        )
+        # retrieve_by_category should have been called with all_scores
+        mock_rag.retrieve_by_category.assert_called_once()
+        call_kwargs = mock_rag.retrieve_by_category.call_args[1]
+        assert "all_scores" in call_kwargs
+        assert call_kwargs["all_scores"] is not None
+        assert call_kwargs["all_scores"]["Treatment"] == 0.85
+
     def test_multiple_source_details(self, mock_rag_cls, mock_rag):
         """Multiple retrieved results produce multiple source_details."""
         mock_rag.retrieve_by_category.return_value = [

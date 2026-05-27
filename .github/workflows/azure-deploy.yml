@@ -35,12 +35,9 @@
 #   the App Service ends up in a broken state.
 #   FIX: Add an explicit "ensure App Service Plan exists" step in both deploy jobs.
 #
-# Bug 4 (WARNING — imminently breaking): GitHub-hosted runners will force all
-#   actions to Node.js 24 starting June 2, 2026. The workflow uses
-#   actions/checkout@v4, actions/setup-python@v5, actions/cache@v4, and
-#   azure/login@v2, all of which run on Node.js 20.
-#   FIX: Add FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true to the workflow env so
-#        the existing action versions continue to work under Node.js 24.
+# FIXED (Bug 4): Updated all actions to Node.js 24-compatible versions:
+#   actions/checkout@v6, actions/setup-python@v6, actions/cache@v5.
+#   azure/login@v2 remains at v2 (no v3 exists; v2 supports Node.js 24).
 # ──────────────────────────────────────────────────────────────────────────────
 
 name: Azure Deploy
@@ -55,22 +52,20 @@ env:
   APP_NAME: healthcare-rag-app
   DASHBOARD_NAME: healthcare-rag-dashboard
   ACR_NAME: ${{ secrets.AZURE_ACR_NAME }}
-  # FIX (Bug 4): Force Node.js 24 for all actions before the June 2 deadline.
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   # ── 1. Tests ─────────────────────────────────────────────────────────────────
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.10"
 
       - name: Cache pip
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
@@ -101,7 +96,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Azure login
         uses: azure/login@v2
@@ -133,7 +128,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Azure login
         uses: azure/login@v2
@@ -345,6 +340,13 @@ jobs:
               WEBSITES_PORT="8501" \
               WEBSITES_CONTAINER_START_TIME_LIMIT="1800"
 
+      - name: Enable WebSockets for Streamlit
+        run: |
+          az webapp config set \
+            --name $DASHBOARD_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --web-sockets-enabled true
+
       - name: Restart and wait for image pull
         run: |
           az webapp restart \
@@ -375,7 +377,7 @@ jobs:
     if: always()
     steps:
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
 

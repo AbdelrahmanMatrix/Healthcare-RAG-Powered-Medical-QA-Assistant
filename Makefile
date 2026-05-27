@@ -3,7 +3,7 @@ API_PORT  := 8000
 ACR_NAME  := healthcareragacr
 .DEFAULT_GOAL := help
 
-.PHONY: install test test-api run lint docker-build docker-build-no-cache docker-run docker-push docker-pull docker-login docker-dev docker-prod docker-clean docker-stats docker-logs docker-exec docker-restart docker-ps docker-top docker-test docker-save docker-load latency-test mlflow dashboard download-classifier clean help
+.PHONY: install test test-api test-ci test-e2e test-workflow test-coverage validate run lint docker-build docker-build-no-cache docker-smoke-test docker-run docker-push docker-pull docker-login docker-dev docker-prod docker-clean docker-stats docker-logs docker-exec docker-restart docker-ps docker-top docker-test docker-save docker-load latency-test mlflow dashboard download download-classifier clean help
 
 install:       ## Install all dependencies
 	pip install --upgrade pip && pip install -r requirements.txt && pip install -e .
@@ -11,20 +11,42 @@ install:       ## Install all dependencies
 download-classifier: ## Download BioBERT classifier weights from HuggingFace
 	python scripts/download_classifier.py
 
+download:       ## Download data artifacts (FAISS index, CSVs) from HuggingFace
+	python download.py
+
+test-workflow:  ## Run GitHub Actions workflow YAML tests
+	pytest tests/test_workflow_yml.py -v --tb=short
+
 test:          ## Run all pytest tests
 	pytest tests/ -v --tb=short
 
 test-api:      ## Run API tests only (fast, no models needed)
 	pytest tests/test_api.py -v
 
+test-ci:       ## Run unit tests matching CI scope (excludes integration-heavy tests)
+	pytest tests/ --ignore=tests/test_rag_pipeline.py --tb=short -q
+
+test-e2e:      ## Run end-to-end integration tests (requires real models + FAISS index)
+	pytest tests/test_integration_full_pipeline.py -v --tb=long -m integration
+
+test-extra-coverage: ## Run extra coverage script for module-level code (coverage append mode)
+	coverage run --append --source=src,api tests/run_extra_coverage.py
+
+test-coverage: ## Run unit tests with coverage gate (85% min, matches CI)
+	pytest tests/ --ignore=tests/test_rag_pipeline.py --cov=src --cov=api --cov-report=term-missing --cov-fail-under=100
+	$(MAKE) test-extra-coverage
+
 run:           ## Start FastAPI with hot-reload
 	uvicorn api.main:app --reload --host 0.0.0.0 --port $(API_PORT)
 
 lint:          ## Run flake8 style check (matches CI scope)
-	flake8 src/ api/ config/ scripts/ mlops/ tests/ dashboard/ --max-line-length 120 --exclude __pycache__
+	flake8 src/ api/ config/ scripts/ mlops/ tests/ dashboard/ --max-line-length 120 --exclude __pycache__,*.pyc
 
 docker-build:  ## Build Docker image
 	docker build -f docker/Dockerfile -t $(APP_NAME):latest .
+
+docker-smoke-test:  ## Build Docker image as smoke test (matches CI docker-build job)
+	docker build -f docker/Dockerfile -t $(APP_NAME):ci-smoke .
 
 docker-run:    ## Run Docker container locally
 	docker run -p $(API_PORT):$(API_PORT) --env-file .env --rm $(APP_NAME):latest
@@ -96,6 +118,12 @@ mlflow:        ## Start MLflow UI
 
 dashboard:     ## Start Streamlit KPI dashboard
 	streamlit run dashboard/app.py
+
+validate:      ## Run CI-equivalent checks locally (lint + test-workflow + test-ci + test-coverage)
+	$(MAKE) lint
+	$(MAKE) test-workflow
+	$(MAKE) test-ci
+	$(MAKE) test-coverage
 
 clean:         ## Remove Python cache files
 	find . -type f -name "*.pyc" -delete

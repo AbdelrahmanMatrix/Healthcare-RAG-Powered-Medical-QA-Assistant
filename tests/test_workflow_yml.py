@@ -321,11 +321,14 @@ class TestEnvironmentVariables:
             f"ACR_NAME should reference AZURE_ACR_NAME secret, got: {acr}"
         )
 
-    def test_workflow_level_has_node24_env_var(self, workflow):
-        """FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 is set for Node.js 24 migration (Bug 4 fix)."""
+    def test_workflow_level_no_node24_env_var(self, workflow):
+        """FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 is removed because all actions
+        are now pinned to Node.js 24-native versions (actions/checkout@v6,
+        actions/setup-python@v6, actions/cache@v5)."""
         env = workflow.get("env", {})
-        assert env.get("FORCE_JAVASCRIPT_ACTIONS_TO_NODE24") is True, (
-            "Missing FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 env var (Bug 4 fix)"
+        assert "FORCE_JAVASCRIPT_ACTIONS_TO_NODE24" not in env, (
+            "FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 should be removed — "
+            "actions are now on Node.js 24-native versions (Bug 4 fixed definitively)"
         )
 
 
@@ -345,8 +348,8 @@ class TestHealthCheckShell:
 
     def test_dashboard_health_check_retry_count(self, jobs):
         """The dashboard health check uses 12 retries (6 min window)."""
-        # Step index shifted by +1 due to new "Ensure App Service Plan exists" step
-        run = jobs["deploy-dashboard"]["steps"][6]["run"]
+        # Step index: 0=login, 1=plan, 2=create, 3=acr, 4=env, 5=websockets, 6=restart, 7=health
+        run = jobs["deploy-dashboard"]["steps"][7]["run"]
         assert "{1..12}" in run, (
             "Expected 12 retries in dashboard health check for-loop"
         )

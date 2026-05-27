@@ -12,6 +12,7 @@ Covers all public functions:
 """
 
 from unittest.mock import patch, MagicMock
+import numpy as np
 import pytest
 
 
@@ -126,6 +127,42 @@ class TestComputeBertscore:
             result = compute_bertscore(["test"], ["test"])
             assert result == 0.0
 
+    def test_compute_bertscore_success_path(self):
+        """BERTScore success path: mock bert_score.score and verify F1 mean."""
+        from src.evaluation.metrics import compute_bertscore
+
+        mock_score_fn = MagicMock(return_value=(None, None, np.array([0.85, 0.90])))
+        real_import = __builtins__["__import__"]
+
+        def mock_import(name, *args, **kwargs):
+            if name == "bert_score":
+                mock_mod = MagicMock()
+                mock_mod.score = mock_score_fn
+                return mock_mod
+            return real_import(name, *args, **kwargs)
+
+        with patch("builtins.__import__", side_effect=mock_import):
+            result = compute_bertscore(["pred1"], ["ref1"])
+            assert result == pytest.approx(0.875, abs=1e-4)
+
+    def test_compute_bertscore_success_single_value(self):
+        """BERTScore success path with single prediction pair."""
+        from src.evaluation.metrics import compute_bertscore
+
+        mock_score_fn = MagicMock(return_value=(None, None, np.array([0.92])))
+        real_import = __builtins__["__import__"]
+
+        def mock_import(name, *args, **kwargs):
+            if name == "bert_score":
+                mock_mod = MagicMock()
+                mock_mod.score = mock_score_fn
+                return mock_mod
+            return real_import(name, *args, **kwargs)
+
+        with patch("builtins.__import__", side_effect=mock_import):
+            result = compute_bertscore(["excellent match"], ["excellent match"])
+            assert result == pytest.approx(0.92, abs=1e-4)
+
 
 # ==============================================================================
 # compute_faithfulness
@@ -197,6 +234,97 @@ class TestComputeFaithfulness:
             # 1 prediction, model.predict fails → 0 faithful out of 1
             result = compute_faithfulness(["test pred"], [["test context"]])
             assert result == 0.0
+
+    def test_compute_faithfulness_entailment_above_threshold(self):
+        """Faithfulness counts a pair as faithful when entailment >= threshold."""
+        from src.evaluation.metrics import compute_faithfulness
+
+        with patch("src.evaluation.metrics._get_nli_model") as mock_nli:
+            mock_model = MagicMock()
+            mock_model.predict.return_value = np.array([[0.85, 0.10, 0.05]])
+            mock_nli.return_value = mock_model
+
+            result = compute_faithfulness(["test answer"], [[u"test context"]])
+            assert result == 1.0
+
+    def test_compute_faithfulness_entailment_below_threshold(self):
+        """Faithfulness does NOT count a pair when entailment < threshold."""
+        from src.evaluation.metrics import compute_faithfulness
+
+        with patch("src.evaluation.metrics._get_nli_model") as mock_nli:
+            mock_model = MagicMock()
+            mock_model.predict.return_value = np.array([[0.30, 0.40, 0.30]])
+            mock_nli.return_value = mock_model
+
+            result = compute_faithfulness(["test answer"], [[u"test context"]])
+            assert result == 0.0
+
+    def test_compute_faithfulness_multiple_pairs(self):
+        """Faithfulness averages across multiple prediction-context pairs."""
+        from src.evaluation.metrics import compute_faithfulness
+
+        with patch("src.evaluation.metrics._get_nli_model") as mock_nli:
+            mock_model = MagicMock()
+            mock_model.predict.side_effect = [
+                np.array([[0.90, 0.05, 0.05], [0.20, 0.60, 0.20]]),
+                np.array([[0.20, 0.60, 0.20]]),
+            ]
+            mock_nli.return_value = mock_model
+
+            result = compute_faithfulness(
+                ["answer 1", "answer 2"],
+                [[u"ctx 1a", u"ctx 1b"], [u"ctx 2"]],
+            )
+            assert result == 0.5
+
+
+# ==============================================================================
+# compute_improvement
+# ==============================================================================
+
+# ==============================================================================
+# _get_nli_model
+# ==============================================================================
+
+class TestGetNliModel:
+    """Tests for _get_nli_model() singleton."""
+
+    def test_get_nli_model_loads_cross_encoder(self):
+        """_get_nli_model instantiates CrossEncoder when cache is empty."""
+        import src.evaluation.metrics as metrics_mod
+        metrics_mod._FaithfulnessModel = None
+
+        mock_ce = MagicMock()
+        mock_cross_encoder_cls = MagicMock(return_value=mock_ce)
+        real_import = __builtins__["__import__"]
+
+        def mock_import(name, *args, **kwargs):
+            if name == "sentence_transformers":
+                mock_mod = MagicMock()
+                mock_mod.CrossEncoder = mock_cross_encoder_cls
+                return mock_mod
+            return real_import(name, *args, **kwargs)
+
+        with patch("builtins.__import__", side_effect=mock_import):
+            model = metrics_mod._get_nli_model()
+            assert model is mock_ce
+            mock_cross_encoder_cls.assert_called_once_with(
+                "cross-encoder/nli-deberta-v3-base"
+            )
+
+    def test_get_nli_model_returns_cached_instance(self):
+        """_get_nli_model returns cached model on subsequent calls."""
+        import src.evaluation.metrics as metrics_mod
+
+        cached = MagicMock()
+        metrics_mod._FaithfulnessModel = cached
+
+        with patch("builtins.__import__") as mock_import:
+            model = metrics_mod._get_nli_model()
+            assert model is cached
+            mock_import.assert_not_called()
+
+        metrics_mod._FaithfulnessModel = None
 
 
 # ==============================================================================

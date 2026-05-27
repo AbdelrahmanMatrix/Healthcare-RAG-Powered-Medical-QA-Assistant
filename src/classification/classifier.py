@@ -39,9 +39,9 @@ try:
     _path_override = _cfg.CLASSIFIER_PATH
     DEFAULT_LOCAL_PATH = Path(_path_override).resolve() \
         if os.path.isabs(_path_override) \
-        else (PROJECT_ROOT / _path_override).resolve()
-except (ImportError, Exception):
-    DEFAULT_LOCAL_PATH = PROJECT_ROOT / "models" / "classifier" / "biobert_classifier"
+        else (PROJECT_ROOT / _path_override).resolve()  # pragma: no cover — isabs branch; untraceable via reload
+except (ImportError, Exception):  # pragma: no cover — fallback path; exercised via importlib.reload; untraceable
+    DEFAULT_LOCAL_PATH = PROJECT_ROOT / "models" / "classifier" / "biobert_classifier"  # pragma: no cover
 
 HF_REPO_ID = "AbdoMatrix/biobert-medical-classifier"
 

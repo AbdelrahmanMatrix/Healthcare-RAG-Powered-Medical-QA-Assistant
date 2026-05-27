@@ -16,6 +16,7 @@ exec streamlit run dashboard/app.py \
     --server.address 0.0.0.0 \
     --server.headless true \
     --server.fileWatcherType none \
+    --server.enableWebsocketCompression false \
     --runner.fastReruns false \
     --global.developmentMode false \
     --server.maxUploadSize 1 \
