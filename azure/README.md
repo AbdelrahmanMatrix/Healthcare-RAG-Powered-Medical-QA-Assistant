@@ -67,23 +67,51 @@ open https://healthcare-rag-app.azurewebsites.net/docs
 | `HF_TOKEN` | ✅ | Download BioBERT + FAISS data from HuggingFace |
 | `API_KEY` | Optional | Protects `/query` endpoint (leave empty to disable) |
 | `DEPLOY_ENV` | Auto | Set to `azure` by deploy script |
-| `WEBSITES_PORT` | Auto | Set to `8000` by deploy script for App Service routing |
+| `DEPLOY_DATE` | Auto | Set to deployment date by deploy script |
+| `AZURE_APP_URL` | Auto | API endpoint URL set by deploy script |
+| `DASHBOARD_URL` | Auto | Dashboard endpoint URL set by deploy script |
+| `WEBSITES_PORT` | Auto | `8000` (API) or `8501` (Dashboard) for App Service routing |
+| `WEBSITES_CONTAINER_START_TIME_LIMIT` | Auto | Set to `1800` (30 min) for cold start tolerance |
 
 ---
 
 ## Updating After Code Changes
 
+### API App Service
+
 ```bash
-# Rebuild and push updated image
 ACR_NAME="healthcareragacr"
-ACR_SERVER=$(az acr show --name $ACR_NAME --query loginServer -o tsv)
+RESOURCE_GROUP="healthcare-rag-rg"
+SERVER="${ACR_NAME}.azurecr.io"
 
-docker build -f docker/Dockerfile -t $ACR_SERVER/healthcare-rag:latest .
-docker push $ACR_SERVER/healthcare-rag:latest
+# Build and push
+az acr login --name "$ACR_NAME"
+docker build -f docker/Dockerfile -t "${SERVER}/healthcare-rag:latest" .
+docker push "${SERVER}/healthcare-rag:latest"
 
-# Restart the web app to pull latest image
-az webapp restart --name healthcare-rag-app --resource-group healthcare-rag-rg
+# Restart to pull latest image
+az webapp restart --name healthcare-rag-app --resource-group "$RESOURCE_GROUP"
 ```
+
+### Dashboard App Service
+
+```bash
+ACR_NAME="healthcareragacr"
+RESOURCE_GROUP="healthcare-rag-rg"
+SERVER="${ACR_NAME}.azurecr.io"
+
+# Build and push
+az acr login --name "$ACR_NAME"
+docker build -f docker/Dockerfile.dashboard -t "${SERVER}/healthcare-rag-dashboard:latest" .
+docker push "${SERVER}/healthcare-rag-dashboard:latest"
+
+# Restart to pull latest image
+az webapp restart --name healthcare-rag-dashboard --resource-group "$RESOURCE_GROUP"
+```
+
+> **Note:** The server URL is computed inline as `${ACR_NAME}.azurecr.io` rather than
+> fetched via `az acr show`. This avoids masked-secret issues in CI/CD environments
+> where the ACR login server value may trigger secret masking.
 
 ---
 
