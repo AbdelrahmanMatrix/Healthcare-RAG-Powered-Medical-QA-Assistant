@@ -329,20 +329,20 @@ class TestHealthCheckShell:
     """Validate the shell commands used in health checks."""
 
     def test_api_health_check_retry_count(self, jobs):
-        """The API health check uses 20 retries (10 min window)."""
-        run = jobs["deploy-api"]["steps"][3]["run"]
-        assert "{1..20}" in run, "Expected 20 retries in API health check for-loop"
+        """The API health check uses 30 retries (15 min window)."""
+        run = jobs["deploy-api"]["steps"][5]["run"]
+        assert "{1..30}" in run, "Expected 30 retries in API health check for-loop"
 
     def test_dashboard_health_check_retry_count(self, jobs):
         """The dashboard health check uses 12 retries (6 min window)."""
-        run = jobs["deploy-dashboard"]["steps"][4]["run"]
+        run = jobs["deploy-dashboard"]["steps"][5]["run"]
         assert "{1..12}" in run, (
             "Expected 12 retries in dashboard health check for-loop"
         )
 
     def test_api_health_check_sleep_and_exit(self, jobs):
         """API health check sleeps 30s between retries and exits 1 on failure."""
-        run = jobs["deploy-api"]["steps"][3]["run"]
+        run = jobs["deploy-api"]["steps"][5]["run"]
         assert "sleep 30" in run
         assert "exit 1" in run
 
@@ -478,7 +478,7 @@ class TestAzureAppSettings:
 
     def test_api_has_required_app_settings(self, jobs):
         """API App Service config has the required environment variables."""
-        run = jobs["deploy-api"]["steps"][2]["run"]
+        run = jobs["deploy-api"]["steps"][3]["run"]
         assert "GROQ_API_KEY" in run
         assert "HF_TOKEN" in run
         assert "AZURE_APP_URL" in run
@@ -511,7 +511,7 @@ class TestBuildOutputs:
 
     def test_deploy_api_uses_acr_output(self, jobs):
         """deploy-api references the acr-login-server output from build-and-push-api."""
-        run = jobs["deploy-api"]["steps"][1]["run"]
+        run = jobs["deploy-api"]["steps"][2]["run"]
         assert "acr-login-server" in run, (
             "deploy-api should reference needs.build-and-push-api.outputs.acr-login-server"
         )

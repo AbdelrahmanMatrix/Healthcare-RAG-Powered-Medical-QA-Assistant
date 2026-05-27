@@ -92,6 +92,7 @@ jobs:
 
           docker build \
             -f docker/Dockerfile \
+            --build-arg HF_TOKEN=${{ secrets.HF_TOKEN }} \
             -t $IMAGE \
             -t $LATEST \
             .
@@ -148,6 +149,19 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Create API App Service (if not exists)
+        run: |
+          az webapp show \
+            --name $APP_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --output table 2>/dev/null || \
+          az webapp create \
+            --resource-group $RESOURCE_GROUP \
+            --plan healthcare-rag-plan \
+            --name $APP_NAME \
+            --deployment-container-image-name nginx:alpine \
+            --output table
+
       - name: Update App Service image
         run: |
           SERVER=${{ needs.build-and-push-api.outputs.acr-login-server }}
@@ -167,25 +181,38 @@ jobs:
               DEPLOY_DATE="$(date +%Y-%m-%d)" \
               DEPLOY_ENV="azure" \
               AZURE_APP_URL="https://${APP_NAME}.azurewebsites.net" \
-              WEBSITES_PORT="8000"
+              WEBSITES_PORT="8000" \
+              WEBSITES_CONTAINER_START_TIME_LIMIT="1800"
+
+      - name: Restart and wait for image pull
+        # az webapp config container set updates the image tag but does NOT
+        # restart the container. An explicit restart is required. The 3-minute
+        # wait gives Azure time to pull the 4-6 GB image before probing.
+        run: |
+          az webapp restart \
+            --name $APP_NAME \
+            --resource-group $RESOURCE_GROUP
+          echo "Waiting 3 minutes for image pull + cold start..."
+          sleep 180
 
       - name: Wait for deployment and smoke test
         # Startup timeline: uvicorn binds port immediately, then lifespan
         # downloads data (~1-2 min) and pre-loads models (~30s). The /health
-        # endpoint returns 503 until lifespan completes, then returns 200.
-        # 20 retries × 30s = 10 min gives ample time even on cold starts.
+        # endpoint returns 200 as soon as uvicorn is ready (lifespan yields
+        # immediately). 30 retries × 30s = 15 min gives ample time even on
+        # cold starts pulling a 4-6 GB image.
         run: |
           URL="https://${APP_NAME}.azurewebsites.net"
-          for attempt in {1..20}; do
+          for attempt in {1..30}; do
             STATUS=$(curl -so /dev/null -w "%{http_code}" "${URL}/health" || echo "000")
-            echo "Health check attempt ${attempt}/20: HTTP ${STATUS}"
+            echo "Health check attempt ${attempt}/30: HTTP ${STATUS}"
             if [ "$STATUS" = "200" ]; then
               echo "✅ API deployment healthy: ${URL}"
               exit 0
             fi
             sleep 30
           done
-          echo "❌ API deployment did not become healthy within 10 minutes."
+          echo "❌ API deployment did not become healthy within 15 minutes."
           exit 1
 
   # ── 3b. Deploy Dashboard to Azure App Service ────────────────────────────────
@@ -233,7 +260,19 @@ jobs:
               DEPLOY_ENV="azure" \
               AZURE_APP_URL="https://${APP_NAME}.azurewebsites.net" \
               DASHBOARD_URL="https://${DASHBOARD_NAME}.azurewebsites.net" \
-              WEBSITES_PORT="8501"
+              WEBSITES_PORT="8501" \
+              WEBSITES_CONTAINER_START_TIME_LIMIT="1800"
+
+      - name: Restart and wait for image pull
+        # az webapp config container set updates the image tag but does NOT
+        # restart the container. An explicit restart is required. The 2-minute
+        # wait gives Azure time to pull the image before probing.
+        run: |
+          az webapp restart \
+            --name $DASHBOARD_NAME \
+            --resource-group $RESOURCE_GROUP
+          echo "Waiting 2 minutes for image pull + cold start..."
+          sleep 120
 
       - name: Wait for dashboard deployment
         run: |
@@ -294,9 +333,15 @@ jobs:
             echo "Query: ❌ Connection failed"
             echo "query-status=connection-failed" >> $GITHUB_OUTPUT
           else
-            HAS_ANSWER=$(echo "$RESPONSE" | python -c "import sys,json; d=json.load(sys.stdin); print('yes' if d.get('answer') else 'no')" 2>/dev/null || echo "parse-failed")
-            HAS_CATEGORY=$(echo "$RESPONSE" | python -c "import sys,json; d=json.load(sys.stdin); print('yes' if d.get('category') else 'no')" 2>/dev/null || echo "parse-failed")
-            HAS_SOURCES=$(echo "$RESPONSE" | python -c "import sys,json; d=json.load(sys.stdin); print('yes' if d.get('source_citations') else 'no')" 2>/dev/null || echo "parse-failed")
+            HAS_ANSWER=$(echo "$RESPONSE" | python -c \
+              "import sys,json; d=json.load(sys.stdin); print('yes' if d.get('answer') else 'no')" \
+              2>/dev/null || echo "parse-failed")
+            HAS_CATEGORY=$(echo "$RESPONSE" | python -c \
+              "import sys,json; d=json.load(sys.stdin); print('yes' if d.get('category') else 'no')" \
+              2>/dev/null || echo "parse-failed")
+            HAS_SOURCES=$(echo "$RESPONSE" | python -c \
+              "import sys,json; d=json.load(sys.stdin); print('yes' if d.get('source_citations') else 'no')" \
+              2>/dev/null || echo "parse-failed")
             echo "Query: answer=${HAS_ANSWER}, category=${HAS_CATEGORY}, sources=${HAS_SOURCES}"
             echo "query-status=ok" >> $GITHUB_OUTPUT
             echo "query-answer=${HAS_ANSWER}" >> $GITHUB_OUTPUT
@@ -318,7 +363,10 @@ jobs:
           echo "  Dashboard:      HTTP ${DASH} $([ "$DASH" = "200" ] || [ "$DASH" = "302" ] && echo '✅' || echo '❌')"
 
           if [ "$QRY" = "ok" ]; then
-            echo "  API query:      ✅ (answer=${{ steps.api-query.outputs.query-answer }}, category=${{ steps.api-query.outputs.query-category }}, sources=${{ steps.api-query.outputs.query-sources }})"
+            ANS=${{ steps.api-query.outputs.query-answer }}
+            CAT=${{ steps.api-query.outputs.query-category }}
+            SRC=${{ steps.api-query.outputs.query-sources }}
+            echo "  API query:      ✅ (answer=${ANS}, category=${CAT}, sources=${SRC})"
           elif [ "$QRY" = "connection-failed" ]; then
             echo "  API query:      ❌ Connection failed"
           else

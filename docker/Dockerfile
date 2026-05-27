@@ -57,6 +57,12 @@ COPY models/   ./models/
 # Install project in editable mode
 RUN pip install --no-cache-dir -e .
 
+# HF_TOKEN must be passed as --build-arg at build time so that
+# download_models.py can authenticate with HuggingFace Hub.
+# See azure-deploy.yml, build-and-push-api job.
+ARG HF_TOKEN
+ENV HF_TOKEN=$HF_TOKEN
+
 # ── Pre-download all HuggingFace models & data ────────────────────────────
 # Models are cached in /app/hf_cache and will be copied to the runtime stage.
 # This saves 2-3 GB of downloads on every cold start.
