@@ -982,6 +982,9 @@ let currentLang = localStorage.getItem('rag_lang') || 'en';
 let chartsInitialized = false;
 let chartInstances = {};
 
+// Track API connectivity explicitly (not derived from label text)
+let apiIsLive = false;
+
 function t(key) {
   if (currentLang === 'ar' && TRANSLATIONS.ar[key]) return TRANSLATIONS.ar[key];
   return null;
@@ -1057,14 +1060,10 @@ function applyLanguage() {
     }
   });
 
-  // Update API label
+  // Update API label using tracked status (not reliant on current text)
   const apiLabel = document.getElementById('apiLabel');
   if (apiLabel && !apiLabel.textContent.includes('Connecting') && !apiLabel.textContent.includes('جار')) {
-    if (apiLabel.textContent === 'API Live' || apiLabel.textContent === 'API نشط') {
-      apiLabel.textContent = t('status.api_live') || 'API Live';
-    } else if (apiLabel.textContent === 'API Offline' || apiLabel.textContent === 'API غير متصل') {
-      apiLabel.textContent = t('status.api_offline') || 'API Offline';
-    }
+    apiLabel.textContent = apiIsLive ? (t('status.api_live') || 'API Live') : (t('status.api_offline') || 'API Offline');
   }
 
   // Destroy charts so they re-init on next KPI view
@@ -1079,7 +1078,6 @@ function toggleLang() {
   currentLang = currentLang === 'en' ? 'ar' : 'en';
   localStorage.setItem('rag_lang', currentLang);
   applyLanguage();
-  checkHealth();
   // Re-init charts if on KPI view
   if (document.getElementById('view-kpi').classList.contains('active')) initCharts();
 }
@@ -1169,6 +1167,7 @@ async function checkHealth() {
   try {
     const h = await apiGet('/health');
     dot.className = 'dot on';
+    apiIsLive = true;
     label.textContent = t('status.api_live') || 'API Live';
 
     document.getElementById('statModel').textContent = h.model_loaded ? (t('status.loaded') || 'Loaded') : (t('status.loading') || 'Loading');
@@ -1181,6 +1180,7 @@ async function checkHealth() {
     document.getElementById('hubEnv').textContent = h.status;
   } catch(e) {
     dot.className = 'dot off';
+    apiIsLive = false;
     label.textContent = t('status.api_offline') || 'API Offline';
     document.getElementById('statModel').textContent = t('status.offline') || 'Offline';
     document.getElementById('statClassifier').textContent = t('status.offline') || 'Offline';
