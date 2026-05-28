@@ -96,7 +96,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Azure login
-        uses: azure/login@v3
+        uses: azure/login@v2  # pinned to v2 — v3 breaks auth with existing service principal
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
@@ -135,7 +135,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Azure login
-        uses: azure/login@v3
+        uses: azure/login@v2  # pinned to v2 — v3 breaks auth with existing service principal
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
@@ -168,7 +168,7 @@ jobs:
       url: https://${{ env.APP_NAME }}.azurewebsites.net
     steps:
       - name: Azure login
-        uses: azure/login@v3
+        uses: azure/login@v2  # pinned to v2 — v3 breaks auth with existing service principal
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
@@ -294,7 +294,7 @@ jobs:
       url: https://${{ env.DASHBOARD_NAME }}.azurewebsites.net
     steps:
       - name: Azure login
-        uses: azure/login@v3
+        uses: azure/login@v2  # pinned to v2 — v3 breaks auth with existing service principal
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
