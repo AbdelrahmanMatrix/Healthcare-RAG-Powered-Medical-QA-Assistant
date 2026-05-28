@@ -355,11 +355,17 @@ exec uvicorn api.main:app  →  port 8000 is listening
     │
     ▼  (lifespan in api/main.py)
   1. Download missing data artifacts from HuggingFace (~1-2 min)
-  2. Pre-load RAG pipeline + BioBERT classifier (~30s)
+  2. Pre-load RAG pipeline + BioBERT classifier from local cache (~30s)
     │
     ▼
   /health returns 200 ✅
+  (model_loaded=true if warm-up completed, false otherwise)
 ```
+
+**First-query latency:** If the first query arrives before Step 2 finishes,
+the pipeline loads lazily on demand — the query still succeeds but is
+slower (~7–15s instead of ~2–3s). Call `GET /warmup` proactively to
+load the pipeline before routing user traffic.
 
 This design ensures the container port is open from the first second, so
 Azure App Service health probes succeed once the lifespan completes —

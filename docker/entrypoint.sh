@@ -6,8 +6,9 @@
 #   - Local Docker uses WEBSITE_PORT
 #   - Falls back to 8000 if neither is set
 #
-# NOTE: Data download (FAISS index, CSVs) and model pre-loading happen
-# in a BACKGROUND TASK spawned by the FastAPI lifespan, NOT here.
+# NOTE: Data download (FAISS index, CSVs) happens in a BACKGROUND TASK
+# spawned by the FastAPI lifespan, NOT here. ML models are pre-downloaded
+# into the Docker image during the build phase (pre_download_models.py).
 # The lifespan yields immediately so uvicorn serves HTTP requests (including
 # /health probes from Azure) while initialization runs asynchronously.
 # See api/main.py lifespan() for the background task implementation.

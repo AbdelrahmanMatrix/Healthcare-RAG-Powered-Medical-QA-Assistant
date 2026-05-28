@@ -4,21 +4,24 @@
 #
 # ── Design Rationale ──────────────────────────────────────────────────────────
 # MULTI-STAGE BUILD:
-#   Stage 1 (builder):  Install all Python deps + download HuggingFace models.
-#                       Includes build tools (gcc, etc.) that are NOT needed
-#                       at runtime.
+#   Stage 1 (builder):  Install all Python deps + pre-configure the HF cache
+#                       directory. Includes build tools (gcc, etc.) that are
+#                       NOT needed at runtime.
 #   Stage 2 (runtime):  Python-slim base. Copies ONLY the installed packages,
-#                       HF model cache, and source code. Much smaller image.
+#                       HF cache directory structure, and source code.
+#                       Much smaller image.
 #
-# PRE-DOWNLOADED MODELS:
-#   All HuggingFace models (PubMedBERT, BioBERT, CrossEncoder, flan-t5-base)
-#   and data artifacts (FAISS index, CSVs) are downloaded during the BUILD
-#   phase. They're cached in ~/.cache/huggingface/ and baked into the image.
-#   This eliminates the 2-3 GB download on every Azure App Service cold start.
+# HF CACHE STRATEGY:
+#   The HF_HOME directory (/app/hf_cache) is created and POPULATED during the
+#   BUILD phase by running pre_download_models.py (requires HF_TOKEN build-arg).
+#   All models (classifier, embeddings, reranker) are baked into the image,
+#   so cold starts skip the ~2 GB download entirely. Data artifacts (FAISS
+#   index, CSVs) are still downloaded at runtime on first cold start via
+#   the FastAPI lifespan (download.py).
 # ──────────────────────────────────────────────────────────────────────────────
 
 # ══════════════════════════════════════════════════════════════════════════════
-# STAGE 1: Builder — install deps + pre-download models
+# STAGE 1: Builder — install deps + prepare HF cache directory
 # ══════════════════════════════════════════════════════════════════════════════
 FROM python:3.10-slim AS builder
 
@@ -32,6 +35,10 @@ ENV TORCH_HOME=/app/hf_cache/torch
 ENV TRANSFORMERS_CACHE=/app/hf_cache/transformers
 
 WORKDIR /app
+
+# Pre-create HF cache directory so COPY --from=builder in stage 2 succeeds
+# even if no models were downloaded during the build (they download at runtime).
+RUN mkdir -p /app/hf_cache
 
 # System build deps
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -51,6 +58,7 @@ COPY mlops/    ./mlops/
 COPY dashboard/ ./dashboard/
 COPY setup.py  .
 COPY download.py .
+COPY pre_download_models.py .
 COPY models/   ./models/
 
 # Install project in editable mode
@@ -62,10 +70,11 @@ RUN pip install --no-cache-dir -e .
 ARG HF_TOKEN
 ENV HF_TOKEN=$HF_TOKEN
 
-# ── Pre-download all HuggingFace models & data ────────────────────────────
-# Models are cached in /app/hf_cache and will be copied to the runtime stage.
-# This saves 2-3 GB of downloads on every cold start.
-# Models download at runtime via FastAPI lifespan (download.py handles data artifacts).
+# ── Pre-download HF models (populated during build) ────────────────────
+# Downloads classifier, embedding, and reranker models into /app/hf_cache
+# so they are baked into the runtime stage. Requires HF_TOKEN build-arg.
+# Data artifacts (FAISS index, CSVs) still download at runtime.
+RUN python pre_download_models.py
 
 # Clean up pip cache to save space
 RUN pip cache purge || true
@@ -103,9 +112,10 @@ RUN mkdir -p /home/LogFiles && ln -sf /dev/stdout /home/LogFiles/entrypoint.log
 COPY --from=builder /usr/local/lib/python3.10/site-packages/ /usr/local/lib/python3.10/site-packages/
 COPY --from=builder /usr/local/bin/ /usr/local/bin/
 
-# ── Copy pre-downloaded HuggingFace model cache ──────────────────────────────
-# This is the KEY optimization: models are already downloaded, so cold starts
-# don't need to fetch 2-3 GB from HuggingFace.
+# ── Copy HF cache directory (models pre-downloaded) from builder ────────────
+# Copies the populated /app/hf_cache directory (classifier, embeddings,
+# reranker) to the runtime stage. Cold starts skip the ~2 GB download
+# since models are already baked into the image.
 COPY --from=builder /app/hf_cache/ /app/hf_cache/
 
 # ── Copy source code ─────────────────────────────────────────────────────────

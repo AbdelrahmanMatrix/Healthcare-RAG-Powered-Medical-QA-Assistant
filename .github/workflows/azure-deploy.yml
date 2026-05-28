@@ -36,8 +36,8 @@
 #   FIX: Add an explicit "ensure App Service Plan exists" step in both deploy jobs.
 #
 # FIXED (Bug 4): Updated all actions to Node.js 24-compatible versions:
-#   actions/checkout@v6, actions/setup-python@v6, actions/cache@v5.
-#   azure/login@v2 remains at v2 (no v3 exists; v2 supports Node.js 24).
+#   actions/checkout@v6, actions/setup-python@v6, actions/cache@v5,
+#   azure/login@v3 (upgraded from v2).
 # ──────────────────────────────────────────────────────────────────────────────
 
 name: Azure Deploy
@@ -99,7 +99,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Azure login
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
@@ -131,7 +131,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Azure login
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
@@ -162,7 +162,7 @@ jobs:
       url: https://${{ env.APP_NAME }}.azurewebsites.net
     steps:
       - name: Azure login
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
@@ -276,7 +276,7 @@ jobs:
       url: https://${{ env.DASHBOARD_NAME }}.azurewebsites.net
     steps:
       - name: Azure login
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 

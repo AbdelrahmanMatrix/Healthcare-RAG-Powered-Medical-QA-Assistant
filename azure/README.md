@@ -34,6 +34,8 @@ The script:
 
 **First startup takes 2–5 minutes** — the container downloads the FAISS index, CSVs, and pre-loads models inside the FastAPI lifespan. The port is listening immediately, so Azure health probes do not time out. See `README.md` → [Startup Sequence](../README.md#startup-sequence) for details.
 
+> **First-query latency:** ML models are pre-downloaded into the Docker image during the build, so cold starts skip the ~2 GB network download. However, the background warm-up must still load them from disk into memory (~30s). If the first query arrives before warm-up finishes, it triggers lazy loading — the query still succeeds but with higher latency (~7–15s instead of ~2–3s). Call `GET /warmup` proactively before routing user traffic to avoid this penalty.
+
 ---
 
 ## Test Your Deployment

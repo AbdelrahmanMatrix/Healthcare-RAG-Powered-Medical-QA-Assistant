@@ -154,6 +154,7 @@ az webapp restart \
 | CPU minutes/day | 60 | High-volume testing will exhaust daily quota |
 | Idle timeout | 20 min | Cold-start latency 60–120s after idle period |
 | Cold-start | 60–120s | Excluded from KPI latency measurement (warm-instance only) |
+| First-query latency | ~7–15s | If the first query arrives before the background warm-up completes (models loaded from disk cache), lazy loading adds latency. Warm-up typically finishes within 30s of startup. Call `GET /warmup` proactively to avoid this. |
 | Custom domain / HTTPS | HTTPS included | azurewebsites.net URL includes TLS |
 
 **Note:** Keep the Azure URL live until July 2026 — it is required for M4 end-to-end testing, M5 demo video, and the final DEPI submission panel.

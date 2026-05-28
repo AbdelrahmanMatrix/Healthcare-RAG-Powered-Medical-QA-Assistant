@@ -127,6 +127,14 @@ async def health_check() -> HealthResponse:
     """
     Health probe — returns diagnostic info about every model component.
     Never triggers model loading (fast, safe to call frequently).
+
+    **Cold-start / lazy loading fallback:**
+    - `model_loaded=false` until the background warm-up completes or the
+      first query triggers lazy loading. This is normal at startup.
+    - `classifier_ready=false` until the BioBERT classifier is loaded.
+    - The first `/query` call will trigger lazy loading if warm-up hasn't
+      finished — it succeeds but with higher latency (~7-15s vs ~2-3s).
+    - Call `GET /warmup` to proactively trigger loading.
     """
     import os
     from src.pipeline import _rag
@@ -144,3 +152,39 @@ async def health_check() -> HealthResponse:
         groq_configured=groq_configured,
         index_vectors=index_vectors,
     )
+
+
+@router.get("/warmup")
+async def warmup():
+    """
+    Warm up the RAG pipeline by loading it into memory.
+
+    Models are pre-cached in the Docker image (pre_download_models.py), so
+    this loads from local disk — no network downloads. Blocks until the
+    pipeline is ready, then returns a 200 response.
+
+    Useful for:
+      - Azure deployment scripts that call /warmup before routing traffic
+      - Proactive startup warm-up to ensure the first user query is fast
+      - Monitoring probes that also want to trigger model loading
+
+    **Lazy-loading fallback:**
+    If the background warm-up hasn't completed yet, calling this endpoint
+    triggers the lazy load explicitly — subsequent queries will have normal
+    warm latency (~2-3s).
+
+    This endpoint is NOT required for normal operation — the pipeline loads
+    lazily on the first /query call and the lifespan pre-loads it in the
+    background automatically.
+    """
+    from src.pipeline import _get_rag
+    await run_in_threadpool(_get_rag)
+
+    from src.pipeline import _rag
+    from src.classification.classifier import _classifier_instance
+
+    return {
+        "status": "ok",
+        "model_loaded": _rag is not None,
+        "classifier_ready": _classifier_instance is not None,
+    }

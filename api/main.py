@@ -32,17 +32,16 @@ async def lifespan(app: FastAPI):
     """
     On startup:
       Spawn a background task to:
-        1. Download FAISS index + CSVs from HuggingFace if missing
-        2. Pre-load the RAG pipeline + classifier
+        1. Download missing data artifacts (FAISS index + CSVs) from HuggingFace
+        2. Warm up the RAG pipeline by loading models from local cache
 
-      The lifespan yields IMMEDIATELY so uvicorn can serve HTTP requests
-      (including /health probes from Azure) while initialization runs in
-      the background.  The /health endpoint returns HTTP 200 right away
-      with model_loaded=false, then switches to model_loaded=true once
-      the background task completes.
+      Both steps run asynchronously. The lifespan yields IMMEDIATELY so
+      uvicorn can serve HTTP requests (including /health probes from Azure)
+      while initialization completes in the background.
 
-      NOTE: The entrypoint.sh starts uvicorn immediately (no blocking
-      download).  See docker/entrypoint.sh for details.
+      NOTE: ML models are pre-downloaded into the Docker image during the
+      build phase (pre_download_models.py), so the warm-up step loads from
+      local disk — no network downloads at startup.
     """
     logger.info("Healthcare RAG API starting up...")
 
@@ -55,14 +54,19 @@ async def lifespan(app: FastAPI):
 
 async def _background_init():
     """
-    Download data artifacts and pre-load models in the background.
+    Initialize the application in the background.
 
-    This runs as an asyncio task after the lifespan has yielded, which
-    lets uvicorn serve /health immediately while initialization completes.
-    The /health endpoint returns status="ok" regardless, so Azure health
-    probes see HTTP 200 right away.
+    Steps (both run after the lifespan yields, so uvicorn starts immediately):
+      1. Download missing data artifacts (FAISS index, CSVs) from HuggingFace
+      2. Warm up the RAG pipeline by loading models from the local HF cache
+
+    Step 2 is fast because models are pre-downloaded into the Docker image
+    (pre_download_models.py at build time) — no network calls, just disk I/O.
+
+    The /health endpoint returns HTTP 200 right away regardless of whether
+    initialization has completed.
     """
-    # ── Step 1: ensure data artifacts are present ───────────────────────────────────────────
+    # ── Step 1: ensure data artifacts are present ───────────────────────────────
     try:
         from starlette.concurrency import run_in_threadpool
         from src.data.hub import download_all_data, check_data_exists
@@ -89,16 +93,15 @@ async def _background_init():
             "pipeline may not work until artifacts are available."
         )
 
-    # ── Step 2: pre-load RAG pipeline + classifier ────────────────────────────────────────
-
+    # ── Step 2: warm up the RAG pipeline from local cache ───────────────────
     try:
         from src.pipeline import _get_rag
         await run_in_threadpool(_get_rag)
-        logger.info("✅ Models pre-loaded. Swagger UI at /docs")
+        logger.info("✅ RAG pipeline loaded from cache — ready for queries")
     except Exception as e:
-        logger.error(
-            f"⚠️  Model pre-load failed: {e!r} — "
-            "first request will trigger load. Check FAISS index and model paths."
+        logger.warning(
+            f"⚠️  Pipeline warm-up failed: {e!r} — "
+            "first query will trigger lazy load. Check FAISS index and model paths."
         )
 
 
@@ -108,7 +111,11 @@ app = FastAPI(
     description=(
         "RAG-powered medical Q&A grounded in PubMedQA peer-reviewed research. "
         "Every /query response includes a mandatory medical disclaimer.\n\n"
-        f"📊 **[Dashboard]({settings.DASHBOARD_URL})** — system KPIs, model performance, and query interface."
+        f"📊 **[Dashboard]({settings.DASHBOARD_URL})** — system KPIs, model performance, and query interface.\n\n"
+        "⚡ **First-query latency:** ML models are pre-loaded in the background at startup. "
+        "If the first query arrives before this completes, the pipeline loads lazily — "
+        "the query still succeeds but with higher latency (~7–15s instead of ~2–3s). "
+        "Call `GET /warmup` proactively to load the pipeline before routing user traffic."
     ),
     lifespan=lifespan,
 )

@@ -3,7 +3,7 @@ M3 API tests — run with: pytest tests/test_api.py -v
 All 9 tests must pass before Docker build.
 """
 import asyncio
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
 from api.main import app
 from config.settings import settings
@@ -26,6 +26,31 @@ class TestHealth:
 
     def test_latency_header_present(self):
         assert "X-Response-Time-Ms" in client.get("/health").headers
+
+    def test_model_loaded_state_before_and_after_query(self):
+        """model_loaded=false before any query, true after a mocked query loads the pipeline."""
+        mock_rag = MagicMock()
+        mock_rag.index.ntotal = 211186
+
+        # Before: pipeline not loaded
+        with patch("src.pipeline._rag", None):
+            with patch("src.classification.classifier._classifier_instance", None):
+                r_before = client.get("/health")
+                data_before = r_before.json()
+                assert data_before["model_loaded"] is False, \
+                    f"Expected model_loaded=False before warmup, got {data_before['model_loaded']}"
+                assert data_before["classifier_ready"] is False
+                assert data_before["index_vectors"] == 0
+
+        # After: pipeline loaded (simulate a query that loaded _rag)
+        with patch("src.pipeline._rag", mock_rag):
+            with patch("src.classification.classifier._classifier_instance", MagicMock()):
+                r_after = client.get("/health")
+                data_after = r_after.json()
+                assert data_after["model_loaded"] is True, \
+                    f"Expected model_loaded=True after warmup, got {data_after['model_loaded']}"
+                assert data_after["classifier_ready"] is True
+                assert data_after["index_vectors"] == 211186
 
 
 class TestQuery:
@@ -93,6 +118,37 @@ class TestQuery:
 
     def test_root_returns_200(self):
         assert client.get("/").status_code == 200
+
+
+# ==============================================================================
+# ── Warmup endpoint ───────────────────────────────────────────────────────────
+# ==============================================================================
+
+
+class TestWarmup:
+    """Tests for GET /warmup — pipeline load-on-demand endpoint."""
+
+    def test_warmup_returns_200_with_pipeline_loaded(self):
+        """Successful warm-up returns 200 with model_loaded=true."""
+        with patch("api.routes.query.run_in_threadpool") as mock_run:
+            mock_run.side_effect = lambda fn, *a, **kw: fn(*a, **kw) if callable(fn) else fn
+            with patch("src.pipeline._get_rag") as mock_get_rag:
+                mock_get_rag.return_value = None
+                r = client.get("/warmup")
+                assert r.status_code == 200
+                data = r.json()
+                assert data["status"] == "ok"
+                assert "model_loaded" in data
+                assert "classifier_ready" in data
+
+    def test_warmup_includes_latency_header(self):
+        """Warmup response includes X-Response-Time-Ms header."""
+        with patch("api.routes.query.run_in_threadpool") as mock_run:
+            mock_run.side_effect = lambda fn, *a, **kw: fn(*a, **kw) if callable(fn) else fn
+            with patch("src.pipeline._get_rag") as mock_get_rag:
+                mock_get_rag.return_value = None
+                r = client.get("/warmup")
+                assert "X-Response-Time-Ms" in r.headers
 
 
 # ==============================================================================
