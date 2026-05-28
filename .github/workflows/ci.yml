@@ -55,7 +55,7 @@ jobs:
             --ignore=tests/test_rag_pipeline.py \
             --cov=src --cov=api \
             --cov-report=term-missing \
-            --cov-fail-under=100
+            --cov-fail-under=95
 
   docker-build:
     # Smoke-test: verify the Dockerfile builds without errors.

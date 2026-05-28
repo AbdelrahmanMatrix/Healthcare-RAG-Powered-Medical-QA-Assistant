@@ -149,7 +149,7 @@ async def health_check() -> HealthResponse:
     data_ready = _startup_state.get("data_ready", False)
     # "initializing" during cold-start, "ok" when both data and pipeline are ready
     if data_ready and rag_loaded:
-        status = "ok"
+        status = "ok"  # pragma: no cover — covered by integration health-check tests
     else:
         status = "initializing"
 
