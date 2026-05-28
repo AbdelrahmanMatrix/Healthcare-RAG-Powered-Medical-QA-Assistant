@@ -286,7 +286,7 @@ class TestStepNames:
         assert "Create API App Service (if not exists)" in step_names
         assert "Enable ACR admin and update App Service image" in step_names
         assert "Update environment variables" in step_names
-        assert "Wait for deployment and smoke test" in step_names
+        assert "Wait for deployment — /health probe" in step_names
 
     def test_post_deploy_steps(self, jobs):
         """The post-deploy job has the expected step names."""
@@ -344,13 +344,13 @@ class TestHealthCheckShell:
         """The API health check uses 30 retries (15 min window)."""
         # Step index shifted by +1 due to new "Ensure App Service Plan exists" step
         run = jobs["deploy-api"]["steps"][6]["run"]
-        assert "{1..30}" in run, "Expected 30 retries in API health check for-loop"
+        assert "$(seq 1 30)" in run, "Expected 30 retries in API health check for-loop"
 
     def test_dashboard_health_check_retry_count(self, jobs):
         """The dashboard health check uses 12 retries (6 min window)."""
         # Step index: 0=login, 1=plan, 2=create, 3=acr, 4=env, 5=restart, 6=health
         run = jobs["deploy-dashboard"]["steps"][6]["run"]
-        assert "{1..12}" in run, (
+        assert "$(seq 1 12)" in run, (
             "Expected 12 retries in dashboard health check for-loop"
         )
 
@@ -816,7 +816,7 @@ class TestCiStepNames:
         """The docker-build job has the expected step."""
         steps = ci_jobs["docker-build"]["steps"]
         names = [s["name"] for s in steps if "name" in s]
-        assert "Build Docker image (smoke test)" in names
+        assert "Build Docker image (smoke test — no model downloads)" in names
 
 
 # ==============================================================================
