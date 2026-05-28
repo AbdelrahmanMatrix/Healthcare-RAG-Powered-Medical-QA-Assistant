@@ -25,6 +25,7 @@ LogFiles/
 docker/*
 !docker/entrypoint.sh
 !docker/entrypoint-dashboard.sh
+!docker/nginx-dashboard.conf
 
 # ── Markup & config files ───────────────────────────────────────
 *.md
