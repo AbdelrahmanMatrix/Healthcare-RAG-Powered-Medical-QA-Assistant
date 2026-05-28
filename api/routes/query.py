@@ -4,9 +4,7 @@ from collections import OrderedDict
 from hashlib import sha256
 
 from fastapi import APIRouter, HTTPException, Depends
-from deep_translator import GoogleTranslator
 from starlette.concurrency import run_in_threadpool
-from pydantic import BaseModel
 from api.schemas.request import QueryRequest, QueryResponse, HealthResponse, SourceCitation
 from config.settings import settings
 from src.pipeline import run_pipeline
@@ -14,67 +12,6 @@ from api.middleware.auth import verify_api_key
 
 logger = logging.getLogger("healthcare_rag.routes")
 router = APIRouter()
-
-# ── Translation Request/Response schemas ────────────────────────────────────
-
-
-class TranslateRequest(BaseModel):
-    text: str
-    source: str = "auto"
-    target: str = "en"
-
-
-class TranslateResponse(BaseModel):
-    translated_text: str
-
-
-# ── In-memory translation cache ─────────────────────────────────────────────
-# Small LRU cache for translations to avoid repeated API calls.
-_TRANSLATION_CACHE = OrderedDict()
-_TRANSLATION_CACHE_SIZE = 256
-
-
-def _translate_cached(text: str, source: str, target: str) -> str:
-    """Translate text using GoogleTranslator with in-memory caching."""
-    key = f"{text}||{source}||{target}"
-    if key in _TRANSLATION_CACHE:
-        _TRANSLATION_CACHE.move_to_end(key)
-        return _TRANSLATION_CACHE[key]
-
-    try:
-        translator = GoogleTranslator(source=source, target=target)
-        result = translator.translate(text)
-        if result:
-            # Cache result
-            if len(_TRANSLATION_CACHE) >= _TRANSLATION_CACHE_SIZE:
-                _TRANSLATION_CACHE.popitem(last=False)
-            _TRANSLATION_CACHE[key] = result
-            return result
-        return text
-    except Exception as e:
-        logger.warning(f"Translation failed: {e}")
-        return text
-
-
-@router.post("/translate", response_model=TranslateResponse)
-async def handle_translate(request: TranslateRequest):
-    """
-    Translate text between languages using Google Translate (free, no API key).
-    Supports auto-detection of source language.
-    Used by the dashboard to translate Arabic queries to English and responses back to Arabic.
-    """
-    try:
-        result = await run_in_threadpool(
-            _translate_cached,
-            request.text,
-            request.source,
-            request.target,
-        )
-        return TranslateResponse(translated_text=result)
-    except Exception as e:
-        logger.error(f"Translation endpoint error: {e}")
-        raise HTTPException(status_code=500, detail=f"Translation error: {str(e)}")
-
 
 # ── Response Cache ───────────────────────────────────────────────────────────
 # Simple in-memory LRU cache for duplicate queries.
