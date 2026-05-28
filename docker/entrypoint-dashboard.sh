@@ -25,7 +25,7 @@ INDEX="/usr/share/nginx/html/index.html"
 if [ -f "$INDEX" ]; then
     # Replace the apiBase default with the runtime value
     # Matches: apiBase: localStorage.getItem('rag_api_base') || 'http://localhost:8000'
-    sed -i "s|apiBase: localStorage.getItem('rag_api_base') || 'http://localhost:8000'|apiBase: localStorage.getItem('rag_api_base') || '${API_URL}'|g" "$INDEX"
+    sed -i "s#apiBase: localStorage.getItem('rag_api_base') || 'http://localhost:8000'#apiBase: localStorage.getItem('rag_api_base') || '${API_URL}'#g" "$INDEX"
     echo "Index HTML configured with API URL: ${API_URL}"
     INJECTED=true
 fi
