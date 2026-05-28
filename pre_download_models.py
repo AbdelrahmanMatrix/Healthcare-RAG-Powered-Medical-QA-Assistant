@@ -55,7 +55,8 @@ def main():
     hf_token = os.environ.get("HF_TOKEN", "").strip()
 
     print(f"  HF_HOME  = {hf_home or '(not set)'}")
-    print(f"  HF_TOKEN = {'\u2713 set' if hf_token else '\u2717 not set'}")
+    hf_token_status = "\u2713 set" if hf_token else "\u2717 not set"
+    print(f"  HF_TOKEN = {hf_token_status}")
     print()
 
     # ── Guard: HF_HOME must be set (Docker build sets it; local dev does not) ─────────────────────────
