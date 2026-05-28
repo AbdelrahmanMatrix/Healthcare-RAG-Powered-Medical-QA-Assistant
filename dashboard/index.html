@@ -577,7 +577,7 @@ window.APP_CONFIG = {
   <div class="top-nav-links">
     <button class="active" data-view="hub" onclick="switchView('hub')" data-i18n="nav.hub">⎈ Hub</button>
     <button data-view="query" onclick="switchView('query')" data-i18n="nav.query">⚡ Query</button>
-    <button data-view="kpi" onclick="switchView('kpi')" data-i18n="nav.telemetry">◱ Telemetry</button>
+    <button data-view="kpi" onclick="switchView('kpi')" data-i18n="nav.telemetry">◱ Metrics</button>
   </div>
   <div class="nav-controls">
     <div class="api-status" id="apiStatus">
@@ -639,7 +639,7 @@ window.APP_CONFIG = {
       <div class="card-icon">◱</div>
       <h3 class="card-title" data-i18n="card.analytics.title">Analytics &amp; Evaluation Hub</h3>
       <p class="card-desc" data-i18n="card.analytics.desc">Audit deployment validation metrics, inspect data label balances, system latencies, and MLflow experiment tracking across all pipeline components.</p>
-      <button class="card-btn" onclick="switchView('kpi')" data-i18n="card.analytics.btn">Open Telemetry →</button>
+      <button class="card-btn" onclick="switchView('kpi')" data-i18n="card.analytics.btn">Open Metrics →</button>
     </div>
   </div>
 
@@ -742,7 +742,7 @@ window.APP_CONFIG = {
 <div id="view-kpi" class="view">
 
   <div class="section-header">
-    <h2 data-i18n="section.kpi.header">◱ System Verification Telemetry</h2>
+    <h2 data-i18n="section.kpi.header">◱ System Metrics</h2>
     <span data-i18n="section.kpi.subtitle">Pipeline metrics · Classification · Data quality</span>
   </div>
 
@@ -851,7 +851,7 @@ const TRANSLATIONS = {
     'nav.brand': 'الرعاية الصحية // RAG',
     'nav.hub': '⎈ المركز',
     'nav.query': '⚡ استعلام',
-    'nav.telemetry': '◱ القياسات',
+    'nav.telemetry': '◱ المقاييس',
     'hero.title.prefix': 'نظام',
     'hero.title.highlight': 'RAG',
     'hero.title.suffix': 'الاسترجاع الطبي',
@@ -869,12 +869,12 @@ const TRANSLATIONS = {
     'card.portal.btn': 'تشغيل الخط →',
     'card.analytics.title': 'مركز التحليلات والتقييم',
     'card.analytics.desc': 'دقق مقاييس التحقق من النشر، وافحص توازن تسميات البيانات، وتأخيرات النظام، وتتبع تجارب MLflow عبر جميع مكونات الخط.',
-    'card.analytics.btn': 'فتح القياسات →',
+    'card.analytics.btn': 'فتح المقاييس →',
     'section.topology': 'طوبولوجيا النظام',
     'section.topology.deployment': 'النشر:',
     'section.query.header': '⚡ استعلام الأبحاث السريرية',
     'section.query.subtitle': 'Groq Llama 4 · استرجاع أدبيات PubMedQA',
-    'section.kpi.header': '◱ قياسات التحقق من النظام',
+    'section.kpi.header': '◱ مقاييس النظام',
     'section.kpi.subtitle': 'مقاييس الخط · التصنيف · جودة البيانات',
     'topology.api': 'خادم API · المنفذ 8000',
     'topology.faiss': 'مخزن المتجهات · FlatIP',
