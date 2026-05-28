@@ -47,7 +47,6 @@ RUN pip install --no-cache-dir --upgrade pip && \
 COPY src/      ./src/
 COPY api/      ./api/
 COPY config/   ./config/
-COPY scripts/  ./scripts/
 COPY mlops/    ./mlops/
 COPY dashboard/ ./dashboard/
 COPY setup.py  .
@@ -66,7 +65,7 @@ ENV HF_TOKEN=$HF_TOKEN
 # ── Pre-download all HuggingFace models & data ────────────────────────────
 # Models are cached in /app/hf_cache and will be copied to the runtime stage.
 # This saves 2-3 GB of downloads on every cold start.
-RUN python scripts/download_models.py || echo "⚠️  Some model downloads failed — build continues"
+# Models download at runtime via FastAPI lifespan (download.py handles data artifacts).
 
 # Clean up pip cache to save space
 RUN pip cache purge || true
@@ -113,7 +112,6 @@ COPY --from=builder /app/hf_cache/ /app/hf_cache/
 COPY --from=builder /app/src/      ./src/
 COPY --from=builder /app/api/      ./api/
 COPY --from=builder /app/config/   ./config/
-COPY --from=builder /app/scripts/  ./scripts/
 COPY --from=builder /app/mlops/    ./mlops/
 COPY --from=builder /app/dashboard/ ./dashboard/
 COPY --from=builder /app/setup.py  .

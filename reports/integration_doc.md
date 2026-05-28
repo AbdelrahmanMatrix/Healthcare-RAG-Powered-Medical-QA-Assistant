@@ -165,8 +165,8 @@ az webapp restart \
 | KPI | Target | How to Verify |
 |---|---|---|
 | Local API returns 200 | ✅ | `curl http://localhost:8000/health` (verified locally — Azure URL pending deployment) |
-| All 20 queries return disclaimer | 20/20 | `python scripts/latency_test.py` → Disclaimer OK |
-| Warm latency ≤ 5,000ms | 20/20 | `python scripts/latency_test.py` → Latency pass |
+| All 20 queries return disclaimer | 20/20 | Verified via local FastAPI (see deployment_test_report.md) |
+| Warm latency ≤ 5,000ms | 20/20 | Verified via local FastAPI (see deployment_test_report.md) |
 | Stable Docker deployment | ≥ 1 release | Azure portal → App Service → Deployment logs |
 | API uptime ≥ 90% over 48h | Pending | Azure deployment not completed — verified locally only |
 

@@ -8,8 +8,6 @@ ACR_NAME  := healthcareragacr
 install:       ## Install all dependencies
 	pip install --upgrade pip && pip install -r requirements.txt && pip install -e .
 
-download-classifier: ## Download BioBERT classifier weights from HuggingFace
-	python scripts/download_classifier.py
 
 download:       ## Download data artifacts (FAISS index, CSVs) from HuggingFace
 	python download.py
@@ -36,7 +34,7 @@ run:           ## Start FastAPI with hot-reload
 	uvicorn api.main:app --reload --host 0.0.0.0 --port $(API_PORT)
 
 lint:          ## Run flake8 style check (matches CI scope)
-	flake8 src/ api/ config/ scripts/ mlops/ tests/ dashboard/ --max-line-length 120 --exclude __pycache__,*.pyc
+	flake8 src/ api/ config/ mlops/ tests/ dashboard/ --max-line-length 120 --exclude __pycache__,*.pyc
 
 docker-build:  ## Build Docker image
 	docker build -f docker/Dockerfile -t $(APP_NAME):latest .
@@ -106,8 +104,6 @@ docker-load:   ## Load all stack images from tar archives in docker/images/ (for
 	@echo ""
 	@echo "Images loaded. Run 'make docker-dev' or 'make docker-prod' to start the stack."
 
-latency-test:  ## Run 20-query latency test against live Azure API
-	python scripts/latency_test.py
 
 mlflow:        ## Start MLflow UI
 	mlflow ui --port 5000

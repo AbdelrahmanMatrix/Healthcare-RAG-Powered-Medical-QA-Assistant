@@ -128,7 +128,7 @@ Follow `azure/README.md`.
 
 ```bash
 export AZURE_APP_URL=https://your-azure-url.azurewebsites.net
-python scripts/latency_test.py
+# Run the latency test (see deployment_test_report.md for details)
 ```
 
 Fill results in `reports/deployment_test_report.md`.

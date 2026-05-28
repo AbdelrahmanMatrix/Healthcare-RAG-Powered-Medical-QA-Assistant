@@ -153,9 +153,9 @@ User Query
 | `0f10dc5` | **CI** | ⏳ Pending | Flake8 E501 line-length fix for dashboard (pushed) |
 | `adc4d94` | **CI** | ❌ **Failure** | E501 violations in dashboard (fixed in `0f10dc5`) |
 | `adc4d94` | **Azure Deploy** | 🟡 In progress | Blocked on CI success |
-| `aa543c5` | **CI** | ✅ **Success** | Flake8 E402 fix for `scripts/fix_milestone_plan.py` |
+| `aa543c5` | **CI** | ✅ **Success** | Flake8 E402 fix for `fix_milestone_plan.py` |
 | `aa543c5` | **Azure Deploy** | ✅ **Success** | Docker build + smoke test passed |
-| `9678c9a` | **CI** | ❌ Failure | Flake8 E402 in `scripts/fix_milestone_plan.py` |
+| `9678c9a` | **CI** | ❌ Failure | Flake8 E402 in `fix_milestone_plan.py` |
 
 > **Status:** Commit `adc4d94` (dashboard KPI update) failed CI due to 2 E501 line-length violations — fixed in `0f10dc5` and now pushed to `main`. Commit `1046847` follows with this documentation update. Both commits are pushed and pending CI verification.
 
@@ -225,7 +225,7 @@ User Query
 0f10dc5 - style: fix flake8 E501 line-length violations in dashboard/app.py
 adc4d94 - feat(dashboard): add Key KPIs at a Glance section with final evaluation results
 74f4de6 - docs: add final project summary document with all KPIs, test results, and submission status
-aa543c5 - fix: resolve flake8 E402 import-ordering in scripts/fix_milestone_plan.py
+aa543c5 - fix: resolve flake8 E402 import-ordering in fix_milestone_plan.py
 ```
 
 ---

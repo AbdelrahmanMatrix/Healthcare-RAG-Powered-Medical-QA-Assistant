@@ -297,7 +297,7 @@ docker compose -f docker/docker-compose.yml -f docker/docker-compose.prod.yml up
 
 When you run `make docker-dev`, Docker automatically merges the dev override:
 
-- **Source-code mounts** — `api/`, `src/`, `config/`, `scripts/`, `dashboard/` are bind-mounted so edits reflect instantly
+- **Source-code mounts** — `api/`, `src/`, `config/`, `dashboard/` are bind-mounted so edits reflect instantly
 - **Hot-reload** — uvicorn starts with `--reload`, auto-restarting on file changes
 - **Relaxed `depends_on`** — dashboard starts as soon as the API container is running (no need to wait for full health check)
 - **Shorter healthcheck grace periods** — 30s for API, 15s for dashboard
@@ -337,7 +337,7 @@ make docker-prod         # Start the stack
 The `Dockerfile` (`docker/Dockerfile`) produces a `python:3.10-slim`-based image:
 
 - Installs production dependencies from `requirements.txt`
-- Copies application source (`src/`, `api/`, `config/`, `scripts/`, `mlops/`, `dashboard/`)
+- Copies application source (`src/`, `api/`, `config/`, `mlops/`, `dashboard/`)
 - Classifier config files included; model weights downloaded at runtime from HuggingFace
 - FAISS vector index + CSVs downloaded inside the **FastAPI lifespan** — see [Startup Sequence](#startup-sequence)
 - Exposes port `8000` with `uvicorn` as the entrypoint
