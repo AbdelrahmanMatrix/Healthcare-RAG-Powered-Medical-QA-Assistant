@@ -4,31 +4,40 @@
 #
 # ── Design Rationale ──────────────────────────────────────────────────────────
 # MULTI-STAGE BUILD:
-#   Stage 1 (builder):  Install all Python deps + pre-configure the HF cache
-#                       directory. Includes build tools (gcc, etc.) that are
-#                       NOT needed at runtime.
-#   Stage 2 (runtime):  Python-slim base. Copies ONLY the installed packages,
-#                       HF cache directory structure, and source code.
-#                       Much smaller image.
+#   Stage 1 (builder):  Install all Python deps + pre-download HF models into
+#                       /app/hf_cache. Build tools (gcc, etc.) stay in this stage.
+#   Stage 2 (runtime):  Python-slim base. Copies only installed packages,
+#                       the HF cache, and source code. Much smaller image.
 #
-# HF CACHE STRATEGY:
-#   The HF_HOME directory (/app/hf_cache) is created and POPULATED during the
-#   BUILD phase by running pre_download_models.py (requires HF_TOKEN build-arg).
-#   All models (classifier, embeddings, reranker) are baked into the image,
-#   so cold starts skip the ~2 GB download entirely. Data artifacts (FAISS
-#   index, CSVs) are still downloaded at runtime on first cold start via
-#   the FastAPI lifespan (download.py).
+# HF_TOKEN SECRET:
+#   HF_TOKEN is passed via Docker BuildKit secret mount — it is NEVER written
+#   to any image layer or docker history. Eliminates the ARG/ENV secret warning.
+#   Build with:  DOCKER_BUILDKIT=1 docker build --secret id=HF_TOKEN,env=HF_TOKEN ...
+#   (GitHub Actions azure-deploy.yml passes it automatically.)
+#
+# MODEL PRE-DOWNLOAD STRATEGY:
+#   If HF_TOKEN is set:  classifier + embedding + reranker are baked into the
+#                        image → cold starts skip the ~2 GB download entirely.
+#   If HF_TOKEN is absent (CI smoke builds):  pre_download_models.py exits 0
+#                        gracefully → models download lazily at runtime.
+#   Classifier not on Hub: non-fatal; pipeline uses local disk weights or the
+#                        DistilBERT fallback repo at runtime.
+#
+#   Data artifacts (FAISS index, CSVs) are NEVER baked in — they download at
+#   runtime via the FastAPI lifespan background task (download.py).
 # ──────────────────────────────────────────────────────────────────────────────
 
+# syntax=docker/dockerfile:1.4
+
 # ══════════════════════════════════════════════════════════════════════════════
-# STAGE 1: Builder — install deps + prepare HF cache directory
+# STAGE 1: Builder — install deps + pre-download HF model cache
 # ══════════════════════════════════════════════════════════════════════════════
 FROM python:3.10-slim AS builder
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Set HF_HOME so we can easily copy the cache to runtime
+# Point all HF libraries at a single cache directory
 ENV HF_HOME=/app/hf_cache
 ENV SENTENCE_TRANSFORMERS_HOME=/app/hf_cache/sentence_transformers
 ENV TORCH_HOME=/app/hf_cache/torch
@@ -36,8 +45,8 @@ ENV TRANSFORMERS_CACHE=/app/hf_cache/transformers
 
 WORKDIR /app
 
-# Pre-create HF cache directory so COPY --from=builder in stage 2 succeeds
-# even if no models were downloaded during the build (they download at runtime).
+# Pre-create HF cache directory so the COPY in stage 2 always succeeds
+# even when no models were downloaded (CI builds without HF_TOKEN).
 RUN mkdir -p /app/hf_cache
 
 # System build deps
@@ -45,12 +54,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential curl git \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python deps
+# Install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copy source code (needed by download_models.py)
+# Copy source code (needed by pre_download_models.py)
 COPY src/      ./src/
 COPY api/      ./api/
 COPY config/   ./config/
@@ -64,35 +73,31 @@ COPY models/   ./models/
 # Install project in editable mode
 RUN pip install --no-cache-dir -e .
 
-# HF_TOKEN must be passed as --build-arg at build time so that
-# download_models.py can authenticate with HuggingFace Hub.
-# See azure-deploy.yml, build-and-push-api job.
-ARG HF_TOKEN
-ENV HF_TOKEN=$HF_TOKEN
+# ── Pre-download HF models using a BuildKit secret ────────────────────────────
+# HF_TOKEN is read from the secret mount — never written to any image layer.
+# If no secret is provided (CI builds), the script exits 0 and skips downloads.
+# Build with: DOCKER_BUILDKIT=1 docker build --secret id=HF_TOKEN,env=HF_TOKEN ...
+RUN --mount=type=secret,id=HF_TOKEN,required=false \
+    HF_TOKEN=$(cat /run/secrets/HF_TOKEN 2>/dev/null || echo "") \
+    python pre_download_models.py
 
-# ── Pre-download HF models (populated during build) ────────────────────
-# Downloads classifier, embedding, and reranker models into /app/hf_cache
-# so they are baked into the runtime stage. Requires HF_TOKEN build-arg.
-# Data artifacts (FAISS index, CSVs) still download at runtime.
-RUN python pre_download_models.py
-
-# Clean up pip cache to save space
-RUN pip cache purge || true
-RUN find /root/.cache -type f -delete 2>/dev/null || true
-RUN find /tmp -type f -delete 2>/dev/null || true
+# Clean up caches to reduce layer size
+RUN pip cache purge || true && \
+    find /root/.cache/pip -type f -delete 2>/dev/null || true && \
+    find /tmp -maxdepth 1 -type f -delete 2>/dev/null || true
 
 # ══════════════════════════════════════════════════════════════════════════════
-# STAGE 2: Runtime — lean image with only what's needed
+# STAGE 2: Runtime — lean image with only what's needed to serve requests
 # ══════════════════════════════════════════════════════════════════════════════
 FROM python:3.10-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# HF_TOKEN is provided at runtime via Azure App Service app settings or .env file.
-# Do NOT bake it into the image for security reasons.
+# HF_TOKEN is injected at runtime via Azure App Service app settings or .env.
+# It is NOT baked into the image.
 
-# Point to the cached models location
+# Point to the pre-downloaded (or empty) cache directory
 ENV HF_HOME=/app/hf_cache
 ENV SENTENCE_TRANSFORMERS_HOME=/app/hf_cache/sentence_transformers
 ENV TORCH_HOME=/app/hf_cache/torch
@@ -100,25 +105,22 @@ ENV TRANSFORMERS_CACHE=/app/hf_cache/transformers
 
 WORKDIR /app
 
-# Runtime system deps (minimal — NO build tools)
+# Runtime system deps — curl for health probes only; no build tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Create symlink for Azure App Service log streaming
+# Azure App Service log streaming
 RUN mkdir -p /home/LogFiles && ln -sf /dev/stdout /home/LogFiles/entrypoint.log
 
-# ── Copy Python packages from builder ────────────────────────────────────────
+# ── Copy Python packages ──────────────────────────────────────────────────────
 COPY --from=builder /usr/local/lib/python3.10/site-packages/ /usr/local/lib/python3.10/site-packages/
 COPY --from=builder /usr/local/bin/ /usr/local/bin/
 
-# ── Copy HF cache directory (models pre-downloaded) from builder ────────────
-# Copies the populated /app/hf_cache directory (classifier, embeddings,
-# reranker) to the runtime stage. Cold starts skip the ~2 GB download
-# since models are already baked into the image.
+# ── Copy HF model cache (populated at build time, or empty for CI builds) ─────
 COPY --from=builder /app/hf_cache/ /app/hf_cache/
 
-# ── Copy source code ─────────────────────────────────────────────────────────
+# ── Copy source code ──────────────────────────────────────────────────────────
 COPY --from=builder /app/src/      ./src/
 COPY --from=builder /app/api/      ./api/
 COPY --from=builder /app/config/   ./config/
@@ -128,12 +130,18 @@ COPY --from=builder /app/setup.py  .
 COPY --from=builder /app/download.py .
 COPY --from=builder /app/models/   ./models/
 
-# Ensure data directories exist
+# Ensure data directories exist (artifacts download at runtime)
 RUN mkdir -p data/embeddings/faiss_index data/processed data/raw
 
-# Entrypoint: starts uvicorn (data download skipped if already present)
+# Entrypoint: starts uvicorn; data download and pipeline warm-up run
+# asynchronously in the background so /health is immediately reachable.
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+
+# Docker-native health check — validates the API is responding.
+# Azure App Service also has its own HTTP probe (WEBSITES_PORT).
+HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=5 \
+    CMD curl -sf http://localhost:${WEBSITES_PORT:-8000}/health || exit 1
 
 EXPOSE 8000
 CMD ["/entrypoint.sh"]

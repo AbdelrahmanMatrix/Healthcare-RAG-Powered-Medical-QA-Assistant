@@ -21,8 +21,10 @@ class TestHealth:
     def test_returns_200(self):
         assert client.get("/health").status_code == 200
 
-    def test_status_field_is_ok(self):
-        assert client.get("/health").json()["status"] == "ok"
+    def test_status_field_is_valid(self):
+        """During cold-start, status may be 'initializing'; after warm-up, 'ok'."""
+        status = client.get("/health").json()["status"]
+        assert status in ("initializing", "ok"), f"Unexpected status: {status}"
 
     def test_latency_header_present(self):
         assert "X-Response-Time-Ms" in client.get("/health").headers

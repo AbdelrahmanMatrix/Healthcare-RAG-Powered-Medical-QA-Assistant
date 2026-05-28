@@ -10,14 +10,14 @@ jobs:
   lint-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
       - name: Cache pip
-        uses: actions/cache@v5
+        uses: actions/cache@v4
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
@@ -58,13 +58,20 @@ jobs:
             --cov-fail-under=100
 
   docker-build:
+    # Smoke-test: verify the Dockerfile builds without errors.
+    # HF_TOKEN is intentionally NOT passed here — pre_download_models.py
+    # detects the missing token (via BuildKit secret) and exits 0,
+    # skipping all downloads. This keeps CI fast (no 2 GB model downloads)
+    # while still catching any Dockerfile or dependency issues.
     runs-on: ubuntu-latest
     timeout-minutes: 60
     needs: lint-and-test
     if: github.ref == 'refs/heads/main'
+    env:
+      DOCKER_BUILDKIT: "1"
     steps:
-      - uses: actions/checkout@v6
-      - name: Build Docker image (smoke test)
+      - uses: actions/checkout@v4
+      - name: Build Docker image (smoke test — no model downloads)
         run: |
           docker build -f docker/Dockerfile \
             -t healthcare-rag:ci-${{ github.sha }} .

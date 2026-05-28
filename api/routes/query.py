@@ -145,8 +145,16 @@ async def health_check() -> HealthResponse:
     groq_configured = bool(os.getenv("GROQ_API_KEY", ""))
     index_vectors = int(_rag.index.ntotal) if rag_loaded else 0
 
+    from api.main import _startup_state
+    data_ready = _startup_state.get("data_ready", False)
+    # "initializing" during cold-start, "ok" when both data and pipeline are ready
+    if data_ready and rag_loaded:
+        status = "ok"
+    else:
+        status = "initializing"
+
     return HealthResponse(
-        status="ok",
+        status=status,
         model_loaded=rag_loaded,
         classifier_ready=clf_ready,
         groq_configured=groq_configured,

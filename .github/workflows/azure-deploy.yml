@@ -3,11 +3,11 @@
 #
 # Deploys two Azure App Services:
 #   1. healthcare-rag-app       — FastAPI backend
-#   2. healthcare-rag-dashboard — Streamlit frontend
+#   2. healthcare-rag-dashboard — standalone HTML SPA
 #
 # Secrets required (set in GitHub repo Settings > Secrets):
 #   GROQ_API_KEY      — Groq LLM API key
-#   HF_TOKEN          — HuggingFace token
+#   HF_TOKEN          — HuggingFace token (used as a Docker BuildKit secret)
 #   AZURE_ACR_NAME    — Container registry name (e.g. healthcareragacr)
 #   AZURE_CREDENTIALS — Service principal JSON from:
 #                       az ad sp create-for-rbac --name "github-rag-deploy"
@@ -15,29 +15,29 @@
 #                         --scopes /subscriptions/<sub-id>/resourceGroups/healthcare-rag-rg
 #                         --sdk-auth
 #
-# ── FIX SUMMARY ───────────────────────────────────────────────────────────────
-# Bug 1 (CRITICAL — root cause of 503): Job outputs that contain a secret value
-#   are silently masked to "" by GitHub Actions. The acr-login-server output
-#   contained the AZURE_ACR_NAME secret, so deploy-api and deploy-dashboard
-#   received an empty SERVER variable → App Services were configured with an
-#   invalid image name like "/healthcare-rag:sha" → image pull failed → 503.
-#   FIX: Compute the ACR login server inline in every job that needs it:
-#        SERVER="${ACR_NAME}.azurecr.io"   (no job outputs needed)
+# ── FIXES APPLIED ─────────────────────────────────────────────────────────────
+# Fix 1 (CRITICAL — build failure): pre_download_models.py crashed with a 404
+#   RepositoryNotFoundError because AbdoMatrix/biobert-medical-classifier wasn't
+#   on HuggingFace Hub. It's now uploaded. The script gracefully handles any
+#   missing repos with fallback logic and treats only the embedding model and
+#   reranker as required downloads.
 #
-# Bug 2 (CRITICAL — 503): App Service had no credentials to pull from ACR.
-#   The old `az webapp config container set` call did not pass registry auth,
-#   so Azure could not authenticate against the private ACR registry.
-#   FIX: Enable ACR admin user and pass --docker-registry-server-{url,user,password}
-#        in every container-set call.
+# Fix 2 (security): HF_TOKEN was passed via --build-arg, which bakes the token
+#   into the image layer cache and triggers a Docker security warning.
+#   FIX: Use Docker BuildKit --secret mount. The token is injected securely and
+#   is NEVER written to any image layer. The job sets DOCKER_BUILDKIT=1 and
+#   passes --secret id=HF_TOKEN,env=HF_TOKEN (not --build-arg).
 #
-# Bug 3 (CRITICAL — 503): The App Service Plan "healthcare-rag-plan" is assumed
-#   to already exist; if it does not the `az webapp create` silently fails and
-#   the App Service ends up in a broken state.
-#   FIX: Add an explicit "ensure App Service Plan exists" step in both deploy jobs.
+# Fix 3 (CRITICAL — 503): acr-login-server job output was silently masked to ""
+#   because the value contained the AZURE_ACR_NAME secret.
+#   FIX: Compute ACR login server inline in every job: SERVER="${ACR_NAME}.azurecr.io"
 #
-# FIXED (Bug 4): Updated all actions to Node.js 24-compatible versions:
-#   actions/checkout@v6, actions/setup-python@v6, actions/cache@v5,
-#   azure/login@v3 (upgraded from v2).
+# Fix 4 (CRITICAL — 503): App Service had no credentials to pull from ACR.
+#   FIX: Enable ACR admin user and pass --docker-registry-server-{url,user,password}.
+#
+# Fix 5 (CRITICAL — 503): App Service Plan assumed to exist; if missing,
+#   az webapp create silently fails.
+#   FIX: Explicit plan-existence guard in both deploy jobs.
 # ──────────────────────────────────────────────────────────────────────────────
 
 name: Azure Deploy
@@ -58,14 +58,14 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
       - name: Cache pip
-        uses: actions/cache@v5
+        uses: actions/cache@v4
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
@@ -89,24 +89,28 @@ jobs:
             --tb=short -q
 
   # ── 2a. Build & Push API Docker image to ACR ─────────────────────────────────
-  # NOTE: The outputs block has been removed. The acr-login-server output was
-  # being silently masked to "" because its value contained the AZURE_ACR_NAME
-  # secret. Every downstream job now computes the server inline instead.
   build-and-push-api:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Azure login
-        uses: azure/login@v3
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Build and push API image
+        # Fix 1+2: use BuildKit secret mount for HF_TOKEN (not --build-arg).
+        # pre_download_models.py reads the secret and pre-downloads models.
+        # If the classifier repo doesn't exist on Hub, it warns and continues —
+        # the service uses local disk weights or the DistilBERT fallback at runtime.
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          DOCKER_BUILDKIT: "1"
         run: |
-          # FIX (Bug 1): Compute server inline — never use a job output that
-          # contains a secret value, as GitHub Actions masks it to "".
+          # Fix 3: compute server inline — never use a job output that contains
+          # a secret value, as GitHub Actions silently masks it to "".
           SERVER="${ACR_NAME}.azurecr.io"
           az acr login --name "$ACR_NAME"
 
@@ -115,7 +119,7 @@ jobs:
 
           docker build \
             -f docker/Dockerfile \
-            --build-arg HF_TOKEN=${{ secrets.HF_TOKEN }} \
+            --secret id=HF_TOKEN,env=HF_TOKEN \
             -t "$IMAGE" \
             -t "$LATEST" \
             .
@@ -128,16 +132,18 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Azure login
-        uses: azure/login@v3
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Build and push Dashboard image
+        env:
+          DOCKER_BUILDKIT: "1"
         run: |
-          # FIX (Bug 1): Same inline server computation as the API job.
+          # Fix 3: same inline server computation as the API job.
           SERVER="${ACR_NAME}.azurecr.io"
           az acr login --name "$ACR_NAME"
 
@@ -162,13 +168,11 @@ jobs:
       url: https://${{ env.APP_NAME }}.azurewebsites.net
     steps:
       - name: Azure login
-        uses: azure/login@v3
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # FIX (Bug 3): Ensure the App Service Plan exists before creating the
-      # App Service. If the plan is missing, `az webapp create` fails and the
-      # App Service is left in a broken state with no container configured.
+      # Fix 5: Ensure the App Service Plan exists before creating the App Service.
       - name: Ensure App Service Plan exists
         run: |
           az appservice plan show \
@@ -195,9 +199,7 @@ jobs:
             --deployment-container-image-name nginx:alpine \
             --output table
 
-      # FIX (Bug 2): Enable the ACR admin user so the App Service can
-      # authenticate when pulling the image. Admin credentials are fetched
-      # at deploy time — they are never stored in source control.
+      # Fix 4: Enable ACR admin and update App Service image
       - name: Enable ACR admin and update App Service image
         run: |
           SERVER="${ACR_NAME}.azurecr.io"
@@ -205,15 +207,13 @@ jobs:
           # Enable admin user on ACR (idempotent — safe to run every deploy)
           az acr update --name "$ACR_NAME" --admin-enabled true
 
-          # Retrieve admin password at runtime
+          # Retrieve admin password at runtime (never stored in source control)
           ACR_PASSWORD=$(az acr credential show \
             --name "$ACR_NAME" \
             --query "passwords[0].value" \
             --output tsv)
 
-          # FIX (Bug 1 + Bug 2): Pass the full image name AND registry credentials.
-          # Without --docker-registry-server-{url,user,password}, Azure App Service
-          # cannot authenticate against the private ACR and the container pull fails.
+          # Fix 3+4: pass the full image name AND registry credentials.
           az webapp config container set \
             --name $APP_NAME \
             --resource-group $RESOURCE_GROUP \
@@ -239,33 +239,51 @@ jobs:
       - name: Restart and wait for image pull
         # az webapp config container set updates the image tag but does NOT
         # restart the container. An explicit restart is required. The 3-minute
-        # wait gives Azure time to pull the 4-6 GB image before probing.
+        # wait gives Azure time to pull the ~4 GB image before probing.
         run: |
           az webapp restart \
             --name $APP_NAME \
             --resource-group $RESOURCE_GROUP
-          echo "Waiting 3 minutes for image pull + cold start..."
+          echo "Waiting 3 minutes for image pull + container cold start..."
           sleep 180
 
-      - name: Wait for deployment and smoke test
-        # Startup timeline: uvicorn binds port immediately, then lifespan
-        # downloads data (~1-2 min) and pre-loads models (~30s). The /health
-        # endpoint returns 200 as soon as uvicorn is ready (lifespan yields
-        # immediately). 30 retries × 30s = 15 min gives ample time even on
-        # cold starts pulling a 4-6 GB image.
+      - name: Wait for deployment — /health probe
+        # Uvicorn starts immediately; the lifespan background task downloads
+        # data artifacts and pre-loads models asynchronously.
+        # /health returns HTTP 200 right away (status: "initializing"), then
+        # "ok" once both data_ready and pipeline_ready are true.
+        # We first wait for HTTP 200, then call /warmup to block until the
+        # pipeline is fully loaded before routing real traffic.
         run: |
           URL="https://${APP_NAME}.azurewebsites.net"
-          for attempt in {1..30}; do
+
+          # Phase 1: wait until uvicorn is up (HTTP 200 on /health)
+          echo "Phase 1: waiting for HTTP 200 on /health..."
+          for attempt in $(seq 1 30); do
             STATUS=$(curl -so /dev/null -w "%{http_code}" "${URL}/health" || echo "000")
-            echo "Health check attempt ${attempt}/30: HTTP ${STATUS}"
+            echo "  /health attempt ${attempt}/30: HTTP ${STATUS}"
             if [ "$STATUS" = "200" ]; then
-              echo "✅ API deployment healthy: ${URL}"
-              exit 0
+              echo "  ✅ API is up."
+              break
+            fi
+            if [ "$attempt" = "30" ]; then
+              echo "  ❌ API did not respond within 15 minutes."
+              exit 1
             fi
             sleep 30
           done
-          echo "❌ API deployment did not become healthy within 15 minutes."
-          exit 1
+
+          # Phase 2: call /warmup to block until models are fully loaded
+          # This ensures the first real user query hits an already-warm pipeline.
+          echo "Phase 2: calling /warmup to pre-load models..."
+          WARMUP_STATUS=$(curl -so /dev/null -w "%{http_code}" \
+            --max-time 300 "${URL}/warmup" || echo "000")
+          echo "  /warmup → HTTP ${WARMUP_STATUS}"
+          if [ "$WARMUP_STATUS" = "200" ]; then
+            echo "  ✅ Pipeline warmed up — API ready for traffic."
+          else
+            echo "  ⚠️  Warmup returned ${WARMUP_STATUS} — first query may have higher latency."
+          fi
 
   # ── 3b. Deploy Dashboard to Azure App Service ────────────────────────────────
   deploy-dashboard:
@@ -276,11 +294,11 @@ jobs:
       url: https://${{ env.DASHBOARD_NAME }}.azurewebsites.net
     steps:
       - name: Azure login
-        uses: azure/login@v3
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # FIX (Bug 3): Same plan-existence guard as the API deploy job.
+      # Fix 5: same plan-existence guard as the API deploy job.
       - name: Ensure App Service Plan exists
         run: |
           az appservice plan show \
@@ -307,7 +325,7 @@ jobs:
             --deployment-container-image-name nginx:alpine \
             --output table
 
-      # FIX (Bug 1 + Bug 2): Same inline server + ACR credentials fix as API.
+      # Fix 3+4: same inline server + ACR credentials fix as API.
       - name: Enable ACR admin and update Dashboard App Service image
         run: |
           SERVER="${ACR_NAME}.azurecr.io"
@@ -351,7 +369,7 @@ jobs:
       - name: Wait for dashboard deployment
         run: |
           URL="https://${DASHBOARD_NAME}.azurewebsites.net"
-          for attempt in {1..12}; do
+          for attempt in $(seq 1 12); do
             STATUS=$(curl -so /dev/null -w "%{http_code}" "${URL}/" || echo "000")
             echo "Health check attempt ${attempt}/12: HTTP ${STATUS}"
             if [ "$STATUS" = "200" ] || [ "$STATUS" = "304" ]; then
@@ -370,7 +388,7 @@ jobs:
     if: always()
     steps:
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
@@ -397,7 +415,7 @@ jobs:
         run: |
           URL="https://${APP_NAME}.azurewebsites.net"
           echo "── Smoke-testing API query ──"
-          RESPONSE=$(curl -s -X POST "${URL}/query" \
+          RESPONSE=$(curl -s --max-time 120 -X POST "${URL}/query" \
             -H "Content-Type: application/json" \
             -d '{"question": "Does aspirin reduce cardiovascular risk?"}' 2>&1) || RESPONSE="curl-failed"
           if [ "$RESPONSE" = "curl-failed" ]; then
@@ -445,7 +463,7 @@ jobs:
           fi
 
           echo "  ────────────────────────────────────────────"
-          if [ "$API" = "200" ] && ( [ "$DASH" = "200" ] || [ "$DASH" = "302" ] ) && [ "$QRY" = "ok" ]; then
+          if [ "$API" = "200" ] && ( [ "$DASH" = "200" ] || [ "$DASH" = "304" ] ) && [ "$QRY" = "ok" ]; then
             echo "  ✅ All endpoints healthy!"
           else
             echo "  ⚠️ Some checks failed. Review the logs above."

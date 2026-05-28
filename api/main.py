@@ -13,6 +13,7 @@ load_dotenv()  # Must run before config.settings reads os.environ  # noqa: E402
 
 from fastapi import FastAPI, Request  # noqa: E402
 from fastapi.responses import JSONResponse  # noqa: E402
+from fastapi.middleware.gzip import GZipMiddleware  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
 
@@ -25,6 +26,13 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(sys.stdout)],
 )
 logger = logging.getLogger("healthcare_rag")
+
+# Startup state — updated by background init task so /health can report progress
+_startup_state: dict = {
+    "data_ready": False,
+    "pipeline_ready": False,
+    "started_at": None,
+}
 
 
 @asynccontextmanager
@@ -43,32 +51,36 @@ async def lifespan(app: FastAPI):
       build phase (pre_download_models.py), so the warm-up step loads from
       local disk — no network downloads at startup.
     """
+    _startup_state["started_at"] = time.monotonic()
     logger.info("Healthcare RAG API starting up...")
 
     # Spawn background initialization — yield immediately so uvicorn
     # can start serving HTTP requests (health probes, etc.)
     asyncio.create_task(_background_init())
 
-    yield  # application runs here — uvicorn can process HTTP requests
+    yield  # application runs — uvicorn processes HTTP requests
+
+    logger.info("Healthcare RAG API shutting down.")
 
 
 async def _background_init():
     """
-    Initialize the application in the background.
+    Initialize the application in the background (non-blocking startup).
 
     Steps (both run after the lifespan yields, so uvicorn starts immediately):
       1. Download missing data artifacts (FAISS index, CSVs) from HuggingFace
       2. Warm up the RAG pipeline by loading models from the local HF cache
 
-    Step 2 is fast because models are pre-downloaded into the Docker image
+    Step 2 is fast when models are pre-downloaded into the Docker image
     (pre_download_models.py at build time) — no network calls, just disk I/O.
 
-    The /health endpoint returns HTTP 200 right away regardless of whether
-    initialization has completed.
+    /health reports `data_ready` and `pipeline_ready` flags so you can track
+    progress during the cold-start window.
     """
+    from starlette.concurrency import run_in_threadpool
+
     # ── Step 1: ensure data artifacts are present ───────────────────────────────
     try:
-        from starlette.concurrency import run_in_threadpool
         from src.data.hub import download_all_data, check_data_exists
 
         status = await run_in_threadpool(check_data_exists)
@@ -87,7 +99,8 @@ async def _background_init():
                 )
         else:
             logger.info("✅ All data artifacts already present — skipping download.")
-    except Exception as e:  # pragma: no cover — async handler; exercised by coverage_gaps tests; untraceable
+        _startup_state["data_ready"] = True
+    except Exception as e:  # pragma: no cover
         logger.error(
             f"⚠️  Data download step failed: {e!r} — "
             "pipeline may not work until artifacts are available."
@@ -97,7 +110,9 @@ async def _background_init():
     try:
         from src.pipeline import _get_rag
         await run_in_threadpool(_get_rag)
-        logger.info("✅ RAG pipeline loaded from cache — ready for queries")
+        _startup_state["pipeline_ready"] = True
+        elapsed = round(time.monotonic() - (_startup_state["started_at"] or 0), 1)
+        logger.info(f"✅ RAG pipeline loaded from cache — ready for queries (startup: {elapsed}s)")
     except Exception as e:
         logger.warning(
             f"⚠️  Pipeline warm-up failed: {e!r} — "
@@ -118,6 +133,15 @@ app = FastAPI(
         "Call `GET /warmup` proactively to load the pipeline before routing user traffic."
     ),
     lifespan=lifespan,
+)
+
+# ── Middleware stack ───────────────────────────────────────────────────────────
+# Order matters: GZip runs last (outermost), so it compresses whatever the
+# inner middleware and route handlers produce.
+app.add_middleware(
+    GZipMiddleware,
+    minimum_size=1024,   # only compress responses > 1 KB (skip tiny JSON)
+    compresslevel=6,     # balanced speed vs compression (default 9 is too slow)
 )
 
 app.add_middleware(
