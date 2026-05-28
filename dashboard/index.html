@@ -361,8 +361,14 @@ a:hover{color:var(--text)}
 .spinner-ring .spinner{width:22px;height:22px;border-width:3px}
 .spinner-ring span{font-size:0.82rem;color:var(--text-muted);font-weight:500}
 @keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 .btn-spinner{display:inline-flex;align-items:center;gap:6px}
 .btn-spinner .spinner{width:14px;height:14px;border-width:2px}
+
+/* ── Translation status ────────────────────────── */
+.trans-status{display:inline-flex;align-items:center;gap:6px;font-size:0.65rem;color:var(--text-muted)}
+.trans-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 1.2s ease-in-out infinite;display:inline-block}
+.trans-result{font-size:0.65rem;font-style:italic;color:var(--text-muted);display:inline-flex;align-items:center;gap:4px}
 
 /* ═══════════════════════════════════════════════
    CHART CONTAINERS
@@ -1082,18 +1088,27 @@ function toggleLang() {
   if (document.getElementById('view-kpi').classList.contains('active')) initCharts();
 }
 
-// Translate a text string via MyMemory API
+// Translate text via backend endpoint (uses Google Translate, free, no API key)
 async function translateText(text, sourceLang, targetLang) {
   if (!text) return text;
   try {
-    const langpair = sourceLang + '|' + targetLang;
-    const res = await fetch(
-      'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(text.slice(0, 500)) + '&langpair=' + langpair,
-      { signal: AbortSignal.timeout(8000) }
-    );
+    const res = await fetch(window.APP_CONFIG.apiBase + '/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: text.slice(0, 2000),
+        source: sourceLang,
+        target: targetLang,
+      }),
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!res.ok) {
+      console.warn('Translation API returned', res.status);
+      return text;
+    }
     const data = await res.json();
-    if (data && data.responseData && data.responseData.translatedText) {
-      return data.responseData.translatedText;
+    if (data && data.translated_text && data.translated_text !== text) {
+      return data.translated_text;
     }
     return text;
   } catch(e) {
@@ -1102,14 +1117,9 @@ async function translateText(text, sourceLang, targetLang) {
   }
 }
 
-// Translate a longer text by splitting into chunks
+// Translate a longer text — backend handles full text, no need to chunk
 async function translateLongText(text, sourceLang, targetLang) {
-  if (!text) return text;
-  const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
-  const results = await Promise.all(sentences.map(s =>
-    translateText(s.trim(), sourceLang, targetLang)
-  ));
-  return results.map((t, i) => t || sentences[i]).join(' ');
+  return translateText(text, sourceLang, targetLang);
 }
 
 /* ── Navigation ─────────────────────────────────── */
@@ -1371,15 +1381,56 @@ async function submitQuery() {
   btn.disabled = true;
   btn.innerHTML = '<span class="btn-spinner"><span class="spinner"></span>' + (t('asking') || 'Asking...') + '</span>';
 
-  // Auto-detect Arabic query and translate to English
+  // Auto-detect Arabic query and translate to English (regardless of UI language)
   var queryIsArabic = isArabic(question);
   var sentQuestion = question;
 
-  if (queryIsArabic && currentLang === 'ar') {
-    // Show translating indicator
-    addMessage('<div class="bubble"><div class="bubble-header"><span class="bubble-author">' + (t('bubble.you') || 'You') + '</span></div><p class="bubble-text">' + question.replace(/</g, '&lt;') + ' <span style="font-size:0.7rem;color:var(--text-muted)">(' + (t('query.translating') || 'Translating...') + ')</span></p></div>', 'user');
-    sentQuestion = await translateText(question, 'ar', 'en');
-    if (!sentQuestion) sentQuestion = question;
+  if (queryIsArabic) {
+    // Build user bubble with original Arabic + ephemeral translating indicator
+    const container = document.getElementById('chatHistory');
+    const empty = document.getElementById('chatEmpty');
+    if (empty) empty.style.display = 'none';
+
+    var authorName = t('bubble.you') || 'You';
+    var translatingLabel = t('query.translating') || 'Translating...';
+    var safeQ = question.replace(/</g, '&lt;');
+
+    var msgDiv = document.createElement('div');
+    msgDiv.className = 'message user';
+    msgDiv.innerHTML = '<div class="bubble"><div class="bubble-header"><span class="bubble-author">' + authorName + '</span></div><p class="bubble-text">' + safeQ + '</p><div class="bubble-footer" style="border-top:none;margin-top:2px;padding-top:0"><span class="trans-status"><span class="trans-dot"></span>' + translatingLabel + '</span></div></div>';
+    container.appendChild(msgDiv);
+    container.scrollTop = container.scrollHeight;
+
+    // Do the translation
+    var translated = await translateText(question, 'ar', 'en');
+
+    // Update indicator: replace it with the English translation or remove on failure
+    var statusEl = msgDiv.querySelector('.trans-status');
+    if (statusEl) {
+      if (translated && translated !== question) {
+        // Show what was actually sent to the backend
+        statusEl.outerHTML = '<span class="trans-result">→ ' + translated.replace(/</g, '&lt;') + '</span>';
+        sentQuestion = translated;
+      } else {
+        // Translation failed — remove the indicator entirely
+        statusEl.parentElement.style.display = 'none';
+      }
+    }
+
+    // Save clean version to chat history (without ephemeral indicator)
+    var cleanHtml = '<div class="bubble"><div class="bubble-header"><span class="bubble-author">' + authorName + '</span></div><p class="bubble-text">' + safeQ + '</p>';
+    if (translated && translated !== question) {
+      cleanHtml += '<div class="bubble-footer" style="border-top:none;margin-top:2px;padding-top:0"><span class="trans-result">→ ' + translated.replace(/</g, '&lt;') + '</span></div>';
+    }
+    cleanHtml += '</div>';
+    chatHistory.push({html: cleanHtml, cls: 'user'});
+    while (chatHistory.length > CHAT_HISTORY_LIMIT) {
+      chatHistory.shift();
+      var firstMsg = container.querySelector('.message');
+      if (firstMsg) firstMsg.remove();
+    }
+    saveChatHistory();
+
   } else {
     // User message (English / any language)
     addMessage('<div class="bubble"><div class="bubble-header"><span class="bubble-author">' + (t('bubble.you') || 'You') + '</span></div><p class="bubble-text">' + question.replace(/</g, '&lt;') + '</p></div>', 'user');
