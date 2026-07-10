@@ -25,8 +25,8 @@ class Settings(BaseSettings):
     EMBEDDING_MODEL: str = "pritamdeka/S-PubMedBert-MS-MARCO"
 
     # ── LLM ───────────────────────────────────────────────────────────────────
-    # Groq-hosted Llama 4 Scout (preview).  Falls back to flan-t5-base locally.
-    LLM_MODEL: str = "meta-llama/llama-4-scout-17b-16e-instruct"
+    # Groq-hosted OpenAI GPT-OSS 120B (production).  Falls back to flan-t5-base locally.
+    LLM_MODEL: str = "openai/gpt-oss-120b"
     LLM_BASE_URL: str = "https://api.groq.com/openai/v1"
 
     # ── Reranker ──────────────────────────────────────────────────────────────
