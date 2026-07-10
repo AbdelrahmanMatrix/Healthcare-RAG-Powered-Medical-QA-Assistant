@@ -28,10 +28,18 @@ PORT="${WEBSITES_PORT:-${WEBSITE_PORT:-8000}}"
 # Override with UVICORN_WORKERS=2 env var when the plan has >= 6 GB RAM.
 WORKERS="${UVICORN_WORKERS:-1}"
 
+# Log available memory for debugging OOM issues on constrained plans
 echo "========================================================"
 echo "  Healthcare RAG API"
 echo "  Port:    ${PORT}"
 echo "  Workers: ${WORKERS}"
+if command -v free >/dev/null 2>&1; then
+    echo "  Memory:"
+    free -h | grep -v total | head -2
+elif [ -r /proc/meminfo ]; then
+    echo "  Memory:"
+    grep -E "^(MemTotal|MemAvailable|MemFree)" /proc/meminfo
+fi
 echo "========================================================"
 
 exec uvicorn api.main:app \

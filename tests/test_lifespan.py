@@ -2,9 +2,12 @@
 Tests for api/main.py background initialization.
 
 Covers _background_init() which runs as an asyncio task spawned by
-the FastAPI lifespan — now only handles data artifact download since
-ML models are pre-downloaded into the Docker image during the build
-phase (pre_download_models.py).
+the FastAPI lifespan.
+
+IMPORTANT: _background_init() only handles data artifact download.
+ML models (embedding, reranker, classifier) are NOT loaded here —
+they load lazily on first /query or via /warmup to avoid OOM on
+memory-constrained plans (B2 = 3.5 GB RAM).
 
 Testing strategy:
   - Tests call _background_init() directly (it's a regular async function)
@@ -87,20 +90,9 @@ def mock_download_partial_fail():
         yield m
 
 
-@pytest.fixture
-def mock_model_warmup_ok():
-    """_get_rag loads without error."""
-    with patch("src.pipeline._get_rag") as m:
-        m.return_value = MagicMock()
-        yield m
-
-
-@pytest.fixture
-def mock_model_warmup_fail():
-    """_get_rag raises a runtime error."""
-    with patch("src.pipeline._get_rag") as m:
-        m.side_effect = RuntimeError("GPU out of memory")
-        yield m
+# NOTE: No mock_model_warmup_ok or mock_model_warmup_fail fixtures needed.
+# ML model loading was removed from _background_init() to avoid OOM on
+# memory-constrained plans. Models load lazily on first /query.
 
 
 # ── Step 1: Data artifact check + download ────────────────────────────────────
@@ -111,9 +103,10 @@ class TestBackgroundInitDataCheck:
 
     @pytest.mark.asyncio
     async def test_all_data_present_skips_download(
-        self, caplog, mock_data_all_present, mock_model_warmup_ok,
+        self, caplog, mock_data_all_present,
     ):
-        """When all artifacts exist, a skip message is logged and no download occurs."""
+        """When all artifacts exist, a skip message is logged and no download occurs.
+        ML models are NOT loaded (lazy loading)."""
         from api.main import _background_init
 
         caplog.set_level(logging.INFO)
@@ -124,13 +117,14 @@ class TestBackgroundInitDataCheck:
             mock_dl.assert_not_called()
 
         assert "All data artifacts already present" in caplog.text
-        assert "RAG pipeline loaded from cache" in caplog.text
+        assert "ML models not pre-loaded" in caplog.text
 
     @pytest.mark.asyncio
     async def test_missing_data_triggers_download(
-        self, caplog, mock_data_missing, mock_download_ok, mock_model_warmup_ok,
+        self, caplog, mock_data_missing, mock_download_ok,
     ):
-        """When artifacts are missing, download_all_data is called and results logged."""
+        """When artifacts are missing, download_all_data is called and results logged.
+        ML models are NOT loaded (lazy loading)."""
         from api.main import _background_init
 
         caplog.set_level(logging.INFO)
@@ -141,11 +135,11 @@ class TestBackgroundInitDataCheck:
         assert "Downloading 1 missing data artifact(s)" in caplog.text
         assert "downloaded=1" in caplog.text
         assert "skipped=2" in caplog.text
-        assert "RAG pipeline loaded from cache" in caplog.text
+        assert "ML models not pre-loaded" in caplog.text
 
     @pytest.mark.asyncio
     async def test_download_failure_logs_error(
-        self, caplog, mock_data_missing, mock_download_partial_fail, mock_model_warmup_ok,
+        self, caplog, mock_data_missing, mock_download_partial_fail,
     ):
         """Partial download failure logs an error but does not crash."""
         from api.main import _background_init
@@ -159,10 +153,10 @@ class TestBackgroundInitDataCheck:
 
     @pytest.mark.asyncio
     async def test_check_data_raises_error_logs_and_continues(
-        self, caplog, mock_model_warmup_ok,
+        self, caplog,
     ):
         """When check_data_exists raises (e.g. network timeout), error is logged
-        and warm-up still runs."""
+        and init continues (no model warmup to fail)."""
         from api.main import _background_init
 
         with patch("src.data.hub.check_data_exists", side_effect=RuntimeError("Network timeout")):
@@ -171,75 +165,50 @@ class TestBackgroundInitDataCheck:
             await _background_init()
 
         assert "Data download step failed" in caplog.text
-        mock_model_warmup_ok.assert_called_once()
+        # No _get_rag mock to check — models are NOT loaded in background init
 
 
-# ── Step 2: Pipeline warm-up from cache ───────────────────────────────────
+# ── Lazy loading log message ───────────────────────────────────────────────
 
 
-class TestBackgroundInitWarmup:
-    """Coverage for Step 2 of _background_init — RAG pipeline warm-up."""
+class TestBackgroundInitLazyLoading:
+    """ML model loading was removed from _background_init() to avoid OOM.
+    Models now load lazily on first /query or via /warmup."""
 
     @pytest.mark.asyncio
-    async def test_warmup_success(
-        self, caplog, mock_data_all_present, mock_model_warmup_ok,
-    ):
-        """Successful warm-up logs confirmation."""
+    async def test_logs_lazy_loading_message(self, caplog, mock_data_all_present):
+        """Background init logs that models will load lazily."""
         from api.main import _background_init
 
         caplog.set_level(logging.INFO)
 
         await _background_init()
 
-        assert "RAG pipeline loaded from cache" in caplog.text
+        assert "ML models not pre-loaded" in caplog.text
+        assert "load lazily" in caplog.text
 
     @pytest.mark.asyncio
-    async def test_warmup_failure_logs_warning(
-        self, caplog, mock_data_all_present, mock_model_warmup_fail,
-    ):
-        """When warm-up fails, warning is logged and init continues."""
-        from api.main import _background_init
-
-        caplog.set_level(logging.WARNING)
-
-        await _background_init()
-
-        assert "Pipeline warm-up failed" in caplog.text
-        assert "GPU out of memory" in caplog.text
-
-    @pytest.mark.asyncio
-    async def test_download_ok_warmup_fails(
-        self, caplog, mock_data_missing, mock_download_ok, mock_model_warmup_fail,
-    ):
-        """Download succeeds but warm-up fails: Step 1 logs success,
-        Step 2 logs warning, init does not crash."""
-        from api.main import _background_init
-
-        caplog.set_level(logging.WARNING)
-
-        await _background_init()
-
-        mock_download_ok.assert_called_once()
-        mock_model_warmup_fail.assert_called_once()
-        assert "Pipeline warm-up failed" in caplog.text
-        assert "GPU out of memory" in caplog.text
+    async def test_does_not_call_get_rag(self, mock_data_all_present):
+        """_get_rag() should NOT be called by background init."""
+        with patch("src.pipeline._get_rag") as mock_get_rag:
+            from api.main import _background_init
+            await _background_init()
+            mock_get_rag.assert_not_called()
 
 
 # ── Edge cases ────────────────────────────────────────────────────────────────
 
 
 class TestBackgroundInitEdgeCases:
-    """Graceful degradation when both steps fail."""
+    """Graceful degradation when data download fails."""
 
     @pytest.mark.asyncio
-    async def test_both_steps_fail_init_completes(self):
-        """Even when both data check AND warm-up raise errors,
-        _background_init completes without crashing."""
+    async def test_data_check_fails_init_completes(self):
+        """When data check raises an error, _background_init completes without crashing."""
         from api.main import _background_init
 
         with patch("src.data.hub.check_data_exists", side_effect=RuntimeError("fail")):
-            with patch("src.pipeline._get_rag", side_effect=RuntimeError("fail")):
-                await _background_init()  # should not raise
+            await _background_init()  # should not raise
 
     @pytest.mark.asyncio
     async def test_logger_message_format(self, caplog):

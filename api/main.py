@@ -67,15 +67,18 @@ async def _background_init():
     """
     Initialize the application in the background (non-blocking startup).
 
-    Steps (both run after the lifespan yields, so uvicorn starts immediately):
-      1. Download missing data artifacts (FAISS index, CSVs) from HuggingFace
-      2. Warm up the RAG pipeline by loading models from the local HF cache
+    Step: Download missing data artifacts (FAISS index, CSVs) from HuggingFace.
 
-    Step 2 is fast when models are pre-downloaded into the Docker image
-    (pre_download_models.py at build time) — no network calls, just disk I/O.
+    NOTE: ML models (embedding, reranker, classifier) are NOT loaded here.
+    They load lazily on the first `/query` request or proactively via `/warmup`.
+    This avoids OOM on memory-constrained App Service Plans (B2 = 3.5 GB RAM)
+    where loading all three models simultaneously exceeds available memory.
 
-    /health reports `data_ready` and `pipeline_ready` flags so you can track
-    progress during the cold-start window.
+    On Azure App Service, set USE_RERANKER=false to reduce memory pressure
+    when models do load (saves ~500 MB).
+
+    /health reports `data_ready` and `pipeline_ready` flags — pipeline_ready
+    stays False here since models load lazily.
     """
     from starlette.concurrency import run_in_threadpool
 
@@ -106,18 +109,12 @@ async def _background_init():
             "pipeline may not work until artifacts are available."
         )
 
-    # ── Step 2: warm up the RAG pipeline from local cache ───────────────────
-    try:
-        from src.pipeline import _get_rag
-        await run_in_threadpool(_get_rag)
-        _startup_state["pipeline_ready"] = True
-        elapsed = round(time.monotonic() - (_startup_state["started_at"] or 0), 1)
-        logger.info(f"✅ RAG pipeline loaded from cache — ready for queries (startup: {elapsed}s)")
-    except Exception as e:
-        logger.warning(
-            f"⚠️  Pipeline warm-up failed: {e!r} — "
-            "first query will trigger lazy load. Check FAISS index and model paths."
-        )
+    # ── Step 2: ML models load lazily — skipped here to avoid OOM ──────────
+    logger.info(
+        "⏳ ML models not pre-loaded — will load lazily on first /query "
+        "or via /warmup endpoint."
+    )
+    _startup_state["pipeline_ready"] = False
 
 
 app = FastAPI(

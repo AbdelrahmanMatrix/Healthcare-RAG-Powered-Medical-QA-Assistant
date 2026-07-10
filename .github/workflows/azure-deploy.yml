@@ -226,6 +226,8 @@ jobs:
             --docker-registry-server-password "$ACR_PASSWORD"
 
       - name: Update environment variables
+        # B2 plan has 3.5 GB RAM — skip reranker (~500 MB) to reduce memory pressure.
+        # Models load lazily (not on startup) — UVICORN_WORKERS=1 keeps memory low.
         run: |
           az webapp config appsettings set \
             --name $APP_NAME \
@@ -237,26 +239,25 @@ jobs:
               DEPLOY_ENV="azure" \
               AZURE_APP_URL="https://${APP_NAME}.azurewebsites.net" \
               WEBSITES_PORT="8000" \
-              WEBSITES_CONTAINER_START_TIME_LIMIT="1800"
+              WEBSITES_CONTAINER_START_TIME_LIMIT="1800" \
+              USE_RERANKER="false" \
+              UVICORN_WORKERS="1"
 
       - name: Restart and wait for image pull
-        # az webapp config container set updates the image tag but does NOT
-        # restart the container. An explicit restart is required. The 3-minute
-        # wait gives Azure time to pull the ~4 GB image before probing.
+        # The Docker image is ~4 GB (includes pre-downloaded ML models).
+        # Pulling from ACR Basic tier over a B2 connection can take 5-8 minutes.
+        # We wait 8 minutes before probing to give the pull enough time.
         run: |
           az webapp restart \
             --name $APP_NAME \
             --resource-group $RESOURCE_GROUP
-          echo "Waiting 3 minutes for image pull + container cold start..."
-          sleep 180
+          echo "Waiting 8 minutes for image pull + container cold start..."
+          sleep 480
 
       - name: Wait for deployment — /health probe
-        # Uvicorn starts immediately; the lifespan background task downloads
-        # data artifacts and pre-loads models asynchronously.
-        # /health returns HTTP 200 right away (status: "initializing"), then
-        # "ok" once both data_ready and pipeline_ready are true.
-        # We first wait for HTTP 200, then call /warmup to block until the
-        # pipeline is fully loaded before routing real traffic.
+        # Uvicorn starts immediately (no model loading at startup — models
+        # load lazily to avoid OOM on B2 plan with 3.5 GB RAM).
+        # /health returns HTTP 200 right away.
         run: |
           URL="https://${APP_NAME}.azurewebsites.net"
 
@@ -276,8 +277,9 @@ jobs:
             sleep 30
           done
 
-          # Phase 2: call /warmup to block until models are fully loaded
-          # This ensures the first real user query hits an already-warm pipeline.
+          # Phase 2: call /warmup to pre-load models (allow up to 5 min).
+          # This is best-effort — if warmup fails (OOM), the first user query
+          # will trigger lazy loading instead.
           echo "Phase 2: calling /warmup to pre-load models..."
           WARMUP_STATUS=$(curl -so /dev/null -w "%{http_code}" \
             --max-time 300 "${URL}/warmup" || echo "000")
@@ -285,7 +287,8 @@ jobs:
           if [ "$WARMUP_STATUS" = "200" ]; then
             echo "  ✅ Pipeline warmed up — API ready for traffic."
           else
-            echo "  ⚠️  Warmup returned ${WARMUP_STATUS} — first query may have higher latency."
+            echo "  ⚠️  Warmup returned ${WARMUP_STATUS} — first query will trigger lazy load."
+            echo "  This is normal on memory-constrained plans."
           fi
 
   # ── 3b. Deploy Dashboard to Azure App Service ────────────────────────────────

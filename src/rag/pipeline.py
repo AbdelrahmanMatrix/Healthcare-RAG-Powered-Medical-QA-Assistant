@@ -69,8 +69,8 @@ DEFAULT_FALLBACK_MODEL = "google/flan-t5-base"
 # CrossEncoder reranker (12-layer, higher precision than 6-layer)
 DEFAULT_RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-12-v2"
 
-DEFAULT_TOP_K = 15          # FAISS retrieval candidates
-DEFAULT_INJECT_K = 3        # chunks fed to LLM after reranking
+DEFAULT_TOP_K = 30          # FAISS retrieval candidates (increased for broader coverage)
+DEFAULT_INJECT_K = 5        # chunks fed to LLM after reranking (increased for more evidence)
 DEFAULT_MAX_CONTEXT_WORDS = 200
 DEFAULT_MAX_NEW_TOKENS = 256
 DEFAULT_MIN_ANSWER_WORDS = 3
@@ -121,8 +121,8 @@ _LEADING_PUNCT_RE = re.compile(r'^[\W_]+')
 
 _HEDGING_PATTERNS = [
     # Hedging = LLM refuses to answer when evidence IS relevant.
-    # "Does not contain sufficient information" is now the CORRECT response
-    # when evidence is about a different disease/condition (see _build_prompt).
+    # The prompt uses a "topical relevance" rule: the LLM should only refuse
+    # when ALL evidence is unrelated to the query topic (see _build_prompt).
     re.compile(r'not directly (linked|address|answer|support|evidence)', re.IGNORECASE),
     re.compile(r'no (direct )?evidence', re.IGNORECASE),
     re.compile(r'(there is|there are) no', re.IGNORECASE),
@@ -266,6 +266,12 @@ class RAGPipeline:
         except Exception as e:  # pragma: no cover — sys.modules patching; untraceable
             print(f"[WARN] Classifier unavailable ({e}) — category routing disabled")
 
+        # ── Reranker score threshold for quality-aware fallback ─────────────
+        # When the average reranker score of top chunks falls below this
+        # threshold, the category-filtered retrieval falls back to general
+        # retrieval (used by run_pipeline in src/pipeline.py).
+        self._reranker_fallback_threshold = 1.0
+
         # ── CrossEncoder Reranker (MiniLM-L-12-v2) ───────────────────
         self._use_reranker = use_reranker
         if use_reranker:
@@ -335,6 +341,25 @@ class RAGPipeline:
 
         return sorted(candidates, key=lambda x: x.get("reranker_score", 0), reverse=True)
 
+    def _expand_query(self, query: str, category: str = None) -> str:
+        """
+        Expand the query with category context for improved FAISS retrieval.
+
+        Prepends the medical category to the query so the embedding model
+        focuses on the relevant medical domain. This helps retrieve chunks
+        that are more closely related to the query's medical context.
+
+        Args:
+            query: The original user query.
+            category: Optional predicted category (Symptoms, Diagnosis, etc.).
+
+        Returns:
+            Expanded query string for embedding only (reranking uses original).
+        """
+        if category and category != "General":
+            return f"{category.lower()}: {query}"
+        return query
+
     def retrieve(self, query: str, top_k: int = None) -> list:
         """
         Hybrid retrieval: BM25 + FAISS -> CrossEncoder reranker.
@@ -343,6 +368,9 @@ class RAGPipeline:
           1. FAISS retrieves top_k semantic candidates
           2. BM25 prepends high-confidence keyword hits (if available)
           3. CrossEncoder reranks the merged pool
+
+        Note: Query expansion is handled by the caller (run_pipeline).
+        The retrieve method uses the query as-is for all operations.
         """
         requested_k = self.top_k if top_k is None else top_k
         k = max(0, min(requested_k, self.index.ntotal))
@@ -377,7 +405,10 @@ class RAGPipeline:
 
         return self._rerank(query, candidates)
 
-    def retrieve_by_category(self, query: str, category: str, top_k: int = None, all_scores: dict = None) -> list:
+    def retrieve_by_category(
+        self, query: str, category: str, top_k: int = None,
+        all_scores: dict = None
+    ) -> list:
         """
         Hybrid category-prioritised retrieval: BM25 + FAISS -> scored matching -> rerank.
 
@@ -498,18 +529,21 @@ class RAGPipeline:
             "answer the question concisely.\n\n"
             "Rules - FOLLOW IN ORDER OF PRIORITY:\n"
             "\n"
-            "[RULE 1 — DISEASE MISMATCH — HIGHEST PRIORITY]\n"
-            "If the evidence discusses a DIFFERENT disease, condition, or medication "
-            "than the question asks about, you MUST respond with exactly: "
+            "[RULE 1 — TOPICAL RELEVANCE — HIGHEST PRIORITY]\n"
+            "If NONE of the provided evidence discusses any disease, condition, or "
+            "medication related to the question, respond with:\n"
             "'The retrieved medical literature does not contain sufficient information "
             "to answer this question.'\n"
-            "CRITICAL: Even if the evidence MENTIONS a symptom or word from the query, "
-            "do NOT answer if the MAIN TOPIC of the evidence is a different condition.\n"
+            "CRITICAL: If the evidence IS topically related (same disease, body system, "
+            "symptom type, or treatment class), you MUST synthesize the most relevant "
+            "finding even if the evidence covers a specific research angle rather than "
+            "directly answering the question.\n"
+            "Only refuse if ALL evidence is completely unrelated to the question's subject.\n"
             "EXAMPLE:\n"
-            "  Question: 'What are the symptoms of fever?'\n"
-            "  Evidence: 'Fever is not a relevant symptom in chronic rhinosinusitis.'\n"
-            "  → The MAIN TOPIC is chronic rhinosinusitis, NOT fever. Respond with the "
-            "insufficient information message.\n"
+            "  Question: 'What are the symptoms of diabetes?'\n"
+            "  Evidence: 'Depression is a common complication of type 2 diabetes...'\n"
+            "  → The evidence covers diabetes complications — this IS topically related.\n"
+            "    Synthesize the finding even though it studies a specific aspect.\n"
             "\n"
             "[RULE 2] Synthesize findings from ALL evidence into one clear sentence\n"
             "[RULE 3] If the evidence directly answers the question, state it plainly\n"
@@ -614,13 +648,16 @@ class RAGPipeline:
         if not retrieved_chunks:
             return INSUFFICIENT_CONTEXT_MESSAGE
 
-        # Find the best non-empty answer across all chunks
+        # Find the best non-empty answer across all chunks (by reranker score)
         best_answer = ""
+        best_score = float("-inf")
         for chunk in retrieved_chunks:
             candidate = chunk.get("answer", "").strip()
             if candidate:
-                best_answer = candidate
-                break
+                score = chunk.get("reranker_score", float("-inf"))
+                if score > best_score:
+                    best_answer = candidate
+                    best_score = score
 
         # ── Extractive mode: return best chunk's answer directly ────────
         if self._extractive:
@@ -642,16 +679,15 @@ class RAGPipeline:
                 "Do NOT start with hedging phrases. Be concise and direct.\n\n"
                 "Rules - FOLLOW IN ORDER OF PRIORITY:\n"
                 "\n"
-                "[RULE 1 — DISEASE MISMATCH — HIGHEST PRIORITY]\n"
-                "If the evidence discusses a DIFFERENT disease or condition than the "
-                "question asks about, you MUST respond with exactly: "
+                "[RULE 1 — TOPICAL RELEVANCE — HIGHEST PRIORITY]\n"
+                "If NONE of the provided evidence is related to the question's topic "
+                "(disease, condition, medication, or body system), respond with exactly:\n"
                 "'The retrieved medical literature does not contain sufficient information "
                 "to answer this question.'\n"
-                "CRITICAL: The evidence MENTIONING a symptom from the query does NOT "
-                "make it relevant. Check the MAIN TOPIC of the evidence.\n"
-                "EXAMPLE: Question='What are the symptoms of fever?' Evidence='Fever is "
-                "not a relevant symptom in chronic rhinosinusitis.' → MAIN TOPIC is "
-                "chronic rhinosinusitis, NOT fever. Respond with insufficient info.\n"
+                "CRITICAL: Topically related evidence SHOULD be used. If the evidence "
+                "covers the same disease, symptoms, treatments, or medical domain as "
+                "the question, synthesize the most relevant finding into your answer.\n"
+                "Only refuse if ALL evidence is completely unrelated to the question.\n"
                 "\n"
                 "[RULE 2] State the answer directly. Do NOT use hedging language.\n"
                 "[RULE 3] Do NOT say 'the evidence does not directly address' or similar.\n"

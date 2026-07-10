@@ -37,6 +37,8 @@ def mock_rag():
     # Make the pipeline fall back to the module-level predict() so tests
     # can continue to mock src.pipeline.predict for category control.
     rag._use_classifier = False
+    # Allow category-retrieval quality check (set a valid float threshold)
+    rag._reranker_fallback_threshold = 1.0
 
     def _format_sources(retrieved):
         return [
@@ -54,13 +56,16 @@ def mock_rag():
     rag.format_sources = _format_sources
     rag.retrieve.return_value = [
         {"chunk_id": 1, "question": "q1", "category": "General",
-         "distance": 0.1, "relevance_score": 0.9, "excerpt": "e1"},
+         "distance": 0.1, "relevance_score": 0.9, "excerpt": "e1",
+         "reranker_score": 2.0},
         {"chunk_id": 2, "question": "q2", "category": "General",
-         "distance": 0.2, "relevance_score": 0.8, "excerpt": "e2"},
+         "distance": 0.2, "relevance_score": 0.8, "excerpt": "e2",
+         "reranker_score": 1.5},
     ]
     rag.retrieve_by_category.return_value = [
         {"chunk_id": 10, "question": "q10", "category": "Symptoms",
-         "distance": 0.05, "relevance_score": 0.95, "excerpt": "e10"},
+         "distance": 0.05, "relevance_score": 0.95, "excerpt": "e10",
+         "reranker_score": 2.5},
     ]
     rag.generate.return_value = "The patient may experience fever and fatigue."
     return rag
@@ -260,7 +265,7 @@ class TestRunPipelineTopK:
         with patch("src.pipeline.predict", return_value="Diagnosis"):
             run_pipeline("test", top_k=10, category="Diagnosis")
             mock_rag.retrieve_by_category.assert_called_once_with(
-                "test", "Diagnosis", 10, all_scores=None
+                "diagnosis: test", "Diagnosis", 10, all_scores=None
             )
 
     def test_top_k_passed_to_general_retrieve(self, mock_rag_cls, mock_rag):
@@ -269,6 +274,7 @@ class TestRunPipelineTopK:
 
         with patch("src.pipeline.predict", return_value=None):
             run_pipeline("test", top_k=7)
+            # When category is None, query is not expanded
             mock_rag.retrieve.assert_called_once_with("test", 7)
 
     def test_top_k_none_uses_default(self, mock_rag_cls, mock_rag):
@@ -288,8 +294,9 @@ class TestRunPipelineTopK:
 
         with patch("src.pipeline.predict", return_value="Symptoms"):
             run_pipeline("test", top_k=0, category="Symptoms")
+            # Query is expanded with category prefix
             mock_rag.retrieve_by_category.assert_called_once_with(
-                "test", "Symptoms", 0, all_scores=None
+                "symptoms: test", "Symptoms", 0, all_scores=None
             )
 
 
@@ -380,11 +387,14 @@ class TestRunPipelineEdgeCases:
         """Multiple retrieved results produce multiple source_details."""
         mock_rag.retrieve_by_category.return_value = [
             {"chunk_id": 1, "question": "q1", "category": "Symptoms",
-             "distance": 0.1, "relevance_score": 0.9, "excerpt": "e1"},
+             "distance": 0.1, "relevance_score": 0.9, "excerpt": "e1",
+             "reranker_score": 2.0},
             {"chunk_id": 2, "question": "q2", "category": "Symptoms",
-             "distance": 0.2, "relevance_score": 0.8, "excerpt": "e2"},
+             "distance": 0.2, "relevance_score": 0.8, "excerpt": "e2",
+             "reranker_score": 1.8},
             {"chunk_id": 3, "question": "q3", "category": "Symptoms",
-             "distance": 0.3, "relevance_score": 0.7, "excerpt": "e3"},
+             "distance": 0.3, "relevance_score": 0.7, "excerpt": "e3",
+             "reranker_score": 1.5},
         ]
 
         from src.pipeline import run_pipeline
