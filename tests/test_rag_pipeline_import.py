@@ -171,7 +171,7 @@ class TestCallGroqWithoutTenacity:
             mock_response = MagicMock()
             mock_response.choices[0].message.content = \
                 "  Answer without tenacity  "
-            pipeline._groq_client.chat.completions.create.return_value \
+            pipeline._groq_clients[0].chat.completions.create.return_value \
                 = mock_response
 
             result = pipeline._call_groq("test prompt")

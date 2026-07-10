@@ -5,7 +5,7 @@ Top-level pipeline entry point — thread-safe singleton loading.
 """
 import threading
 from src.classification.classifier import predict
-from src.rag.pipeline import build_rag_pipeline
+from src.rag.pipeline import build_rag_pipeline, GENERAL_KNOWLEDGE_NOTE
 
 _rag = None
 _rag_lock = threading.Lock()
@@ -117,10 +117,15 @@ def run_pipeline(question: str, top_k: int = None, category: str = None) -> dict
 
     raw_answer = rag.generate(question, retrieved)
     sources = rag.format_sources(retrieved)
+    answer_source = getattr(rag, '_last_answer_source', 'rag')
+
+    # Append transparency note when answer came from general knowledge
+    transparency_note = GENERAL_KNOWLEDGE_NOTE if answer_source == 'general_knowledge' else ""
 
     return {
-        "answer":         raw_answer,
+        "answer":         raw_answer + transparency_note,
         "category":       effective_category or "General",
         "sources":        [str(s["chunk_id"]) for s in sources],
         "source_details": sources,
+        "answer_source":  answer_source,
     }

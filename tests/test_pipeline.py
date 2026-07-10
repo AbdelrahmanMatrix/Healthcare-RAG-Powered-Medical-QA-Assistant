@@ -156,7 +156,7 @@ class TestRunPipelineBasics:
 
         with patch("src.pipeline.predict", return_value="General"):
             result = run_pipeline("test question")
-        assert set(result.keys()) == {"answer", "category", "sources", "source_details"}
+        assert set(result.keys()) == {"answer", "category", "sources", "source_details", "answer_source"}
 
     def test_answer_is_string(self, mock_rag_cls, mock_rag):
         """Answer is a string."""

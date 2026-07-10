@@ -608,7 +608,7 @@ class TestCallGroq:
         pipeline = builder.pipeline
         mock_response = MagicMock()
         mock_response.choices[0].message.content = "  Answer text  "
-        pipeline._groq_client.chat.completions.create.return_value = mock_response
+        pipeline._groq_clients[0].chat.completions.create.return_value = mock_response
 
         result = pipeline._call_groq("test prompt")
         assert result == "Answer text"
@@ -618,10 +618,10 @@ class TestCallGroq:
         pipeline = builder.pipeline
         mock_response = MagicMock()
         mock_response.choices[0].message.content = "answer"
-        pipeline._groq_client.chat.completions.create.return_value = mock_response
+        pipeline._groq_clients[0].chat.completions.create.return_value = mock_response
 
         pipeline._call_groq("test prompt")
-        call_kwargs = pipeline._groq_client.chat.completions.create.call_args[1]
+        call_kwargs = pipeline._groq_clients[0].chat.completions.create.call_args[1]
         messages = call_kwargs["messages"]
         system_msgs = [m for m in messages if m["role"] == "system"]
         assert len(system_msgs) == 1
@@ -631,11 +631,52 @@ class TestCallGroq:
         pipeline = builder.pipeline
         mock_response = MagicMock()
         mock_response.choices[0].message.content = "answer"
-        pipeline._groq_client.chat.completions.create.return_value = mock_response
+        pipeline._groq_clients[0].chat.completions.create.return_value = mock_response
 
         pipeline._call_groq("test prompt")
-        call_kwargs = pipeline._groq_client.chat.completions.create.call_args[1]
+        call_kwargs = pipeline._groq_clients[0].chat.completions.create.call_args[1]
         assert call_kwargs["temperature"] == 0.0
+
+    def test_429_rotates_key_and_retries(self, builder):
+        """On 429 rate limit, _call_groq rotates to next key and retries."""
+        pipeline = builder.pipeline
+
+        # Set up 2 mock clients
+        mock_client1 = MagicMock()
+        mock_client2 = MagicMock()
+        pipeline._groq_clients = [mock_client1, mock_client2]
+        pipeline._groq_key_index = 0
+
+        # First client raises 429, second succeeds
+        error_429 = Exception("Rate limited")
+        error_429.status_code = 429
+        mock_client1.chat.completions.create.side_effect = error_429
+
+        mock_response = MagicMock()
+        mock_response.choices[0].message.content = "Success answer"
+        mock_client2.chat.completions.create.return_value = mock_response
+
+        result = pipeline._call_groq("test prompt")
+        assert result == "Success answer"
+        # Key should have rotated to 1
+        assert pipeline._groq_key_index == 1
+
+    def test_429_single_key_no_rotation(self, builder):
+        """With a single key, 429 is not caught — exception propagates."""
+        pipeline = builder.pipeline
+
+        # Single key only (default in builder)
+        pipeline._groq_clients = [pipeline._groq_clients[0]]
+        pipeline._groq_key_index = 0
+
+        error_429 = Exception("Rate limited")
+        error_429.status_code = 429
+        pipeline._groq_clients[0].chat.completions.create.side_effect = error_429
+
+        with pytest.raises(Exception, match="Rate limited"):
+            pipeline._call_groq("test prompt")
+        # Key should NOT have rotated (still 0)
+        assert pipeline._groq_key_index == 0
 
 
 # ==============================================================================
@@ -756,9 +797,9 @@ class TestGenerate:
         # No retry - hedging is skipped for non-Groq models
         assert result == "The evidence does not directly address this."
 
-    def test_disease_mismatch_honest_response_passes_through(self, builder):
-        """The honest 'does not contain sufficient information' response passes
-        through generate() WITHOUT triggering hedging recovery."""
+    def test_disease_mismatch_triggers_general_knowledge_fallback(self, builder):
+        """When evidence is insufficient, generate() falls back to LLM general
+        knowledge instead of returning the refusal message."""
         pipeline = builder.pipeline
         honest_response = (
             "The retrieved medical literature does not contain sufficient "
@@ -766,14 +807,17 @@ class TestGenerate:
         )
         pipeline._generate_once = MagicMock(return_value=honest_response)
         pipeline._is_hedging = MagicMock(return_value=False)
+        pipeline._call_groq = MagicMock(return_value="General knowledge answer about symptoms.")
 
         chunks = [{"answer": "Some irrelevant answer.", "context": "c1"}]
         result = pipeline.generate("test query", chunks)
 
-        # The honest response should be returned as-is
-        assert result == honest_response
+        # Should fall back to general knowledge instead of returning the refusal
+        assert result == "General knowledge answer about symptoms."
         # _is_hedging was checked but returned False — no retry
         pipeline._is_hedging.assert_called_once_with(honest_response)
+        # _call_groq was called for the general knowledge fallback
+        pipeline._call_groq.assert_called()
 
     def test_disease_mismatch_not_flagged_as_hedging_in_is_hedging(self, builder):
         """_is_hedging() explicitly returns False for the prompt-mandated text."""
@@ -816,7 +860,7 @@ class TestAnswer:
         result = pipeline.answer("What causes disease X?")
         assert set(result.keys()) == {
             "question", "answer", "answer_raw", "retrieved_sources",
-            "disclaimer_present", "top_k", "used_rag",
+            "disclaimer_present", "top_k", "used_rag", "answer_source",
             "retrieval_quality", "mean_cosine_similarity",
         }
         assert result["question"] == "What causes disease X?"
@@ -871,6 +915,27 @@ class TestAnswer:
         assert result["retrieval_quality"] == pytest.approx(0.8, abs=1e-4)
         # mean_cosine_similarity = mean of distance = (0.8 + 0.6) / 2 = 0.7
         assert result["mean_cosine_similarity"] == pytest.approx(0.7, abs=1e-4)
+
+    def test_answer_source_is_rag_by_default(self, builder):
+        """answer_source defaults to 'rag' when using standard RAG."""
+        pipeline = builder.pipeline
+        pipeline._needs_retrieval = MagicMock(return_value=True)
+        pipeline.generate = MagicMock(return_value="An answer from evidence.")
+
+        result = pipeline.answer("test")
+        assert result["answer_source"] == "rag"
+
+    def test_answer_source_general_knowledge_when_fallback(self, builder):
+        """answer_source is 'general_knowledge' when fallback is triggered."""
+        pipeline = builder.pipeline
+        pipeline._needs_retrieval = MagicMock(return_value=True)
+        pipeline.generate = MagicMock(return_value="General knowledge answer.")
+        pipeline._last_answer_source = "general_knowledge"
+
+        result = pipeline.answer("test")
+        assert result["answer_source"] == "general_knowledge"
+        from src.rag.pipeline import GENERAL_KNOWLEDGE_NOTE
+        assert GENERAL_KNOWLEDGE_NOTE in result["answer"]
 
     def test_disclaimer_appended(self, builder):
         """answer appends disclaimer to answer_raw."""
@@ -958,9 +1023,30 @@ class TestAnswerWithRouting:
             "question", "category", "classifier_confidence",
             "routing_applied", "answer", "answer_raw",
             "retrieved_sources", "disclaimer_present", "top_k",
-            "category_matched_sources",
+            "answer_source", "category_matched_sources",
         }
         assert set(result.keys()) == expected_keys
+
+    def test_answer_source_rag_default_routing(self, builder):
+        """answer_with_routing sets answer_source to 'rag' by default."""
+        pipeline = builder.pipeline
+        pipeline.generate = MagicMock(return_value="Answer text.")
+
+        result = pipeline.answer_with_routing("test query", category="Symptoms")
+        assert result["answer_source"] == "rag"
+        from src.rag.pipeline import GENERAL_KNOWLEDGE_NOTE
+        assert GENERAL_KNOWLEDGE_NOTE not in result["answer"]
+
+    def test_answer_source_general_knowledge_routing(self, builder):
+        """answer_with_routing includes answer_source and transparency note."""
+        pipeline = builder.pipeline
+        pipeline.generate = MagicMock(return_value="General knowledge answer.")
+        pipeline._last_answer_source = "general_knowledge"
+
+        result = pipeline.answer_with_routing("test query", category="Symptoms")
+        assert result["answer_source"] == "general_knowledge"
+        from src.rag.pipeline import GENERAL_KNOWLEDGE_NOTE
+        assert GENERAL_KNOWLEDGE_NOTE in result["answer"]
 
 
 # ==============================================================================
@@ -981,7 +1067,7 @@ class TestNeedsRetrieval:
         pipeline = builder.pipeline
         mock_response = MagicMock()
         mock_response.choices[0].message.content = '{"needs_rag": true}'
-        pipeline._groq_client.chat.completions.create.return_value = mock_response
+        pipeline._groq_clients[0].chat.completions.create.return_value = mock_response
 
         assert pipeline._needs_retrieval("Does metformin reduce HbA1c?") is True
 
@@ -990,14 +1076,14 @@ class TestNeedsRetrieval:
         pipeline = builder.pipeline
         mock_response = MagicMock()
         mock_response.choices[0].message.content = '{"needs_rag": false}'
-        pipeline._groq_client.chat.completions.create.return_value = mock_response
+        pipeline._groq_clients[0].chat.completions.create.return_value = mock_response
 
         assert pipeline._needs_retrieval("Hi there!") is False
 
     def test_groq_exception_falls_back_to_true(self, builder):
         """Exception in Groq call falls back to True (always retrieve)."""
         pipeline = builder.pipeline
-        pipeline._groq_client.chat.completions.create.side_effect = RuntimeError("API down")
+        pipeline._groq_clients[0].chat.completions.create.side_effect = RuntimeError("API down")
 
         assert pipeline._needs_retrieval("test query") is True
 
@@ -1006,7 +1092,7 @@ class TestNeedsRetrieval:
         pipeline = builder.pipeline
         mock_response = MagicMock()
         mock_response.choices[0].message.content = "not valid json"
-        pipeline._groq_client.chat.completions.create.return_value = mock_response
+        pipeline._groq_clients[0].chat.completions.create.return_value = mock_response
 
         assert pipeline._needs_retrieval("test query") is True
 

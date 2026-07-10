@@ -25,12 +25,16 @@ Public API (stable):
         answer_with_routing(query, category=None, top_k=None) -> dict
 """
 
+import logging
 import os
 import pickle
 import re
 import sys
 import threading
 from pathlib import Path
+
+
+logger = logging.getLogger(__name__)
 
 # Fix stdout encoding so emoji don't crash on Windows cp1252 terminals
 try:
@@ -60,6 +64,15 @@ INSUFFICIENT_CONTEXT_MESSAGE = (
     "directly or rephrase your question."
 )
 
+# Transparency note appended when answer comes from general knowledge fallback
+# (not from retrieved RAG evidence). Shared between answer() and run_pipeline().
+GENERAL_KNOWLEDGE_NOTE = (
+    "\n\n("
+    "based on general medical knowledge — "
+    "the retrieved research did not contain specific information on this topic"
+    ")"
+)
+
 # Biomedical domain embedding model (PubMedBERT fine-tuned on MS-MARCO)
 DEFAULT_EMBEDDING_MODEL = "pritamdeka/S-PubMedBert-MS-MARCO"
 
@@ -72,7 +85,7 @@ DEFAULT_RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-12-v2"
 DEFAULT_TOP_K = 30          # FAISS retrieval candidates (increased for broader coverage)
 DEFAULT_INJECT_K = 5        # chunks fed to LLM after reranking (increased for more evidence)
 DEFAULT_MAX_CONTEXT_WORDS = 200
-DEFAULT_MAX_NEW_TOKENS = 256
+DEFAULT_MAX_NEW_TOKENS = 384
 DEFAULT_MIN_ANSWER_WORDS = 3
 CLASSIFIER_CONFIDENCE_THRESHOLD = 0.70
 
@@ -120,9 +133,9 @@ _LEADING_PUNCT_RE = re.compile(r'^[\W_]+')
 # hedging variants observed in llama-4-scout on medical QA.
 
 _HEDGING_PATTERNS = [
-    # Hedging = LLM refuses to answer when evidence IS relevant.
-    # The prompt uses a "topical relevance" rule: the LLM should only refuse
-    # when ALL evidence is unrelated to the query topic (see _build_prompt).
+    # Hedging = LLM refuses to answer even when evidence IS directly relevant.
+    # The prompt uses a "direct relevance" rule: the LLM should only refuse
+    # when the evidence does NOT answer the specific question (see _build_prompt).
     re.compile(r'not directly (linked|address|answer|support|evidence)', re.IGNORECASE),
     re.compile(r'no (direct )?evidence', re.IGNORECASE),
     re.compile(r'(there is|there are) no', re.IGNORECASE),
@@ -130,6 +143,16 @@ _HEDGING_PATTERNS = [
     re.compile(r'cannot (answer|determine|say)', re.IGNORECASE),
     re.compile(r'unable to (answer|determine)', re.IGNORECASE),
     re.compile(r'does not provide (enough|sufficient|direct)', re.IGNORECASE),
+]
+
+# ── Insufficient-context patterns ──────────────────────────────────────────
+# When the LLM says evidence is insufficient (legitimately), we fall back to
+# the LLM's general medical knowledge instead of showing a refusal message.
+# These patterns detect the exact refusal message from the "direct relevance" prompt.
+
+_INSUFFICIENT_CONTEXT_PATTERNS = [
+    re.compile(r'does not contain (sufficient|enough) information', re.IGNORECASE),
+    re.compile(r'insufficient information', re.IGNORECASE),
 ]
 
 
@@ -211,20 +234,21 @@ class RAGPipeline:
         self.min_answer_words = min_answer_words
         self.max_new_tokens = max_new_tokens
         self._extractive = extractive
+        self._last_answer_source = "rag"  # tracks whether answer came from RAG or general knowledge
 
         # ── Embedding model (PubMedBERT) ──────────────────────────────
-        print(f"Loading embedding model: {embedding_model}")
+        logger.info("Loading embedding model: %s", embedding_model)
         self.encoder = SentenceTransformer(embedding_model)
 
         # ── FAISS index ───────────────────────────────────────────────
         idx_path = faiss_index_path or str(FAISS_INDEX_PATH)
-        print(f"Loading FAISS index: {idx_path}")
+        logger.info("Loading FAISS index: %s", idx_path)
         self.index = faiss.read_index(idx_path)
-        print(f"  Vectors in index: {self.index.ntotal:,}")
+        logger.info("  Vectors in index: %s", f"{self.index.ntotal:,}")
 
         # ── Chunk mapping ─────────────────────────────────────────────
         map_path = chunk_mapping_path or str(CHUNK_MAPPING_PATH)
-        print(f"Loading chunk mapping: {map_path}")
+        logger.info("Loading chunk mapping: %s", map_path)
         with open(map_path, "rb") as f:
             self.mapping_df = pickle.load(f)
 
@@ -262,9 +286,9 @@ class RAGPipeline:
             from src.classification.classifier import load_classifier
             self._classifier = load_classifier()
             self._use_classifier = True
-            print("[OK] Classifier ready for category routing")
+            logger.info("[OK] Classifier ready for category routing")
         except Exception as e:  # pragma: no cover — sys.modules patching; untraceable
-            print(f"[WARN] Classifier unavailable ({e}) — category routing disabled")
+            logger.warning("[WARN] Classifier unavailable (%s) — category routing disabled", e)
 
         # ── Reranker score threshold for quality-aware fallback ─────────────
         # When the average reranker score of top chunks falls below this
@@ -277,27 +301,31 @@ class RAGPipeline:
         if use_reranker:
             try:
                 from sentence_transformers import CrossEncoder
-                print(f"Loading reranker: {reranker_model}")
+                logger.info("Loading reranker: %s", reranker_model)
                 self.reranker = CrossEncoder(reranker_model)
-                print("[OK] Reranker ready")
+                logger.info("[OK] Reranker ready")
             except Exception as e:  # pragma: no cover — reranker fallback; exercised via importlib.reload; untraceable
-                print(f"[WARN] Reranker unavailable ({e}) - skipping reranking")  # pragma: no cover
+                logger.warning("[WARN] Reranker unavailable (%s) - skipping reranking", e)  # pragma: no cover
                 self._use_reranker = False  # pragma: no cover
 
         # ── LLM (Groq API or local flan-t5-base fallback) ────────────
-        groq_key = os.getenv("GROQ_API_KEY", "")
-        if groq_key:
+        groq_keys_raw = os.getenv("GROQ_API_KEY", "")
+        if groq_keys_raw:
             from openai import OpenAI
-            print(f"Loading LLM via Groq API: {llm_model}")
-            self._groq_client = OpenAI(
-                api_key=groq_key,
-                base_url="https://api.groq.com/openai/v1",
-            )
+            # Support multiple comma-separated keys — rotates on rate limits (429)
+            keys = [k.strip() for k in groq_keys_raw.split(",") if k.strip()]
+            logger.info("Loading LLM via Groq API: %s (%d key(s))", llm_model, len(keys))
+            self._groq_clients = [
+                OpenAI(api_key=k, base_url="https://api.groq.com/openai/v1")
+                for k in keys
+            ]
+            self._groq_key_index = 0
+            self._groq_key_lock = threading.Lock()
             self._groq_model = llm_model
             self._use_groq = True
-            print("[OK] Groq client ready")
+            logger.info("[OK] Groq client ready")
         else:
-            print("GROQ_API_KEY not set — falling back to local flan-t5-base")
+            logger.info("GROQ_API_KEY not set — falling back to local flan-t5-base")
 
             from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
             import torch
@@ -309,7 +337,7 @@ class RAGPipeline:
             self._torch = torch
             self._use_groq = False
 
-        print("[OK] RAG Pipeline ready")
+        logger.info("[OK] RAG Pipeline ready")
 
     # ── Retrieval ─────────────────────────────────────────────────────────────
 
@@ -525,25 +553,21 @@ class RAGPipeline:
         evidence = "\n---\n".join(evidence_blocks)
 
         return (
-            "Based on the medical research evidence below, "
-            "answer the question concisely.\n\n"
+            "Below is information from medical research. Explain the answer in "
+            "simple, clear terms that anyone can understand.\n\n"
             "Rules - FOLLOW IN ORDER OF PRIORITY:\n"
             "\n"
-            "[RULE 1 — TOPICAL RELEVANCE — HIGHEST PRIORITY]\n"
-            "If NONE of the provided evidence discusses any disease, condition, or "
-            "medication related to the question, respond with:\n"
+            "[RULE 1 — DIRECT RELEVANCE — HIGHEST PRIORITY]\n"
+            "The evidence must DIRECTLY answer the specific question asked.\n"
+            "If the evidence discusses a related topic (same disease, body system, or "
+            "treatment area) but does NOT answer the specific question, respond with:\n"
             "'The retrieved medical literature does not contain sufficient information "
             "to answer this question.'\n"
-            "CRITICAL: If the evidence IS topically related (same disease, body system, "
-            "symptom type, or treatment class), you MUST synthesize the most relevant "
-            "finding even if the evidence covers a specific research angle rather than "
-            "directly answering the question.\n"
-            "Only refuse if ALL evidence is completely unrelated to the question's subject.\n"
-            "EXAMPLE:\n"
-            "  Question: 'What are the symptoms of diabetes?'\n"
-            "  Evidence: 'Depression is a common complication of type 2 diabetes...'\n"
-            "  → The evidence covers diabetes complications — this IS topically related.\n"
-            "    Synthesize the finding even though it studies a specific aspect.\n"
+            "CRITICAL: Being \"about the same disease\" is NOT enough — the evidence must "
+            "actually address what was asked. For example, evidence about heart attack "
+            "symptoms in diabetic patients does NOT answer \"What are the symptoms of "
+            "diabetes?\" because it discusses a complication, not diabetes symptoms.\n"
+            "Only synthesize if the evidence DIRECTLY addresses the question's topic.\n"
             "\n"
             "[RULE 2] Synthesize findings from ALL evidence into one clear sentence\n"
             "[RULE 3] If the evidence directly answers the question, state it plainly\n"
@@ -551,7 +575,9 @@ class RAGPipeline:
             "[RULE 5] Do NOT start with hedging phrases such as 'The evidence does not "
             "directly address' or 'The provided research conclusions'\n"
             "[RULE 6] Do NOT reference study numbers in your answer — just give the answer\n"
-            "[RULE 7] Use the same medical terminology as the evidence\n"
+            "[RULE 7] Explain in plain, everyday language — avoid medical jargon. "
+            "If you must use a medical term (e.g., 'hypertension'), also explain it "
+            "in simple words (e.g., 'high blood pressure').\n"
             "[RULE 8] Be conclusive: end your answer with a period.\n"
             "\n"
             "Medical Research Evidence:\n"
@@ -560,24 +586,52 @@ class RAGPipeline:
             "Answer:"
         )
 
-    def _call_groq(self, prompt: str) -> str:
-        _system = (
-            "You are a medical research assistant. Synthesize research evidence into "
-            "concise, direct medical answers. Ground your answer in the evidence. "
-            "Do NOT start with hedging phrases. Be concise and direct."
+    def _get_groq_client(self):
+        """Get the current Groq client (thread-safe)."""
+        with self._groq_key_lock:
+            return self._groq_clients[self._groq_key_index]
+
+    def _rotate_groq_key(self):
+        """Rotate to the next Groq API key (thread-safe)."""
+        with self._groq_key_lock:
+            self._groq_key_index = (self._groq_key_index + 1) % len(self._groq_clients)
+            n = self._groq_key_index + 1
+        logger.info("[KEY ROTATE] Switching to key %d/%d", n, len(self._groq_clients))
+
+    def _call_groq(self, prompt: str, system_message: str = None) -> str:
+        _system = system_message or (
+            "You are a helpful health information assistant. Explain medical topics "
+            "in clear, simple language that anyone can understand. Be accurate but "
+            "avoid unnecessary jargon. If you use a medical term, explain it simply "
+            "in everyday words."
         )
 
         def _do_call():
-            response = self._groq_client.chat.completions.create(
-                model=self._groq_model,
-                messages=[
-                    {"role": "system", "content": _system},
-                    {"role": "user", "content": prompt},
-                ],
-                max_tokens=self.max_new_tokens,
-                temperature=0.0,
-            )
-            return response.choices[0].message.content.strip()
+            # Try each key at most once — loop handles rotation on 429.
+            # Loop (not recursion) prevents infinite depth when all keys are 429'd.
+            last_error = None
+            for _ in range(len(self._groq_clients)):
+                client = self._get_groq_client()
+                try:
+                    response = client.chat.completions.create(
+                        model=self._groq_model,
+                        messages=[
+                            {"role": "system", "content": _system},
+                            {"role": "user", "content": prompt},
+                        ],
+                        max_tokens=self.max_new_tokens,
+                        temperature=0.0,
+                    )
+                    return response.choices[0].message.content.strip()
+                except Exception as e:
+                    last_error = e
+                    status = getattr(e, 'status_code', None) or getattr(e, 'code', None)
+                    if status == 429 and len(self._groq_clients) > 1:
+                        self._rotate_groq_key()
+                        continue  # try next key
+                    raise  # non-429 error — propagate to tenacity
+            # All keys got 429 — let tenacity retry with backoff
+            raise last_error
 
         if HAS_TENACITY:  # pragma: no cover — tenacity retry exercised via integration tests
             @retry(  # pragma: no cover
@@ -595,6 +649,43 @@ class RAGPipeline:
     def _is_hedging(self, answer: str) -> bool:
         """Check if the answer contains hedging patterns that weaken it."""
         return any(p.search(answer) for p in _HEDGING_PATTERNS)
+
+    def _is_insufficient_context(self, answer: str) -> bool:
+        """Check if the answer indicates insufficient evidence to answer.
+
+        When the LLM correctly identifies that the retrieved evidence does not
+        answer the specific question (per the "direct relevance" rule), we
+        detect this and fall back to the LLM's general medical knowledge.
+        """
+        return any(p.search(answer) for p in _INSUFFICIENT_CONTEXT_PATTERNS)
+
+    def _generate_general_knowledge(self, query: str) -> str:
+        """
+        Fall back to the LLM's general medical knowledge when the RAG evidence
+        is insufficient to answer the specific question.
+
+        The LLM (GPT-OSS 120B) was trained on a large corpus of medical
+        literature and can answer general medical questions (e.g., "What are
+        the symptoms of diabetes?") that may not be present in the PubMedQA
+        dataset as specific research findings.
+
+        Uses a simpler system prompt without the "ground in evidence"
+        instruction since no retrieved evidence is available here.
+        """
+        prompt = (
+            "Based on established medical knowledge, answer the following question "
+            "in simple, clear language that anyone can understand. Explain things "
+            "as if talking to a friend or family member. If you are not confident "
+            "in the answer, state that clearly.\n\n"
+            f"Question: {query}\n\n"
+            "Answer:"
+        )
+        system_message = (
+            "You are a friendly health educator. Explain medical topics in simple, "
+            "everyday language that someone without medical training can understand. "
+            "Be accurate but avoid unnecessary jargon."
+        )
+        return self._call_groq(prompt, system_message=system_message)
 
     def _generate_once(self, query: str, retrieved_chunks: list) -> str:
         """Single generation attempt (no hedging recovery)."""
@@ -674,24 +765,23 @@ class RAGPipeline:
             best_first_answer = best_chunk.get("answer", "").strip() or best_answer
 
             retry_prompt = (
-                "You are a medical research assistant. Synthesize research evidence into "
-                "concise, direct medical answers. Ground your answer in the evidence. "
-                "Do NOT start with hedging phrases. Be concise and direct.\n\n"
+                "You are a helpful health information assistant. Explain medical topics "
+                "in clear, simple language. Be accurate but avoid jargon.\n\n"
                 "Rules - FOLLOW IN ORDER OF PRIORITY:\n"
                 "\n"
-                "[RULE 1 — TOPICAL RELEVANCE — HIGHEST PRIORITY]\n"
-                "If NONE of the provided evidence is related to the question's topic "
-                "(disease, condition, medication, or body system), respond with exactly:\n"
+                "[RULE 1 — DIRECT RELEVANCE — HIGHEST PRIORITY]\n"
+                "The evidence must DIRECTLY answer the specific question asked.\n"
+                "If the evidence discusses a related topic (same disease, body system, or "
+                "treatment area) but does NOT answer the specific question, respond with exactly:\n"
                 "'The retrieved medical literature does not contain sufficient information "
                 "to answer this question.'\n"
-                "CRITICAL: Topically related evidence SHOULD be used. If the evidence "
-                "covers the same disease, symptoms, treatments, or medical domain as "
-                "the question, synthesize the most relevant finding into your answer.\n"
-                "Only refuse if ALL evidence is completely unrelated to the question.\n"
+                "CRITICAL: Being \"about the same disease\" is NOT enough — the evidence must "
+                "actually address what was asked. Only synthesize if the evidence DIRECTLY "
+                "addresses the question's topic.\n"
                 "\n"
                 "[RULE 2] State the answer directly. Do NOT use hedging language.\n"
                 "[RULE 3] Do NOT say 'the evidence does not directly address' or similar.\n"
-                "[RULE 4] If the evidence provides relevant findings, synthesize them.\n"
+                "[RULE 4] If the evidence directly answers the question, synthesize it.\n"
                 "[RULE 5] Answer must be one clear, definitive sentence.\n"
                 "\n"
                 "Medical Research Evidence:\n"
@@ -709,6 +799,17 @@ class RAGPipeline:
                 cleaned = retry_cleaned
             elif best_answer:
                 cleaned = best_answer
+
+        # ── Fallback: if LLM says evidence is insufficient → use general knowledge ──
+        # When the strict "direct relevance" prompt correctly identifies that
+        # the evidence doesn't answer the question, we fall back to the LLM's
+        # own medical knowledge (e.g. for general questions like "symptoms of
+        # diabetes" that aren't in the PubMedQA dataset).
+        # Track the answer source for transparency in the response.
+        self._last_answer_source = "rag"
+        if self._use_groq and self._is_insufficient_context(cleaned):
+            cleaned = self._generate_general_knowledge(query)
+            self._last_answer_source = "general_knowledge"
 
         return cleaned
 
@@ -736,14 +837,30 @@ class RAGPipeline:
         )
         try:
             import json
-            resp = self._groq_client.chat.completions.create(
-                model=self._groq_model,
-                messages=[{"role": "user", "content": ROUTING_PROMPT}],
-                max_tokens=20,
-                temperature=0.0,
-            )
-            raw = resp.choices[0].message.content.strip()
-            return json.loads(raw).get("needs_rag", True)
+            # Retry with key rotation on 429
+            last_error = None
+            for attempt in range(len(self._groq_clients)):
+                try:
+                    client = self._get_groq_client()
+                    resp = client.chat.completions.create(
+                        model=self._groq_model,
+                        messages=[{"role": "user", "content": ROUTING_PROMPT}],
+                        max_tokens=20,
+                        temperature=0.0,
+                    )
+                    raw = resp.choices[0].message.content.strip()
+                    return json.loads(raw).get("needs_rag", True)
+                except Exception as exc:
+                    last_error = exc
+                    status = getattr(exc, 'status_code', None) or getattr(exc, 'code', None)
+                    if status == 429 and len(self._groq_clients) > 1:
+                        self._rotate_groq_key()
+                        continue
+                    break  # non-429 error — don't retry
+            # All attempts exhausted (all keys got 429)
+            if last_error is not None:
+                raise last_error
+            return True
         except Exception:
             return True   # safe fallback — always retrieve
 
@@ -807,14 +924,19 @@ class RAGPipeline:
             retrieval_quality = 0.0
             mean_cosine_sim = 0.0
 
+        # Add transparency note when answer came from general knowledge
+        answer_source = self._last_answer_source
+        transparency_note = GENERAL_KNOWLEDGE_NOTE if answer_source == 'general_knowledge' else ""
+
         return {
             "question": query,
-            "answer": raw_answer + DISCLAIMER,
+            "answer": raw_answer + transparency_note + DISCLAIMER,
             "answer_raw": raw_answer,
             "retrieved_sources": sources,
             "disclaimer_present": True,
             "top_k": len(retrieved),
             "used_rag": needs_rag,
+            "answer_source": answer_source,
             "retrieval_quality": round(retrieval_quality, 4),
             "mean_cosine_similarity": round(mean_cosine_sim, 4),
         }
@@ -845,16 +967,21 @@ class RAGPipeline:
         raw_answer = self.generate(query, retrieved)
         sources = self.format_sources(retrieved)
 
+        # Add transparency note when answer came from general knowledge
+        answer_source = self._last_answer_source
+        transparency_note = GENERAL_KNOWLEDGE_NOTE if answer_source == 'general_knowledge' else ""
+
         return {
             "question": query,
             "category": effective_category or "Unknown",
             "classifier_confidence": round(confidence, 4),
             "routing_applied": effective_category is not None,
-            "answer": raw_answer + DISCLAIMER,
+            "answer": raw_answer + transparency_note + DISCLAIMER,
             "answer_raw": raw_answer,
             "retrieved_sources": sources,
             "disclaimer_present": True,
             "top_k": len(retrieved),
+            "answer_source": answer_source,
             "category_matched_sources": sum(
                 1 for s in sources if s["category"] == effective_category
             ) if effective_category else 0,
