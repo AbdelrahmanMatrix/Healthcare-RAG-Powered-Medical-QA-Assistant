@@ -650,12 +650,12 @@ class RAGPipeline:
 
         # Find the best non-empty answer across all chunks (by reranker score)
         best_answer = ""
-        best_score = float("-inf")
+        best_score = None
         for chunk in retrieved_chunks:
             candidate = chunk.get("answer", "").strip()
             if candidate:
                 score = chunk.get("reranker_score", float("-inf"))
-                if score > best_score:
+                if best_score is None or score > best_score:
                     best_answer = candidate
                     best_score = score
 

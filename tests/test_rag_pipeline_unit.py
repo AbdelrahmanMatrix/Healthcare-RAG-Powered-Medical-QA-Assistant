@@ -1071,7 +1071,7 @@ class TestPipelineConstants:
 
     def test_inject_k_constant(self):
         from src.rag.pipeline import DEFAULT_INJECT_K
-        assert DEFAULT_INJECT_K == 3
+        assert DEFAULT_INJECT_K == 5
 
     def test_category_expansion_constant(self):
         from src.rag.pipeline import CATEGORY_EXPANSION
