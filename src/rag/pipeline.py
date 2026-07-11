@@ -59,8 +59,18 @@ DISCLAIMER = (
 )
 
 INSUFFICIENT_CONTEXT_MESSAGE = (
-    "Sorry, I wasn't able to find enough information to answer this question. "
-    "Could you try asking it in a different way?"
+    "The retrieved medical literature does not contain enough information "
+    "to answer this question confidently. Please consult the listed sources "
+    "directly or rephrase your question."
+)
+
+# Transparency note appended when answer comes from general knowledge fallback
+# (not from retrieved RAG evidence). Shared between answer() and run_pipeline().
+GENERAL_KNOWLEDGE_NOTE = (
+    "\n\n("
+    "based on general medical knowledge — "
+    "the retrieved research did not contain specific information on this topic"
+    ")"
 )
 
 # Biomedical domain embedding model (PubMedBERT fine-tuned on MS-MARCO)
@@ -547,23 +557,25 @@ class RAGPipeline:
             "simple, clear terms that anyone can understand.\n\n"
             "Rules - FOLLOW IN ORDER OF PRIORITY:\n"
             "\n"
-            "[RULE 1 — ANSWER FROM EVIDENCE OR KNOWLEDGE] \n"
-            "Base your answer on the provided evidence when possible. If the evidence "
-            "directly answers the question, synthesize it into a clear response. If the "
-            "evidence discusses a related topic but does NOT directly answer the question "
-            "(e.g., evidence about heart attack symptoms in diabetics does not answer "
-            "'What are the symptoms of diabetes?'), use your medical knowledge to give "
-            "a complete, helpful answer. Do NOT say the evidence is insufficient — just "
-            "provide the best answer you can.\n"
+            "[RULE 1 — DIRECT RELEVANCE — HIGHEST PRIORITY]\n"
+            "The evidence must DIRECTLY answer the specific question asked.\n"
+            "If the evidence discusses a related topic (same disease, body system, or "
+            "treatment area) but does NOT answer the specific question, respond with:\n"
+            "'The retrieved medical literature does not contain sufficient information "
+            "to answer this question.'\n"
+            "CRITICAL: Being \"about the same disease\" is NOT enough — the evidence must "
+            "actually address what was asked. For example, evidence about heart attack "
+            "symptoms in diabetic patients does NOT answer \"What are the symptoms of "
+            "diabetes?\" because it discusses a complication, not diabetes symptoms.\n"
+            "Only synthesize if the evidence DIRECTLY addresses the question's topic.\n"
             "\n"
-            "[RULE 2] Synthesize findings from ALL evidence into a clear, informative explanation\n"
-            "[RULE 3] If the evidence directly answers the question, state it plainly and add helpful context\n"
-            "[RULE 4] Stay grounded in the evidence when possible; use medical knowledge when needed\n"
+            "[RULE 2] Synthesize findings from ALL evidence into one clear sentence\n"
+            "[RULE 3] If the evidence directly answers the question, state it plainly\n"
+            "[RULE 4] Stay grounded in the evidence — do not add external knowledge\n"
             "[RULE 5] Do NOT start with hedging phrases such as 'The evidence does not "
-            "directly address' or 'Based on the provided research'\n"
-            "[RULE 6] Write a complete, detailed answer — include relevant explanations, "
-            "not just a single sentence. Explain why and how, not just what.\n"
-            "[RULE 7] Write in plain, everyday language — avoid medical jargon. "
+            "directly address' or 'The provided research conclusions'\n"
+            "[RULE 6] Do NOT reference study numbers in your answer — just give the answer\n"
+            "[RULE 7] Explain in plain, everyday language — avoid medical jargon. "
             "If you must use a medical term (e.g., 'hypertension'), also explain it "
             "in simple words (e.g., 'high blood pressure').\n"
             "[RULE 8] Be conclusive: end your answer with a period.\n"
@@ -666,11 +678,9 @@ class RAGPipeline:
         """
         prompt = (
             "Based on established medical knowledge, answer the following question "
-            "with a detailed, informative explanation. Write in simple, clear language "
-            "that anyone can understand. Explain things as if talking to a friend or "
-            "family member — cover the main points, explain why they matter, and give "
-            "useful context. Write at least 3-4 sentences with meaningful detail. "
-            "If you are not confident in the answer, state that clearly. "
+            "in simple, clear language that anyone can understand. Explain things "
+            "as if talking to a friend or family member. If you are not confident "
+            "in the answer, state that clearly. "
             "Do NOT use markdown formatting (bold, italics, tables, lists, code blocks, "
             "or any special characters like * or `). Write in plain text only.\n\n"
             f"Question: {query}\n\n"
@@ -679,7 +689,6 @@ class RAGPipeline:
         system_message = (
             "You are a friendly health educator. Explain medical topics in simple, "
             "everyday language that someone without medical training can understand. "
-            "Give thorough, educational answers with helpful context and explanations. "
             "Be accurate but avoid unnecessary jargon. "
             "IMPORTANT: Do NOT use markdown formatting (bold, italics, tables, lists, "
             "code blocks, or any special formatting) in your answer. Write in plain text only."
@@ -768,17 +777,20 @@ class RAGPipeline:
                 "in clear, simple language. Be accurate but avoid jargon.\n\n"
                 "Rules - FOLLOW IN ORDER OF PRIORITY:\n"
                 "\n"
-                "[RULE 1 — ANSWER FROM EVIDENCE OR KNOWLEDGE] \n"
-                "Base your answer on the provided evidence when possible. If the evidence "
-                "directly answers the question, synthesize it. If the evidence discusses "
-                "a related topic but does NOT directly answer the question, use your medical "
-                "knowledge to give a complete, helpful answer. Do NOT say the evidence is "
-                "insufficient — just provide the best answer you can.\n"
+                "[RULE 1 — DIRECT RELEVANCE — HIGHEST PRIORITY]\n"
+                "The evidence must DIRECTLY answer the specific question asked.\n"
+                "If the evidence discusses a related topic (same disease, body system, or "
+                "treatment area) but does NOT answer the specific question, respond with exactly:\n"
+                "'The retrieved medical literature does not contain sufficient information "
+                "to answer this question.'\n"
+                "CRITICAL: Being \"about the same disease\" is NOT enough — the evidence must "
+                "actually address what was asked. Only synthesize if the evidence DIRECTLY "
+                "addresses the question's topic.\n"
                 "\n"
                 "[RULE 2] State the answer directly. Do NOT use hedging language.\n"
                 "[RULE 3] Do NOT say 'the evidence does not directly address' or similar.\n"
                 "[RULE 4] If the evidence directly answers the question, synthesize it.\n"
-                "[RULE 5] Write a detailed, informative answer with helpful context — not just one sentence.\n"
+                "[RULE 5] Answer must be one clear, definitive sentence.\n"
                 "[RULE 6] Do NOT use markdown formatting (bold, italics, tables, lists, "
                 "code blocks, or any special characters like * or `). Write in plain text only.\n"
                 "\n"
@@ -901,7 +913,7 @@ class RAGPipeline:
             retrieved = []
             prompt = (
                 "You are a medical research assistant. "
-                f"Give a detailed, informative answer: {query}"
+                f"Answer concisely: {query}"
             )
             if self._use_groq:
                 raw_answer = self._call_groq(prompt)
@@ -922,15 +934,19 @@ class RAGPipeline:
             retrieval_quality = 0.0
             mean_cosine_sim = 0.0
 
+        # Add transparency note when answer came from general knowledge
+        answer_source = self._last_answer_source
+        transparency_note = GENERAL_KNOWLEDGE_NOTE if answer_source == 'general_knowledge' else ""
+
         return {
             "question": query,
-            "answer": raw_answer + DISCLAIMER,
+            "answer": raw_answer + transparency_note + DISCLAIMER,
             "answer_raw": raw_answer,
             "retrieved_sources": sources,
             "disclaimer_present": True,
             "top_k": len(retrieved),
             "used_rag": needs_rag,
-            "answer_source": self._last_answer_source,
+            "answer_source": answer_source,
             "retrieval_quality": round(retrieval_quality, 4),
             "mean_cosine_similarity": round(mean_cosine_sim, 4),
         }
@@ -961,17 +977,21 @@ class RAGPipeline:
         raw_answer = self.generate(query, retrieved)
         sources = self.format_sources(retrieved)
 
+        # Add transparency note when answer came from general knowledge
+        answer_source = self._last_answer_source
+        transparency_note = GENERAL_KNOWLEDGE_NOTE if answer_source == 'general_knowledge' else ""
+
         return {
             "question": query,
             "category": effective_category or "Unknown",
             "classifier_confidence": round(confidence, 4),
             "routing_applied": effective_category is not None,
-            "answer": raw_answer + DISCLAIMER,
+            "answer": raw_answer + transparency_note + DISCLAIMER,
             "answer_raw": raw_answer,
             "retrieved_sources": sources,
             "disclaimer_present": True,
             "top_k": len(retrieved),
-            "answer_source": self._last_answer_source,
+            "answer_source": answer_source,
             "category_matched_sources": sum(
                 1 for s in sources if s["category"] == effective_category
             ) if effective_category else 0,
