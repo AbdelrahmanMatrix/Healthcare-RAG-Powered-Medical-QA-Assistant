@@ -579,6 +579,8 @@ class RAGPipeline:
             "If you must use a medical term (e.g., 'hypertension'), also explain it "
             "in simple words (e.g., 'high blood pressure').\n"
             "[RULE 8] Be conclusive: end your answer with a period.\n"
+            "[RULE 9] Do NOT use markdown formatting (bold, italics, tables, lists, "
+            "code blocks, or any special characters like * or `). Write in plain text only.\n"
             "\n"
             "Medical Research Evidence:\n"
             f"{evidence}\n\n"
@@ -603,7 +605,9 @@ class RAGPipeline:
             "You are a helpful health information assistant. Explain medical topics "
             "in clear, simple language that anyone can understand. Be accurate but "
             "avoid unnecessary jargon. If you use a medical term, explain it simply "
-            "in everyday words."
+            "in everyday words. "
+            "IMPORTANT: Do NOT use markdown formatting (bold, italics, tables, lists, "
+            "code blocks, or any special formatting) in your answer. Write in plain text only."
         )
 
         def _do_call():
@@ -676,14 +680,18 @@ class RAGPipeline:
             "Based on established medical knowledge, answer the following question "
             "in simple, clear language that anyone can understand. Explain things "
             "as if talking to a friend or family member. If you are not confident "
-            "in the answer, state that clearly.\n\n"
+            "in the answer, state that clearly. "
+            "Do NOT use markdown formatting (bold, italics, tables, lists, code blocks, "
+            "or any special characters like * or `). Write in plain text only.\n\n"
             f"Question: {query}\n\n"
             "Answer:"
         )
         system_message = (
             "You are a friendly health educator. Explain medical topics in simple, "
             "everyday language that someone without medical training can understand. "
-            "Be accurate but avoid unnecessary jargon."
+            "Be accurate but avoid unnecessary jargon. "
+            "IMPORTANT: Do NOT use markdown formatting (bold, italics, tables, lists, "
+            "code blocks, or any special formatting) in your answer. Write in plain text only."
         )
         return self._call_groq(prompt, system_message=system_message)
 
@@ -782,10 +790,12 @@ class RAGPipeline:
                 "[RULE 2] State the answer directly. Do NOT use hedging language.\n"
                 "[RULE 3] Do NOT say 'the evidence does not directly address' or similar.\n"
                 "[RULE 4] If the evidence directly answers the question, synthesize it.\n"
-                "[RULE 5] Answer must be one clear, definitive sentence.\n"
-                "\n"
-                "Medical Research Evidence:\n"
-                f"Finding: {best_first_answer}\n"
+            "[RULE 5] Answer must be one clear, definitive sentence.\n"
+            "[RULE 6] Do NOT use markdown formatting (bold, italics, tables, lists, "
+            "code blocks, or any special characters like * or `). Write in plain text only.\n"
+            "\n"
+            "Medical Research Evidence:\n"
+            f"Finding: {best_first_answer}\n"
                 f"Context: {_truncate_words(best_chunk.get('context', ''), 200)}\n"
                 "\n"
                 f"Question: {query}\n\n"

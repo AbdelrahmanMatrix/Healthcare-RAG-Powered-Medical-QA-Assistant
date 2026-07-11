@@ -88,6 +88,11 @@ mlartifacts/
 # ─── Docker ───────────────────────────────────────────────────────────────────
 docker/.env
 
+# ─── Node.js ──────────────────────────────────────────────────────────────────
+node_modules/
+package-lock.json
+server_log.txt
+
 # ─── Testing & Linting Tools ───────────────────────────────────────────────────
 .pytest_cache/
 .bin/
