@@ -59,18 +59,8 @@ DISCLAIMER = (
 )
 
 INSUFFICIENT_CONTEXT_MESSAGE = (
-    "The retrieved medical literature does not contain enough information "
-    "to answer this question confidently. Please consult the listed sources "
-    "directly or rephrase your question."
-)
-
-# Transparency note appended when answer comes from general knowledge fallback
-# (not from retrieved RAG evidence). Shared between answer() and run_pipeline().
-GENERAL_KNOWLEDGE_NOTE = (
-    "\n\n("
-    "based on general medical knowledge — "
-    "the retrieved research did not contain specific information on this topic"
-    ")"
+    "Sorry, I wasn't able to find enough information to answer this question. "
+    "Could you try asking it in a different way?"
 )
 
 # Biomedical domain embedding model (PubMedBERT fine-tuned on MS-MARCO)
@@ -934,19 +924,15 @@ class RAGPipeline:
             retrieval_quality = 0.0
             mean_cosine_sim = 0.0
 
-        # Add transparency note when answer came from general knowledge
-        answer_source = self._last_answer_source
-        transparency_note = GENERAL_KNOWLEDGE_NOTE if answer_source == 'general_knowledge' else ""
-
         return {
             "question": query,
-            "answer": raw_answer + transparency_note + DISCLAIMER,
+            "answer": raw_answer + DISCLAIMER,
             "answer_raw": raw_answer,
             "retrieved_sources": sources,
             "disclaimer_present": True,
             "top_k": len(retrieved),
             "used_rag": needs_rag,
-            "answer_source": answer_source,
+            "answer_source": self._last_answer_source,
             "retrieval_quality": round(retrieval_quality, 4),
             "mean_cosine_similarity": round(mean_cosine_sim, 4),
         }
@@ -977,21 +963,17 @@ class RAGPipeline:
         raw_answer = self.generate(query, retrieved)
         sources = self.format_sources(retrieved)
 
-        # Add transparency note when answer came from general knowledge
-        answer_source = self._last_answer_source
-        transparency_note = GENERAL_KNOWLEDGE_NOTE if answer_source == 'general_knowledge' else ""
-
         return {
             "question": query,
             "category": effective_category or "Unknown",
             "classifier_confidence": round(confidence, 4),
             "routing_applied": effective_category is not None,
-            "answer": raw_answer + transparency_note + DISCLAIMER,
+            "answer": raw_answer + DISCLAIMER,
             "answer_raw": raw_answer,
             "retrieved_sources": sources,
             "disclaimer_present": True,
             "top_k": len(retrieved),
-            "answer_source": answer_source,
+            "answer_source": self._last_answer_source,
             "category_matched_sources": sum(
                 1 for s in sources if s["category"] == effective_category
             ) if effective_category else 0,
