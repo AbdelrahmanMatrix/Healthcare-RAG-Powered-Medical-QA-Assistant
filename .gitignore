@@ -69,7 +69,6 @@ data;C/
 # ─── Logs & Temp Files ────────────────────────────────────────────────────────
 *.log
 LogFiles/
-server_log.txt
 webapp_logs/
 webapp_logs_*/
 *.tmp
@@ -88,10 +87,6 @@ mlartifacts/
 
 # ─── Docker ───────────────────────────────────────────────────────────────────
 docker/.env
-
-# ─── Node.js ──────────────────────────────────────────────────────────────────
-node_modules/
-package-lock.json
 
 # ─── Testing & Linting Tools ───────────────────────────────────────────────────
 .pytest_cache/

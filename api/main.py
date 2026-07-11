@@ -1,18 +1,15 @@
 """Healthcare RAG — FastAPI application entry point."""
-import os
 import sys
 import time
 import asyncio
 import logging
-import mimetypes
-from pathlib import Path
 from contextlib import asynccontextmanager
+
+from pathlib import Path
 
 from dotenv import load_dotenv
 
 load_dotenv()  # Must run before config.settings reads os.environ  # noqa: E402
-
-from starlette.responses import Response  # noqa: E402
 
 from fastapi import FastAPI, Request  # noqa: E402
 from fastapi.responses import JSONResponse  # noqa: E402
@@ -171,66 +168,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 # ── Serve Dashboard SPA ───────────────────────────────────────────────
 DASHBOARD_DIR = Path(__file__).resolve().parent.parent / "dashboard"
-
-
-class LoggingStaticFiles(StaticFiles):
-    """
-    StaticFiles subclass that logs JS file serving for MIME-type diagnostics.
-
-    Logs a warning when a `.js` file is served with an unexpected Content-Type
-    (anything other than `application/javascript` or `text/javascript`),
-    and an info line for each successful JS serve.
-    """
-
-    def file_response(
-        self,
-        full_path,  # str in this Starlette version
-        stat_result: os.stat_result,
-        scope: dict,
-    ) -> Response:
-        response = super().file_response(full_path, stat_result, scope)
-        # full_path is a string path in this Starlette version (not a Path object)
-        if full_path.endswith(".js"):
-            content_type = response.headers.get("content-type", "").lower()
-            filename = os.path.basename(full_path)
-            logger.debug(
-                "📦 Dashboard JS served: /dashboard/%s (%s bytes, Content-Type: %s)",
-                filename, stat_result.st_size, content_type,
-            )
-            # Warn if MIME type is not JavaScript (e.g. wrong server config)
-            if content_type and "javascript" not in content_type:
-                logger.warning(
-                    "⚠️  Dashboard JS served with non-JS Content-Type: "
-                    "/dashboard/%s → '%s' (expected 'application/javascript')",
-                    filename, content_type,
-                )
-            # Warn if gzipped (FastAPI GZipMiddleware may double-compress)
-            if content_type and "gzip" in content_type:
-                logger.warning(
-                    "⚠️  Dashboard JS served with gzip Content-Type — "
-                    "may indicate double compression: /dashboard/%s",
-                    filename,
-                )
-        return response
-
-
-# ── Startup static-file diagnostic ────────────────────────────────────
-if DASHBOARD_DIR.is_dir():
-    js_files = sorted(DASHBOARD_DIR.glob("*.js"))
-    if js_files:
-        logger.info("📄 Dashboard static files check — %d JS file(s):", len(js_files))
-        for f in js_files:
-            mime, _ = mimetypes.guess_type(str(f))
-            logger.info(
-                "   📄 %s (%s bytes, MIME: %s)",
-                f.name, f.stat().st_size, mime or "unknown",
-            )
-    else:
-        logger.warning("⚠️  No .js files found in dashboard directory: %s", DASHBOARD_DIR)
-else:
-    logger.warning("⚠️  Dashboard directory not found: %s", DASHBOARD_DIR)
-
-app.mount("/dashboard", LoggingStaticFiles(directory=str(DASHBOARD_DIR), html=True), name="dashboard")
+app.mount("/dashboard", StaticFiles(directory=str(DASHBOARD_DIR), html=True), name="dashboard")
 
 
 app.include_router(query.router)
