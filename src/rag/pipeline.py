@@ -75,7 +75,7 @@ DEFAULT_RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-12-v2"
 DEFAULT_TOP_K = 30          # FAISS retrieval candidates (increased for broader coverage)
 DEFAULT_INJECT_K = 5        # chunks fed to LLM after reranking (increased for more evidence)
 DEFAULT_MAX_CONTEXT_WORDS = 200
-DEFAULT_MAX_NEW_TOKENS = 384
+DEFAULT_MAX_NEW_TOKENS = 768   # was 384; increased for thorough answers (general-knowledge path uses 1024)
 DEFAULT_MIN_ANSWER_WORDS = 3
 CLASSIFIER_CONFIDENCE_THRESHOLD = 0.70
 
@@ -559,17 +559,27 @@ class RAGPipeline:
             "diabetes?\" because it discusses a complication, not diabetes symptoms.\n"
             "Only synthesize if the evidence DIRECTLY addresses the question's topic.\n"
             "\n"
-            "[RULE 2] Synthesize findings from ALL evidence into one clear sentence\n"
-            "[RULE 3] If the evidence directly answers the question, state it plainly\n"
-            "[RULE 4] Stay grounded in the evidence — do not add external knowledge\n"
-            "[RULE 5] Do NOT start with hedging phrases such as 'The evidence does not "
+            "[RULE 2] Provide a thorough, well-rounded answer that covers all the important "
+            "aspects of the question, not just one narrow point. Use multiple sentences (3-8) "
+            "to give a complete overview.\n"
+            "[RULE 3] If the evidence is about a specific aspect of the topic (e.g., one "
+            "symptom or one treatment) but the question asks for a general overview, do NOT "
+            "limit your answer to just that narrow finding — instead, use it as a starting "
+            "point and supplement with your general medical knowledge to cover the full scope.\n"
+            "[RULE 4] CRITICAL — Assess completeness: Does the evidence cover the FULL breadth "
+            "of what was asked? If not (e.g., the question asks for 'symptoms' but evidence "
+            "only mentions one), supplement with your established medical knowledge to give "
+            "a comprehensive answer covering all major points a patient would need to know.\n"
+            "[RULE 5] Stay truthful: base your answer on the evidence where possible, but "
+            "extend with general knowledge when the evidence is too narrow or incomplete.\n"
+            "[RULE 6] Do NOT start with hedging phrases such as 'The evidence does not "
             "directly address' or 'The provided research conclusions'\n"
-            "[RULE 6] Do NOT reference study numbers in your answer — just give the answer\n"
-            "[RULE 7] Explain in plain, everyday language — avoid medical jargon. "
+            "[RULE 7] Do NOT reference study numbers in your answer — just give the answer\n"
+            "[RULE 8] Explain in plain, everyday language — avoid medical jargon. "
             "If you must use a medical term (e.g., 'hypertension'), also explain it "
             "in simple words (e.g., 'high blood pressure').\n"
-            "[RULE 8] Be conclusive: end your answer with a period.\n"
-            "[RULE 9] Do NOT use markdown formatting (bold, italics, tables, lists, "
+            "[RULE 9] Be conclusive: end your answer with a period.\n"
+            "[RULE 10] Do NOT use markdown formatting (bold, italics, tables, lists, "
             "code blocks, or any special characters like * or `). Write in plain text only.\n"
             "\n"
             "Medical Research Evidence:\n"
@@ -590,7 +600,7 @@ class RAGPipeline:
             n = self._groq_key_index + 1
         logger.info("[KEY ROTATE] Switching to key %d/%d", n, len(self._groq_clients))
 
-    def _call_groq(self, prompt: str, system_message: str = None) -> str:
+    def _call_groq(self, prompt: str, system_message: str = None, max_tokens: int = None) -> str:
         _system = system_message or (
             "You are a helpful health information assistant. Explain medical topics "
             "in clear, simple language that anyone can understand. Be accurate but "
@@ -613,7 +623,7 @@ class RAGPipeline:
                             {"role": "system", "content": _system},
                             {"role": "user", "content": prompt},
                         ],
-                        max_tokens=self.max_new_tokens,
+                        max_tokens=max_tokens or self.max_new_tokens,
                         temperature=0.0,
                     )
                     return response.choices[0].message.content.strip()
@@ -692,7 +702,7 @@ class RAGPipeline:
             "IMPORTANT: Do NOT use markdown formatting (bold, italics, tables, lists, "
             "code blocks, or any special formatting) in your answer. Write in plain text only."
         )
-        return self._call_groq(prompt, system_message=system_message)
+        return self._call_groq(prompt, system_message=system_message, max_tokens=1024)
 
     def _generate_once(self, query: str, retrieved_chunks: list) -> str:
         """Single generation attempt (no hedging recovery)."""
@@ -786,10 +796,16 @@ class RAGPipeline:
                 "actually address what was asked. Only synthesize if the evidence DIRECTLY "
                 "addresses the question's topic.\n"
                 "\n"
-                "[RULE 2] State the answer directly. Do NOT use hedging language.\n"
-                "[RULE 3] Do NOT say 'the evidence does not directly address' or similar.\n"
-                "[RULE 4] If the evidence directly answers the question, synthesize it.\n"
-                "[RULE 5] Answer must be one clear, definitive sentence.\n"
+                "[RULE 2] Provide a thorough, well-rounded answer covering all important "
+                "aspects of the question. Use multiple sentences (3-8) to give a complete overview.\n"
+                "[RULE 3] Assess completeness: Does this evidence cover the FULL breadth of what "
+                "was asked? If not (e.g., asks for 'symptoms' but only mentions one), do NOT limit "
+                "your answer to just that narrow finding — supplement with your general medical "
+                "knowledge to provide a comprehensive answer.\n"
+                "[RULE 4] Stay truthful: base your answer on the evidence where possible, but "
+                "extend with general knowledge when the evidence is too narrow or incomplete.\n"
+                "[RULE 5] Do NOT start with hedging phrases or say 'the evidence does not "
+                "directly address'.\n"
                 "[RULE 6] Do NOT use markdown formatting (bold, italics, tables, lists, "
                 "code blocks, or any special characters like * or `). Write in plain text only.\n"
                 "\n"
