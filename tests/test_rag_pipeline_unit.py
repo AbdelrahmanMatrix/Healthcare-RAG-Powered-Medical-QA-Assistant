@@ -934,8 +934,8 @@ class TestAnswer:
 
         result = pipeline.answer("test")
         assert result["answer_source"] == "general_knowledge"
-        from src.rag.pipeline import GENERAL_KNOWLEDGE_NOTE
-        assert GENERAL_KNOWLEDGE_NOTE in result["answer"]
+        # No transparency note is appended; answer is just raw + disclaimer
+        assert result["answer_raw"] == "General knowledge answer."
 
     def test_disclaimer_appended(self, builder):
         """answer appends disclaimer to answer_raw."""
@@ -1034,19 +1034,17 @@ class TestAnswerWithRouting:
 
         result = pipeline.answer_with_routing("test query", category="Symptoms")
         assert result["answer_source"] == "rag"
-        from src.rag.pipeline import GENERAL_KNOWLEDGE_NOTE
-        assert GENERAL_KNOWLEDGE_NOTE not in result["answer"]
+        # No transparency note is appended for rag answers
 
     def test_answer_source_general_knowledge_routing(self, builder):
-        """answer_with_routing includes answer_source and transparency note."""
+        """answer_with_routing includes answer_source and no transparency note."""
         pipeline = builder.pipeline
         pipeline.generate = MagicMock(return_value="General knowledge answer.")
         pipeline._last_answer_source = "general_knowledge"
 
         result = pipeline.answer_with_routing("test query", category="Symptoms")
         assert result["answer_source"] == "general_knowledge"
-        from src.rag.pipeline import GENERAL_KNOWLEDGE_NOTE
-        assert GENERAL_KNOWLEDGE_NOTE in result["answer"]
+        # No transparency note appended for general knowledge answers
 
 
 # ==============================================================================
