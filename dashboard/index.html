@@ -13,8 +13,8 @@
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
-<!-- Markdown renderer (extracted for testing) -->
-<script src="markdown-renderer.js"></script>
+<!-- marked.js (battle-tested markdown parser) -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 <!-- highlight.js (syntax highlighting) -->
 <script>
@@ -369,34 +369,28 @@ a:hover{color:var(--text)}
   font-size:0.82em;
   border:1px solid rgba(79,195,247,0.1);
 }
-.bubble-text pre .lang-label{
-  position:absolute;top:4px;right:8px;
-  font-size:0.62rem;font-weight:600;
-  text-transform:uppercase;letter-spacing:0.06em;
-  color:var(--text-muted);opacity:0.4;
-  font-family:'Inter',sans-serif;
-}
-.bubble-text pre:hover .lang-label{opacity:0.8}
 
-/* ── Markdown Table Styling ──────────────────────── */
-.rag-table{
+/* ── Markdown Table Styling (marked.js output) ──────── */
+.bubble-text table{
   width:100%;border-collapse:collapse;margin:10px 0;
   font-size:0.82rem;border-radius:8px;overflow:hidden;
   border:1px solid var(--border);
 }
-.rag-table td{
+.bubble-text th,.bubble-text td{
   padding:8px 12px;border:1px solid var(--border);
   color:var(--text-dim);vertical-align:top;
 }
-.rag-table tr:first-child td{
+.bubble-text thead th{
   background:var(--accent-dim);color:var(--text);
   font-weight:600;font-size:0.78rem;
   text-transform:uppercase;letter-spacing:0.03em;
 }
-.rag-table tr:first-child td strong{color:var(--accent)}
-.rag-table td strong{color:var(--text);font-weight:600}
+.bubble-text thead th strong{color:var(--accent)}
+.bubble-text td strong{color:var(--text);font-weight:600}
 .bubble-text ul{margin:8px 0;padding-left:20px;list-style:disc}
 .bubble-text ul li{margin:4px 0;color:var(--text-dim);line-height:1.5}
+/* marked wraps paragraphs in <p> which adds nice spacing */
+.bubble-text p{margin:8px 0;color:var(--text-dim)}
 
 /* ── Source Citations ──────────────────────────── */
 .source-toggle{
@@ -1413,10 +1407,11 @@ function exportChatHistory(format) {
   }
 }
 
-/* ── Simple Markdown Renderer ─────────────────────── */
-// renderMarkdown is defined in markdown-renderer.js (loaded above),
-// and exposed globally so submitQuery() can call it.
-// The canonical implementation lives in the external file for testability.
+/* ── Markdown rendering handled by marked.js (loaded via CDN in <head>) ── */
+// Replaced the custom renderMarkdown with marked.parse().
+// Tests live in tests/test_markdown_renderer.js against markdown-renderer.js.
+// The .lang-label <span> is no longer emitted by marked; highlight.js works
+// directly on <code class="language-xxx"> elements inside <pre>.
 
 function formatSources(sources) {
   if (!sources || sources.length === 0) return '';
@@ -1494,8 +1489,11 @@ async function submitQuery() {
     var footerSources = tn('footer.sources_count', sourcesCount) || (sourcesCount + ' sources');
     var footerDisclaimer = data.disclaimer ? (t('footer.disclaimer_applies') || 'Disclaimer applies') : '';
 
-    // Render markdown in the answer text
-    var renderedAnswer = renderMarkdown(finalAnswer);
+    // Render markdown in the answer text (escape raw HTML via renderer hook for XSS)
+    var r = new marked.Renderer();
+    r.html = function(arg) { var t = (typeof arg === 'string') ? arg : (arg.text || arg.raw || ''); return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
+    r.htmlInline = function(arg) { var t = (typeof arg === 'string') ? arg : (arg.text || arg.raw || ''); return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
+    var renderedAnswer = marked.parse(finalAnswer, { renderer: r });
     addMessage('<div class="bubble"><div class="bubble-header"><span class="bubble-author">' + (t('bubble.rag') || 'Healthcare RAG') + '</span>' + (data.category ? '<span class="bubble-category" style="background:' + catColor + '">' + data.category + '</span>' : '') + '</div><div class="bubble-text">' + renderedAnswer + '</div><div class="bubble-footer"><span> ' + footerSources + '</span><span>' + footerDisclaimer + '</span></div>' + sourcesHtml + '</div>', 'bot');
     // Apply syntax highlighting to any code blocks in the new message
     if (typeof hljs !== 'undefined') {

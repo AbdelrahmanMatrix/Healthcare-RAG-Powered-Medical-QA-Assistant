@@ -1,0 +1,8 @@
+{
+  "name": "healthcare-rag-dashboard",
+  "private": true,
+  "type": "commonjs",
+  "devDependencies": {
+    "marked": "^15.0.4"
+  }
+}
