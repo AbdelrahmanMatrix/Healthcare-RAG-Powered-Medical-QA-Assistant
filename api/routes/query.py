@@ -70,7 +70,6 @@ async def handle_query(request: QueryRequest) -> QueryResponse:
         return QueryResponse(
             answer=cached["answer"],
             category=cached["category"],
-            answer_source=cached.get("answer_source", "rag"),
             retrieved_sources=cached["sources"],
             source_citations=cached["source_citations"],
             disclaimer=cached["disclaimer"],
@@ -100,12 +99,9 @@ async def handle_query(request: QueryRequest) -> QueryResponse:
             for s in raw_details
         ]
 
-        answer_source = result.get("answer_source", "rag")
-
         response = QueryResponse(
             answer=result.get("answer", "Unable to generate a response."),
             category=result.get("category", "General"),
-            answer_source=answer_source,
             retrieved_sources=result.get("sources", []),
             source_citations=source_citations,
             disclaimer=settings.disclaimer,
@@ -115,7 +111,6 @@ async def handle_query(request: QueryRequest) -> QueryResponse:
         _cache_set(cache_key, {
             "answer": response.answer,
             "category": response.category,
-            "answer_source": response.answer_source,
             "sources": response.retrieved_sources,
             "source_citations": [s.model_dump() for s in response.source_citations],
             "disclaimer": response.disclaimer,

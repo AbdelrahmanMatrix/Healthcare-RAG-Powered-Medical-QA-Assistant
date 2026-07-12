@@ -419,8 +419,6 @@ ol.answer-list li::before{content:counter(item) '. ';color:var(--accent);font-we
 }
 .alert.error{background:rgba(239,83,80,0.08);border:1px solid rgba(239,83,80,0.2);color:var(--error)}
 .alert.info{background:var(--accent-dim);border:1px solid rgba(79,195,247,0.15);color:var(--accent)}
-.general-knowledge-note{margin-top:12px;font-size:0.78rem;background:rgba(255,183,77,0.08);border:1px solid rgba(255,183,77,0.2);color:var(--warning)}
-.implicit-list li strong{font-weight:600;color:var(--text)}
 .alert.success{background:rgba(76,175,80,0.08);border:1px solid rgba(76,175,80,0.2);color:var(--success)}
 
 /* ═══════════════════════════════════════════════
@@ -432,17 +430,6 @@ ol.answer-list li::before{content:counter(item) '. ';color:var(--accent);font-we
 }
 .footer p{font-size:0.78rem;color:var(--text-muted);margin:2px 0}
 .footer .team{color:var(--text-muted);opacity:0.6}
-
-/* ═══════════════════════════════════════════════
-   GENERAL KNOWLEDGE ANSWER STYLING
-   ═══════════════════════════════════════════════ */
-.general-knowledge-note{
-  margin-top:12px;padding:10px 14px;border-radius:8px;
-  font-size:0.78rem;line-height:1.5;
-  background:rgba(255,183,77,0.08);border:1px solid rgba(255,183,77,0.2);
-  color:var(--warning);
-}
-.implicit-list li strong{font-weight:600;color:var(--text)}
 
 /* ═══════════════════════════════════════════════
    RESPONSIVE — Three-tier system
@@ -954,8 +941,6 @@ const TRANSLATIONS = {
     'status.api_offline': 'API غير متصل',
     'bubble.you': 'أنت',
     'bubble.rag': 'الاسترجاع الطبي',
-    'bubble.general_knowledge': 'معرفة عامة',
-    'bubble.gen_knowledge_note': '\U0001f9e0 تعتمد هذه الإجابة على المعرفة الطبية الراسخة \u2014 لم تحتوِ المصادر المسترجعة أدناه على أدلة ذات صلة مباشرة. تُعرض المصادر من أجل الشفافية.',
     'spinner.retrieving': 'جارٍ استرجاع الأدلة...',
     'system.error': 'النظام',
     'asking': 'يسأل...',
@@ -1029,12 +1014,11 @@ function formatAnswer(text) {
     var para = paragraphs[p].trim();
     if (!para) continue;
     var lines = para.split('\n');
-    // Detect bullet list: lines starting with \u2022, -, *, or numbers with dot
+    // Detect bullet list: lines starting with •, -, *, or numbers with dot
     var bulletLines = [];
     var numberedLines = [];
     var isBullet = true;
     var isNumbered = true;
-    var isImplicitList = true;  // detect lines like "Symptom – description" without bullet markers
     var nonEmptyCount = 0;
     for (var l = 0; l < lines.length; l++) {
       var line = lines[l].trim();
@@ -1042,11 +1026,11 @@ function formatAnswer(text) {
       nonEmptyCount++;
       if (!/^[\u2022\-\*]\s/.test(line)) isBullet = false;
       if (!/^\d+\.\s/.test(line) && !/^\d+\)\s/.test(line)) isNumbered = false;
-      // Check for implicit list: "Word – ..." or "Word — ..." or "Word: ..."
-      // Widened to include digits and accented characters (e.g., "HbA1c", "vitamin B12")
-      if (!/^[A-Z][A-Za-z0-9\u00C0-\u024F\s]{1,60}?\s[\u2013\u2014:]\s/.test(line) &&
-          !/^[\u0600-\u06FF][\u0600-\u06FF0-9\s]{1,60}?\s[\u2013\u2014:]\s/.test(line)) {
-        isImplicitList = false;
+      if (isBullet) {
+        bulletLines.push(line.replace(/^[\u2022\-\*]\s*/, ''));
+      }
+      if (isNumbered) {
+        numberedLines.push(line.replace(/^\d+[\.\)]\s*/, ''));
       }
     }
     if (isBullet && nonEmptyCount > 1) {
@@ -1059,19 +1043,6 @@ function formatAnswer(text) {
         return '<li>' + item + '</li>';
       }).join('');
       result.push('<ol class="answer-list">' + items + '</ol>');
-    } else if (isImplicitList && nonEmptyCount > 1) {
-      // Implicit list detected — format as styled list items
-      var items = lines.map(function(line) {
-        line = line.trim();
-        if (!line) return '';
-        // Split on first occurrence of " – " or " — " or ": "
-        var parts = line.split(/\s[\u2013\u2014:]\s/);
-        if (parts.length >= 2) {
-          return '<li><strong>' + parts[0] + '</strong> ' + parts.slice(1).join(' \u2013 ') + '</li>';
-        }
-        return '<li>' + line + '</li>';
-      }).filter(function(i) { return i; }).join('');
-      result.push('<ul class="answer-list implicit-list">' + items + '</ul>');
     } else {
       // Single or mixed paragraph — join lines with <br>
       var joined = lines.map(function(l) { return l.trim(); }).filter(function(l) { return l; }).join('<br>');
@@ -1503,17 +1474,7 @@ async function submitQuery() {
     var footerSources = tn('footer.sources_count', sourcesCount) || (sourcesCount + ' sources');
     var footerDisclaimer = data.disclaimer ? (t('footer.disclaimer_applies') || 'Disclaimer applies') : '';
 
-    // General knowledge indicator (answer came from LLM knowledge, not RAG evidence)
-    var genKnowledgeBadge = '';
-    var genKnowledgeNote = '';
-    if (data.answer_source === 'general_knowledge') {
-      genKnowledgeBadge = '<span class="bubble-category" style="background:var(--warning);color:#1a1a1a">' + (t('bubble.general_knowledge') || 'General Knowledge') + '</span>';
-      genKnowledgeNote = '<div class="general-knowledge-note">' +
-        (t('bubble.gen_knowledge_note') || '\U0001f9e0 This answer is based on established medical knowledge \u2014 the retrieved sources below did not contain directly relevant evidence. Sources are shown for transparency.') +
-        '</div>';
-    }
-
-    addMessage('<div class="bubble"><div class="bubble-header"><span class="bubble-author">' + (t('bubble.rag') || 'Healthcare RAG') + '</span>' + (data.category ? '<span class="bubble-category" style="background:' + catColor + '">' + data.category + '</span>' : '') + genKnowledgeBadge + '</div><div class="bubble-text">' + formatAnswer(finalAnswer) + '</div><div class="bubble-footer"><span> ' + footerSources + '</span><span>' + footerDisclaimer + '</span></div>' + genKnowledgeNote + sourcesHtml + '</div>', 'bot');
+    addMessage('<div class="bubble"><div class="bubble-header"><span class="bubble-author">' + (t('bubble.rag') || 'Healthcare RAG') + '</span>' + (data.category ? '<span class="bubble-category" style="background:' + catColor + '">' + data.category + '</span>' : '') + '</div><div class="bubble-text">' + formatAnswer(finalAnswer) + '</div><div class="bubble-footer"><span> ' + footerSources + '</span><span>' + footerDisclaimer + '</span></div>' + sourcesHtml + '</div>', 'bot');
 
   } catch(e) {
     spinnerDiv.remove();
