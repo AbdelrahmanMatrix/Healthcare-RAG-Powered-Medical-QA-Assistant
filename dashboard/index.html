@@ -991,6 +991,9 @@ function formatAnswer(text) {
   if (!text) return text;
   // Escape HTML first
   text = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  // Strip markdown formatting (**bold**, *italic*, __bold__, _italic_)
+  text = text.replace(/\*\*(.+?)\*\*/g, '$1').replace(/__(.+?)__/g, '$1');
+  text = text.replace(/\*(.+?)\*/g, '$1').replace(/_(.+?)_/g, '$1');
   // Split into paragraphs (by blank lines)
   var paragraphs = text.split(/\n\s*\n/);
   var result = [];
