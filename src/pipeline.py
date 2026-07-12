@@ -81,16 +81,23 @@ def run_pipeline(question: str, top_k: int = None, category: str = None) -> dict
     """
     rag = _get_rag()
 
+    # predicted_category is saved SEPARATELY from effective_category so the
+    # classifier's prediction is always shown in the response, even when the
+    # retrieval-quality fallback switches to general (uncategorized) retrieval.
+    predicted_category = None
+
     # Use classifier's per-class probabilities for continuous scoring
     if category:
         effective_category = category
         all_scores = None
     elif rag._use_classifier:
         result = rag._classifier.predict_with_confidence(question)
+        predicted_category = result["category"]  # always saved for display
         effective_category = result["category"]
         all_scores = result["all_scores"]
     else:
-        effective_category = predict(question)
+        predicted_category = predict(question)
+        effective_category = predicted_category
         all_scores = None
 
     # Expand query with category context for improved FAISS retrieval
@@ -119,9 +126,14 @@ def run_pipeline(question: str, top_k: int = None, category: str = None) -> dict
     sources = rag.format_sources(retrieved)
     answer_source = getattr(rag, '_last_answer_source', 'rag')
 
+    # Display the classifier's predicted category even when retrieval fell
+    # back to general search (the answer uses better general retrieval, but
+    # the user should see the actual predicted topic).
+    display_category = predicted_category or effective_category or category or "General"
+
     return {
         "answer":         raw_answer,
-        "category":       effective_category or "General",
+        "category":       display_category,
         "sources":        [str(s["chunk_id"]) for s in sources],
         "source_details": sources,
         "answer_source":  answer_source,
