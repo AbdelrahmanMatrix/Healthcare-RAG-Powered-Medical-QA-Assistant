@@ -241,7 +241,8 @@ jobs:
               WEBSITES_PORT="8000" \
               WEBSITES_CONTAINER_START_TIME_LIMIT="1800" \
               USE_RERANKER="false" \
-              UVICORN_WORKERS="1"
+              UVICORN_WORKERS="1" \
+              TORCHINDUCTOR_CACHE_DIR="/tmp/torchinductor_cache"
 
       - name: Restart and wait for image pull
         # The Docker image is ~4 GB (includes pre-downloaded ML models).

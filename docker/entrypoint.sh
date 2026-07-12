@@ -18,6 +18,11 @@
 # See api/main.py lifespan() for the background task implementation.
 set -e
 
+# PyTorch inductor mega-cache fix — create a writable cache directory
+# Prevents 'Artifact of type=precompile already registered in mega-cache' error
+# on Azure App Service Linux containers. Also set as env var for subprocesses.
+mkdir -p /tmp/torchinductor_cache
+
 # Azure App Service uses WEBSITES_PORT; local Docker uses WEBSITE_PORT
 PORT="${WEBSITES_PORT:-${WEBSITE_PORT:-8000}}"
 

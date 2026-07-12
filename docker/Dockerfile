@@ -103,6 +103,11 @@ ENV SENTENCE_TRANSFORMERS_HOME=/app/hf_cache/sentence_transformers
 ENV TORCH_HOME=/app/hf_cache/torch
 ENV TRANSFORMERS_CACHE=/app/hf_cache/transformers
 
+# PyTorch inductor mega-cache fix — use a writable temp directory
+# Prevents 'Artifact of type=precompile already registered in mega-cache' error
+# that occurs on Azure App Service Linux containers due to cache permission issues.
+ENV TORCHINDUCTOR_CACHE_DIR=/tmp/torchinductor_cache
+
 WORKDIR /app
 
 # Runtime system deps — curl for health probes only; no build tools
