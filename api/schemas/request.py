@@ -58,6 +58,7 @@ class SourceCitation(BaseModel):  # pragma: no cover — class def; coverage.py 
 class QueryResponse(BaseModel):
     answer: str
     category: str
+    answer_source: str = "rag"
     retrieved_sources: List[str]
     source_citations: List[SourceCitation] = Field(default_factory=list)
     disclaimer: str
