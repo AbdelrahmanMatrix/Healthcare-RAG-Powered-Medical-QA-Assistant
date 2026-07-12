@@ -314,6 +314,18 @@ a:hover{color:var(--text)}
   font-family:'JetBrains Mono',monospace;color:#fff;
 }
 .bubble-text{font-size:0.9rem;line-height:1.6;margin:0}
+.answer-paragraph{margin:0 0 8px;line-height:1.6;color:var(--text)}
+.answer-paragraph:last-child{margin-bottom:0}
+.answer-list{margin:4px 0 8px;padding-left:20px;list-style:none}
+.answer-list:last-child{margin-bottom:0}
+.answer-list li{position:relative;padding:2px 0 2px 8px;font-size:0.9rem;line-height:1.6;color:var(--text)}
+.answer-list li::before{content:'\2022';color:var(--accent);font-weight:bold;position:absolute;left:-12px;top:2px}
+ol.answer-list{counter-reset:item}
+ol.answer-list li{counter-increment:item;padding:2px 0 2px 0}
+ol.answer-list li::before{content:counter(item) '. ';color:var(--accent);font-weight:600;position:static}
+.message.user .answer-paragraph{color:var(--bg-deep)}
+.message.user .answer-list li{color:var(--bg-deep)}
+.message.user .answer-list li::before{color:var(--bg-deep)}
 .bubble-footer{
   margin-top:8px;padding-top:8px;border-top:1px solid var(--border);
   font-size:0.72rem;color:var(--text-muted);
@@ -990,6 +1002,56 @@ function t(key) {
   return null;
 }
 
+/** Format answer text with paragraphs, bullet points, and numbered lists */
+function formatAnswer(text) {
+  if (!text) return text;
+  // Escape HTML first
+  text = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  // Split into paragraphs (by blank lines)
+  var paragraphs = text.split(/\n\s*\n/);
+  var result = [];
+  for (var p = 0; p < paragraphs.length; p++) {
+    var para = paragraphs[p].trim();
+    if (!para) continue;
+    var lines = para.split('\n');
+    // Detect bullet list: lines starting with •, -, *, or numbers with dot
+    var bulletLines = [];
+    var numberedLines = [];
+    var isBullet = true;
+    var isNumbered = true;
+    var nonEmptyCount = 0;
+    for (var l = 0; l < lines.length; l++) {
+      var line = lines[l].trim();
+      if (!line) continue;
+      nonEmptyCount++;
+      if (!/^[\u2022\-\*]\s/.test(line)) isBullet = false;
+      if (!/^\d+\.\s/.test(line) && !/^\d+\)\s/.test(line)) isNumbered = false;
+      if (isBullet) {
+        bulletLines.push(line.replace(/^[\u2022\-\*]\s*/, ''));
+      }
+      if (isNumbered) {
+        numberedLines.push(line.replace(/^\d+[\.\)]\s*/, ''));
+      }
+    }
+    if (isBullet && nonEmptyCount > 1) {
+      var items = bulletLines.map(function(item) {
+        return '<li>' + item + '</li>';
+      }).join('');
+      result.push('<ul class="answer-list">' + items + '</ul>');
+    } else if (isNumbered && nonEmptyCount > 1) {
+      var items = numberedLines.map(function(item) {
+        return '<li>' + item + '</li>';
+      }).join('');
+      result.push('<ol class="answer-list">' + items + '</ol>');
+    } else {
+      // Single or mixed paragraph — join lines with <br>
+      var joined = lines.map(function(l) { return l.trim(); }).filter(function(l) { return l; }).join('<br>');
+      result.push('<p class="answer-paragraph">' + joined + '</p>');
+    }
+  }
+  return result.join('');
+}
+
 /** Helper: replace {n} in translated string with a number */
 function tn(key, num) {
   const str = t(key);
@@ -1412,7 +1474,7 @@ async function submitQuery() {
     var footerSources = tn('footer.sources_count', sourcesCount) || (sourcesCount + ' sources');
     var footerDisclaimer = data.disclaimer ? (t('footer.disclaimer_applies') || 'Disclaimer applies') : '';
 
-    addMessage('<div class="bubble"><div class="bubble-header"><span class="bubble-author">' + (t('bubble.rag') || 'Healthcare RAG') + '</span>' + (data.category ? '<span class="bubble-category" style="background:' + catColor + '">' + data.category + '</span>' : '') + '</div><p class="bubble-text">' + finalAnswer + '</p><div class="bubble-footer"><span> ' + footerSources + '</span><span>' + footerDisclaimer + '</span></div>' + sourcesHtml + '</div>', 'bot');
+    addMessage('<div class="bubble"><div class="bubble-header"><span class="bubble-author">' + (t('bubble.rag') || 'Healthcare RAG') + '</span>' + (data.category ? '<span class="bubble-category" style="background:' + catColor + '">' + data.category + '</span>' : '') + '</div><div class="bubble-text">' + formatAnswer(finalAnswer) + '</div><div class="bubble-footer"><span> ' + footerSources + '</span><span>' + footerDisclaimer + '</span></div>' + sourcesHtml + '</div>', 'bot');
 
   } catch(e) {
     spinnerDiv.remove();
