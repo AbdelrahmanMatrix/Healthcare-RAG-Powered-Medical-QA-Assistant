@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     TOP_K: int = 30      # FAISS retrieval candidates
     INJECT_K: int = 5    # chunks fed to LLM after reranking
     MAX_CONTEXT_WORDS: int = 250  # max words per evidence chunk (Finding 7)
-    MAX_TOKENS: int = 1024   # max new tokens for LLM generation (was 512; increased for thorough answers reported by users)
+    MAX_TOKENS: int = 1024   # max new tokens for LLM generation (was 512; increased for thorough answers)
     # ── BM25 hybrid retrieval ───────────────────────────────────────────
     # BM25_THRESHOLD governs the keyword-match filter: only BM25 results
     # scoring ABOVE this threshold are prepended to the FAISS pool before
