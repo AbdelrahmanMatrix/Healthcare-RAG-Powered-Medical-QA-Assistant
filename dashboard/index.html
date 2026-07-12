@@ -335,13 +335,6 @@ ol.answer-list li::before{content:counter(item) '. ';color:var(--accent);font-we
 .message.user .bubble-footer{border-top-color:rgba(0,0,0,0.15)}
 .message.user .bubble-footer span{color:rgba(0,0,0,0.6)}
 
-/* ── RAG Disclaimer ─────────────────────────────── */
-.disclaimer-banner{
-  background:var(--accent-dim);border:1px solid rgba(79,195,247,0.15);
-  border-radius:10px;padding:12px 16px;margin-top:16px;
-  font-size:0.78rem;color:var(--text-muted);text-align:center;line-height:1.5;
-}
-
 /* ── Source Citations ──────────────────────────── */
 .source-toggle{
   background:none;border:none;color:var(--accent);
@@ -534,8 +527,6 @@ ol.answer-list li::before{content:counter(item) '. ';color:var(--accent);font-we
   .metric-delta{font-size:0.52rem}
   .metric-group-header{font-size:0.62rem}
 
-  .disclaimer-banner{font-size:0.7rem;padding:8px 10px}
-
   .kpi-grid{gap:12px}
   .chart-box{padding:10px}
   .chart-box h4{font-size:0.78rem}
@@ -565,7 +556,6 @@ ol.answer-list li::before{content:counter(item) '. ';color:var(--accent);font-we
 <script>
 window.APP_CONFIG = {
   apiBase: localStorage.getItem('rag_api_base') || 'http://localhost:8000',
-  disclaimer: 'This is an informational assistant only. Always consult a qualified healthcare professional for medical decisions. Do not use this information as a substitute for professional medical advice, diagnosis, or treatment.',
   categories: ['Symptoms','Diagnosis','Treatment','Medication','Prevention','General'],
   categoryColors: {
     Symptoms:  '#4FC3F7',
@@ -741,10 +731,6 @@ window.APP_CONFIG = {
       </div>
     </div>
 
-    <!-- Disclaimer -->
-    <div class="disclaimer-banner">
-      <span data-i18n="query.disclaimer">⚕️ This is an informational assistant only. Always consult a qualified healthcare professional for medical decisions.</span>
-    </div>
   </div>
 </div>
 
@@ -898,7 +884,6 @@ const TRANSLATIONS = {
     'query.label.sources': 'المصادر:',
     'query.option.auto': 'تلقائي',
     'query.empty.desc': 'أدخل سؤالاً طبياً أعلاه للاستعلام عن خط RAG.<br>تتضمن الردود مصادر مستشهد بها من أدبيات PubMedQA.',
-    'query.disclaimer': '⚕️ هذا مجرد مساعد معلوماتي. استشر دائماً أخصائي رعاية صحية مؤهل للقرارات الطبية.',
     'kpi.accuracy.header': '🧠 دقة النموذج',
     'kpi.accuracy': '🎯 دقة التصنيف',
     'kpi.performance': '⚡ أداء النظام',
@@ -969,7 +954,6 @@ const TRANSLATIONS = {
 
     'footer.sources': 'مصادر',
     'footer.sources_count': '{n} مصادر',
-    'footer.disclaimer_applies': '⚕️ ينطبق إخلاء المسؤولية',
     'query.unable': 'عذراً، تعذر إنشاء رد.',
     'query.translating': 'جارٍ الترجمة...',
 
@@ -1400,7 +1384,7 @@ function exportChatHistory(format) {
 
 function formatSources(sources) {
   if (!sources || sources.length === 0) return '';
-  const items = sources.slice(0, 10).map(function(s, i) {
+  const items = sources.map(function(s, i) {
     var numLabel = tn('source.num', i + 1) || ('Source ' + (i + 1));
     var title = numLabel + ': ' + (s.question || s.chunk_id || (t('source.na') || 'N/A'));
     var relevance = t('source.relevance') || 'Relevance:';
@@ -1472,9 +1456,7 @@ async function submitQuery() {
     const rawSources = data.retrieved_sources || [];
     var sourcesCount = data.source_citations ? data.source_citations.length : rawSources.length;
     var footerSources = tn('footer.sources_count', sourcesCount) || (sourcesCount + ' sources');
-    var footerDisclaimer = data.disclaimer ? (t('footer.disclaimer_applies') || 'Disclaimer applies') : '';
-
-    addMessage('<div class="bubble"><div class="bubble-header"><span class="bubble-author">' + (t('bubble.rag') || 'Healthcare RAG') + '</span>' + (data.category ? '<span class="bubble-category" style="background:' + catColor + '">' + data.category + '</span>' : '') + '</div><div class="bubble-text">' + formatAnswer(finalAnswer) + '</div><div class="bubble-footer"><span> ' + footerSources + '</span><span>' + footerDisclaimer + '</span></div>' + sourcesHtml + '</div>', 'bot');
+    addMessage('<div class="bubble"><div class="bubble-header"><span class="bubble-author">' + (t('bubble.rag') || 'Healthcare RAG') + '</span>' + (data.category ? '<span class="bubble-category" style="background:' + catColor + '">' + data.category + '</span>' : '') + '</div><div class="bubble-text">' + formatAnswer(finalAnswer) + '</div><div class="bubble-footer"><span> ' + footerSources + '</span></div>' + sourcesHtml + '</div>', 'bot');
 
   } catch(e) {
     spinnerDiv.remove();

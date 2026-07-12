@@ -124,7 +124,6 @@ def run_pipeline(question: str, top_k: int = None, category: str = None) -> dict
 
     raw_answer = rag.generate(question, retrieved)
     sources = rag.format_sources(retrieved)
-    answer_source = getattr(rag, '_last_answer_source', 'rag')
 
     # Display the classifier's predicted category even when retrieval fell
     # back to general search (the answer uses better general retrieval, but
@@ -136,5 +135,4 @@ def run_pipeline(question: str, top_k: int = None, category: str = None) -> dict
         "category":       display_category,
         "sources":        [str(s["chunk_id"]) for s in sources],
         "source_details": sources,
-        "answer_source":  answer_source,
     }
