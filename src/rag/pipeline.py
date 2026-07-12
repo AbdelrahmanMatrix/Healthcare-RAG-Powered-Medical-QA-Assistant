@@ -161,6 +161,9 @@ def _clean_answer(text: str) -> str:
     text = _SOURCE_MARKER_RE.sub(" ", text)
     text = _MULTISPACE_RE.sub(" ", text).strip()
     text = _LEADING_PUNCT_RE.sub("", text).strip()
+    # Fix duplicate/triplicate period patterns: "end. ." or "end.." -> "end."
+    # Uses (?:period + optional whitespace){2,} to catch any run of periods
+    text = re.sub(r"(?:\.\s*){2,}", ".", text)
     return text
 
 
