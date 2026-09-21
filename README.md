@@ -7,6 +7,7 @@ questions from a 211k-sample PubMedQA corpus: BioBERT classifies each query into
 six medical categories, a FAISS + BM25 hybrid retriever grounds the context, and a
 Groq-hosted LLM generates the answer — served by FastAPI with a bilingual web dashboard.
 
+[![CI](https://github.com/AbdelrahmanMatrix/Healthcare-RAG-Powered-Medical-QA-Assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/AbdelrahmanMatrix/Healthcare-RAG-Powered-Medical-QA-Assistant/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
@@ -41,7 +42,7 @@ Final evaluation run — full numbers in [`reports/evaluation_report.md`](report
 
 ```bash
 # 1. Clone
-git clone https://github.com/AbdooMatrix/Healthcare-RAG-Powered-Medical-QA-Assistant.git
+git clone https://github.com/AbdelrahmanMatrix/Healthcare-RAG-Powered-Medical-QA-Assistant.git
 cd Healthcare-RAG-Powered-Medical-QA-Assistant
 
 # 2. Install
