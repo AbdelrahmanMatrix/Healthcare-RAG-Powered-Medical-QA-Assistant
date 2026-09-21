@@ -2,8 +2,38 @@
 
 **eyouth × DEPI | Microsoft Machine Learning Track | 2026**
 
-A Retrieval-Augmented Generation (RAG) system that answers medical questions
-using PubMedQA data, with a BioBERT classifier for intelligent query routing.
+A production-grade Retrieval-Augmented Generation (RAG) system that answers medical
+questions from a 211k-sample PubMedQA corpus: BioBERT classifies each query into one of
+six medical categories, a FAISS + BM25 hybrid retriever grounds the context, and a
+Groq-hosted LLM generates the answer — served by FastAPI with a bilingual web dashboard.
+
+![Python](https://img.shields.io/badge/python-3.10-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-green)
+
+## 🏆 Results at a Glance
+
+Final evaluation run — full numbers in [`reports/evaluation_report.md`](reports/evaluation_report.md):
+
+| KPI | Target | Result | Status |
+|-----|--------|--------|--------|
+| Classification Macro F1 (BioBERT) | ≥ 78% | **90.66%** | ✅ Pass |
+| BERTScore F1 — primary answer quality | ≥ 0.80 | **0.8061** | ✅ Pass |
+| ROUGE-L (abstractive) | ≥ 0.15 | **0.1911** | ✅ Pass |
+| Faithfulness | ≥ 70% | **86.0%** | ✅ Pass |
+| Hallucination rate | ≤ 15% | **10.0%** | ✅ Pass |
+
+## ✨ Highlights
+
+- **Hybrid retrieval** — FAISS `IndexFlatIP` dense search fused with BM25; top-15 candidates reranked to top-3 with category-prioritised boosting
+- **Domain-tuned routing** — BioBERT (`dmis-lab/biobert-v1.1`) fine-tuned on 6 medical categories
+- **Biomedical embeddings** — `S-PubMedBert-MS-MARCO` (768-d), pre-trained on PubMed/PMC
+- **LLM inference** — `llama-4-scout-17b` via Groq API, with a local `flan-t5-base` fallback
+- **Full-stack delivery** — FastAPI + nginx-served SPA dashboard, three-service Docker Compose stack, CI/CD to Azure App Services
+- **MLOps** — MLflow experiment tracking, response caching, `/warmup` preloading
+- **Bilingual UI** — English / العربية dashboard with live KPI board
+- **Tested** — comprehensive pytest suite gating CI coverage
 
 ---
 
@@ -23,6 +53,29 @@ python download.py
 ```
 
 That's it. Run any notebook now.
+
+<details>
+<summary><strong>Expected output of <code>python download.py</code></strong></summary>
+
+```
+============================================================
+🏥 Healthcare RAG — Data Setup
+============================================================
+
+✅ Downloaded: data/raw/pubmedqa_raw.csv (15.2 MB)
+✅ Downloaded: data/processed/pubmedqa_cleaned.csv (12.1 MB)
+✅ Downloaded: data/processed/pubmedqa_labelled.csv (12.3 MB)
+✅ Downloaded: data/embeddings/faiss_index/pubmedqa_index_flatip.faiss (14.7 MB)
+✅ Downloaded: data/embeddings/faiss_index/chunk_mapping.pkl (11.8 MB)
+✅ Downloaded: data/processed/eval_holdout.csv (3.3 MB)
+
+🎉 Setup complete! You can now run any notebook.
+```
+
+The BioBERT classifier auto-downloads from HuggingFace on first inference.
+Open any notebook (e.g. `notebooks/10_end_to_end_test.ipynb`) and run all cells.
+
+</details>
 
 ---
 
@@ -59,7 +112,7 @@ That's it. Run any notebook now.
 │   └── pipeline.py                      # Top-level entry point
 │
 ├── api/                                 # FastAPI REST API
-├── dashboard/                           # Streamlit KPI dashboard
+├── dashboard/                           # HTML SPA dashboard (bilingual)
 ├── docker/                              # Docker deployment
 ├── mlops/                               # MLflow tracking
 ├── reports/                             # Generated reports & figures
@@ -87,10 +140,10 @@ User Query
 └────────────┬────────────┘
              │
              ▼
-┌─────────────────────────┐
-│  FAISS Vector Store     │  → Retrieves top-15 candidates, reranks to top-3
-│  (category-prioritised) │     (category matches boosted)
-└────────────┬────────────┘
+┌──────────────────────────────┐
+│  Hybrid Retrieval            │  → FAISS (IndexFlatIP) + BM25 fusion
+│  (category-prioritised)      │     top-15 candidates → reranked top-3
+└────────────┬─────────────────┘
              │
              ▼
 ┌─────────────────────────┐
@@ -173,6 +226,7 @@ uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 |--------|----------|-------------|
 | POST | `/query` | Submit a medical question |
 | GET | `/health` | Health check (model loaded, classifier ready, Groq configured) |
+| GET | `/warmup` | Pre-load the RAG pipeline and classifier before traffic |
 | GET | `/docs` | Swagger UI (interactive API docs) |
 | GET | `/` | Root info (project, docs link, version) |
 
@@ -207,11 +261,22 @@ Response:
 
 ---
 
-## 📊 Streamlit Dashboard
+## 📊 Dashboard (HTML SPA)
+
+A standalone, mobile-responsive single-page app — no Python dashboard dependency:
 
 ```bash
-streamlit run dashboard/app.py
+# Serve locally (any static server works; API base defaults to localhost:8000)
+python -m http.server 8501 --directory dashboard
+
+# Or run the full Docker stack, which serves it via nginx
+make docker-dev
 ```
+
+- Bilingual UI (English / العربية) with instant language toggle
+- Live KPI board showing the final evaluation results
+- Structured source citations and medical disclaimers on every answer
+- Configurable API endpoint (persisted in `localStorage` as `rag_api_base`)
 
 ---
 
@@ -222,7 +287,7 @@ The project ships a full containerised stack with three services:
 | Service | Container | Description |
 |---------|-----------|-------------|
 | **healthcare-rag** | `healthcare-rag-api` | FastAPI backend (port `8000`) |
-| **dashboard** | `healthcare-rag-dashboard` | Streamlit UI (port `8501`) |
+| **dashboard** | `healthcare-rag-dashboard` | HTML SPA served by nginx (port `8501`) |
 | **mlflow** | `healthcare-rag-mlflow` | MLflow experiment tracking (port `5000`) |
 
 Three Docker Compose files live in the `docker/` directory:
@@ -384,6 +449,8 @@ The `.dockerignore` excludes everything not needed for the build:
 
 ## 📈 KPI Results
 
+Source: final evaluation run — [`reports/evaluation_report.md`](reports/evaluation_report.md) and [`reports/classification_report.md`](reports/classification_report.md).
+
 ### M1 — Data
 | KPI | Target | Result |
 |-----|--------|--------|
@@ -397,13 +464,13 @@ The `.dockerignore` excludes everything not needed for the build:
 |-----|--------|--------|
 | FAISS retrieval | < 500ms | ✅ |
 | Classification macro F1 | ≥ 78% | ✅ (90.66%) |
-| RAG ROUGE-L (abstractive) | ≥ 0.15 | ✅ (0.1887) |
-| BERTScore F1 (primary) | ≥ 0.80 | ✅ (0.8047) |
+| RAG ROUGE-L (abstractive) | ≥ 0.15 | ✅ (0.1911) |
+| BERTScore F1 (primary) | ≥ 0.80 | ✅ (0.8061) |
 | BLEU improvement (RAG vs plain) | ≥ +6% (secondary; see note) | ⚠️ (−13.4%) |
-| Faithfulness | ≥ 70% | ✅ (92.0%) |
+| Faithfulness | ≥ 70% | ✅ (86.0%) |
 | Hallucination rate | ≤ 15% | ✅ (10%) |
 
-> **Note on BLEU:** For abstractive RAG systems, BERTScore F1 is the primary quality metric. BLEU is a secondary n-gram-overlap metric known to underperform for abstractive generation (Lewis et al. 2020). The −13.4% BLEU gap does not indicate a retrieval failure; BERTScore F1 (0.8047 ≥ 0.80 target) is the authoritative pass/fail metric.
+> **Note on BLEU:** For abstractive RAG systems, BERTScore F1 is the primary quality metric. BLEU is a secondary n-gram-overlap metric known to underperform for abstractive generation (Lewis et al. 2020), so a lower BLEU for the RAG arm does not indicate a retrieval failure; BERTScore F1 (0.8061 ≥ 0.80 target) is the authoritative pass/fail metric.
 
 ---
 
@@ -454,25 +521,4 @@ a qualified healthcare provider for medical decisions.
 
 ## 📝 License
 
-MIT License
-```
-
-
-> **Expected output** from `python download.py`:
-> ```
-> ============================================================
-> 🏥 Healthcare RAG — Data Setup
-> ============================================================
->
-> ✅ Downloaded: data/raw/pubmedqa_raw.csv (15.2 MB)
-> ✅ Downloaded: data/processed/pubmedqa_cleaned.csv (12.1 MB)
-> ✅ Downloaded: data/processed/pubmedqa_labelled.csv (12.3 MB)
-> ✅ Downloaded: data/embeddings/faiss_index/pubmedqa_index_flatip.faiss (14.7 MB)
-> ✅ Downloaded: data/embeddings/faiss_index/chunk_mapping.pkl (11.8 MB)
-> ✅ Downloaded: data/processed/eval_holdout.csv (3.3 MB)
->
-> 🎉 Setup complete! You can now run any notebook.
-> ```
->
-> The BioBERT classifier auto-downloads from HuggingFace on first inference.
-> Open any notebook (e.g. `notebooks/10_end_to_end_test.ipynb`) and run all cells.
+Released under the MIT License — see [LICENSE](LICENSE).
