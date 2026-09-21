@@ -475,7 +475,7 @@ The `.dockerignore` excludes everything not needed for the build:
 
 Source: final evaluation run — [`reports/evaluation_report.md`](reports/evaluation_report.md) and [`reports/classification_report.md`](reports/classification_report.md).
 
-### M1 — Data
+### Data Pipeline
 | KPI | Target | Result |
 |-----|--------|--------|
 | Missing values handled | ≥ 90% | ✅ |
@@ -483,7 +483,7 @@ Source: final evaluation run — [`reports/evaluation_report.md`](reports/evalua
 | All 6 categories ≥ 1% | Yes | ✅ |
 | EDA with 4 visualisations | Yes | ✅ |
 
-### M2 — Models
+### Model Evaluation
 | KPI | Target | Result |
 |-----|--------|--------|
 | FAISS retrieval | < 500ms | ✅ |
