@@ -434,6 +434,10 @@ All generated reports are in the `reports/` folder:
 - `preprocessing_pipeline_doc.md` — Text preprocessing pipeline
 - `deployment_test_report.md` — Latency & disclaimer verification
 - `final_summary.md` — Final project summary with all KPIs
+
+Additional project documents:
+- [`docs/graduation-project-documentation.pdf`](docs/graduation-project-documentation.pdf) — full project documentation
+- [`docs/healthcare-rag-presentation.pptx`](docs/healthcare-rag-presentation.pptx) — project presentation deck
 - `integrated_pipeline_test_results.json` — Integrated test output
 - `rag_evaluation_results.csv` — RAG evaluation data
 - `rag_pipeline_test_log.json` — Pipeline test logs

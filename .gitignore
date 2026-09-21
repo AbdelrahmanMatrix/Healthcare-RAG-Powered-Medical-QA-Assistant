@@ -57,8 +57,9 @@ data/embeddings/faiss_index/
 *.sublime-project
 *.sublime-workspace
 
-# ─── OS Files ────────────────────────────────────────────────────────────────
+# ─── OS / Office Temp Files ───────────────────────────────────────────────
 .DS_Store
+~$*
 .DS_Store?
 Thumbs.db
 ehthumbs.db
