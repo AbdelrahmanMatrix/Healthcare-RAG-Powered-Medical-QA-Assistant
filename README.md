@@ -34,7 +34,7 @@ Final evaluation run — full numbers in [`reports/evaluation_report.md`](report
 - **Full-stack delivery** — FastAPI + nginx-served SPA dashboard, three-service Docker Compose stack, CI/CD to Azure App Services
 - **MLOps** — MLflow experiment tracking, response caching, `/warmup` preloading
 - **Bilingual UI** — English / العربية dashboard with live KPI board
-- **Tested** — comprehensive pytest suite gating CI coverage
+- **Tested** — 469 tests across 16 suites gating a 95% coverage floor in CI, plus a Docker image smoke build
 
 ---
 
@@ -181,13 +181,12 @@ the inference pipeline (bottom) is what the FastAPI service runs on every query.
 | Classes | 6 medical categories |
 | HuggingFace | [AbdoMatrix/biobert-medical-classifier](https://huggingface.co/AbdoMatrix/biobert-medical-classifier) |
 
-### Fallback Classifier (DistilBERT)
+### Model Weights & Storage
 | Item | Value |
 |------|-------|
-| Location | `models/classifier/distilbert_classifier/` |
-| Status | Tokenizer configs present; weights are gitignored and downloaded separately |
-| Active | No — BioBERT is the primary classifier for all evaluation and deployment |
-| Purpose | Offline fallback for resource-constrained environments without HuggingFace access |
+| Classifier weights | Auto-downloaded from [HuggingFace Hub](https://huggingface.co/AbdoMatrix/biobert-medical-classifier) on first inference — not stored in the repo |
+| FAISS index + chunk mappings | Downloaded by `download.py` (or the API lifespan) from the project's HF dataset repo |
+| Rationale | Keeps the repository lightweight; `models/` and `data/` hold only directory placeholders |
 
 ### RAG Pipeline
 | Item | Value |
@@ -214,6 +213,28 @@ Or skip to notebook 10 directly (auto-downloads data):
 # Just run the verification notebook
 jupyter notebook notebooks/10_end_to_end_test.ipynb
 ```
+
+---
+
+## 🧪 Testing
+
+```bash
+pytest                      # full suite
+pytest tests/test_api.py    # single suite
+make docker-test            # run inside a disposable container
+```
+
+| Suite | Focus |
+|-------|-------|
+| `test_rag_pipeline_unit.py` | Retrieval, reranking, answer cleaning (106 tests) |
+| `test_workflow_yml.py` | Deploy-workflow structure assertions |
+| `test_rag_modules.py` / `test_data_modules.py` | Embeddings, vector store, BM25, Hub client |
+| `test_api.py` + `test_lifespan.py` | Endpoint behavior, startup/shutdown |
+| `test_classifier_unit.py` | Category prediction and fallback paths |
+| `test_metrics.py` | BLEU, ROUGE-L, BERTScore, faithfulness |
+| `test_integration_full_pipeline.py` | End-to-end query flow |
+
+CI enforces **flake8**, a **95% coverage floor**, and a **Docker build smoke test** on every push.
 
 ---
 
