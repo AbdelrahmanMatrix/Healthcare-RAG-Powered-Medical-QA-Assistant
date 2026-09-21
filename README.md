@@ -131,30 +131,32 @@ Open any notebook (e.g. `notebooks/10_end_to_end_test.ipynb`) and run all cells.
 
 ## 🏗️ Architecture
 
+```mermaid
+flowchart TB
+    subgraph KB["🧠 Knowledge Base — built offline"]
+        direction LR
+        PUBMED["PubMedQA corpus<br/>~211k Q/A samples"] --> EMBED["Biomedical embeddings<br/>S-PubMedBert-MS-MARCO · 768-d"]
+        EMBED --> INDEX[("FAISS IndexFlatIP<br/>+ BM25 lexicon index")]
+    end
+
+    Q(["👩‍⚕️ Medical question"]) --> CLS
+
+    subgraph SERVE["⚡ Inference Pipeline — FastAPI"]
+        CLS["BioBERT classifier<br/>6 medical categories · Macro F1 90.66%"]
+        RET["Hybrid retrieval<br/>FAISS + BM25 fusion · top-15 → top-3<br/>category-prioritised reranking"]
+        GEN["LLM generation<br/>llama-4-scout-17b via Groq · flan-t5-base fallback"]
+        CLS -->|"category routing"| RET
+        RET -->|"grounded context"| GEN
+    end
+
+    INDEX -.->|"vectors + chunks"| RET
+
+    GEN --> OUT["✅ Answer + source citations<br/>+ medical disclaimer"]
+    OUT --> UI["🌐 Bilingual SPA dashboard"]
 ```
-User Query
-    │
-    ▼
-┌─────────────────────────┐
-│  BioBERT Classifier     │  → Predicts medical category
-└────────────┬────────────┘
-             │
-             ▼
-┌──────────────────────────────┐
-│  Hybrid Retrieval            │  → FAISS (IndexFlatIP) + BM25 fusion
-│  (category-prioritised)      │     top-15 candidates → reranked top-3
-└────────────┬─────────────────┘
-             │
-             ▼
-┌─────────────────────────┐
-│  LLM (Groq)             │  → Generates answer from context
-└────────────┬────────────┘
-             │
-             ▼
-┌─────────────────────────┐
-│  Medical Disclaimer     │  → Appended to every response
-└─────────────────────────┘
-```
+
+*The knowledge base (top) is built once by notebooks 01–05 and served from HuggingFace Hub;
+the inference pipeline (bottom) is what the FastAPI service runs on every query.*
 
 ---
 
