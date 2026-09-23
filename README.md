@@ -524,6 +524,7 @@ All generated reports are in the `reports/` folder:
 - `monitoring_doc.md` — Monitoring & retraining strategy
 - `preprocessing_pipeline_doc.md` — Text preprocessing pipeline
 - `deployment_test_report.md` — Latency & disclaimer verification
+- `security_notes.md` — Security & privacy known limitations (CORS, logging, prompt injection)
 - `final_summary.md` — Final project summary with all KPIs
 
 Additional project documents:
