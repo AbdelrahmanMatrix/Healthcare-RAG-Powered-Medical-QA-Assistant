@@ -1,5 +1,7 @@
 # Monitoring & Retraining Strategy
 
+> **[HISTORICAL — PRE-REPAIR]** Written May 2026. All baseline values below are from the pre-repair May 2026 evaluation run and predate the Sept 2026 repairs (grounding policy, leakage-free split, matched decoding). Current numbers: `reports/evaluation_report.md` (canonical run pending) and `reports/classification_report_v2.md` (retrain pending). The latency figures are labelled by operating condition in the note at the bottom.
+
 **Healthcare RAG-Powered Medical Q&A Assistant**
 **Owner:** Ziad Ahmed El-Nady | eyouth x DEPI 2026
 

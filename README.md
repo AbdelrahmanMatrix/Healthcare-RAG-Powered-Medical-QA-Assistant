@@ -194,7 +194,7 @@ the inference pipeline (bottom) is what the FastAPI service runs on every query.
 | Embeddings | `pritamdeka/S-PubMedBert-MS-MARCO` (768d) |
 | Vector Store | FAISS IndexFlatIP + BM25 hybrid retrieval |
 | Generator | `meta-llama/llama-4-scout-17b-16e-instruct` via Groq API (falls back to `google/flan-t5-base` locally) |
-| Retrieval | Top-15 candidates → reranked top-3 with category routing |
+| Retrieval | Top-30 merged candidates (FAISS + threshold-gated BM25) → cross-encoder rerank → top-5 injected into the LLM, with category routing |
 | HTTP Client | `openai` Python SDK pointed at `api.groq.com/openai/v1` |
 
 ---
@@ -311,7 +311,7 @@ The project ships a full containerised stack with three services:
 | Service | Container | Description |
 |---------|-----------|-------------|
 | **healthcare-rag** | `healthcare-rag-api` | FastAPI backend (port `8000`) |
-| **dashboard** | `healthcare-rag-dashboard` | HTML SPA served by nginx (port `8501`) |
+| **dashboard** | `healthcare-rag-dashboard` | HTML SPA served by nginx (host port `8080` → container `80`) |
 | **mlflow** | `healthcare-rag-mlflow` | MLflow experiment tracking (port `5000`) |
 
 Three Docker Compose files live in the `docker/` directory:

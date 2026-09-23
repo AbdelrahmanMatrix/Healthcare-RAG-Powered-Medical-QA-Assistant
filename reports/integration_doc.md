@@ -1,5 +1,7 @@
 # M3 Integration Documentation
 
+> **[PARTIALLY HISTORICAL]** Written May 2026 (M3 phase). Structural content is accurate; some details predate the Sept 2026 repair — see `reports/security_notes.md` and `reports/evaluation_report.md` for current state.
+
 **Owner:** Ziad Ahmed El-Nady | eyouth × DEPI 2026
 **Milestone:** M3 — Azure Deployment
 **Date:** May 2026
@@ -85,7 +87,7 @@ api/routes/query.py  →  run_pipeline (src/pipeline.py)
     ├─▶ BM25 Retriever (src/rag/bm25_retriever.py)  [hybrid retrieval]
     │
     └─▶ LLM (Groq meta-llama/llama-4-scout-17b-16e-instruct via openai client)
-            └─ Generates answer from top-3 reranked chunks (retrieved from top-15 FAISS candidates)
+            └─ Generates answer from the top-5 reranked chunks (merged pool: FAISS top-30 + threshold-gated BM25, cross-encoder reranked)
 
     │
     ▼
