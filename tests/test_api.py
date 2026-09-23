@@ -398,11 +398,28 @@ class TestSchemaValidation:
         assert r.status_code != 422, "Empty category should be treated as None"
 
     def test_source_citation_defaults(self):
-        """SourceCitation model has correct default values."""
+        """SourceCitation model has correct default values (P0.2 schema).
+
+        Score fields are optional and default to None; the mislabelled
+        `distance` / `relevance_score` fields were removed.
+        """
         from api.schemas.request import SourceCitation
-        sc = SourceCitation(chunk_id="1", question="q", category="General", distance=0.5)
-        assert sc.relevance_score == 0.0
+        sc = SourceCitation(chunk_id="1", question="q", category="General",
+                            reranker_score=0.5)
+        assert sc.faiss_score is None
+        assert sc.bm25_score is None
+        assert sc.reranker_score == 0.5
         assert sc.excerpt == ""
+
+    def test_source_citation_has_no_distance_field(self):
+        """P0.2: BM25/FAISS scores must never be conflated into a 'distance'."""
+        from api.schemas.request import SourceCitation
+        sc = SourceCitation(chunk_id="1", question="q", category="General",
+                            faiss_score=0.87, bm25_score=13.4)
+        assert not hasattr(sc, "distance")
+        assert not hasattr(sc, "relevance_score")
+        assert sc.faiss_score == 0.87
+        assert sc.bm25_score == 13.4
 
     def test_validate_category_directly(self):
         """Directly test the field_validator success path."""

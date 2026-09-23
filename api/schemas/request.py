@@ -10,6 +10,9 @@ VALID_CATEGORIES = {
     "General",
 }
 
+# Grounding statuses exposed to API consumers (mirrors src/rag/pipeline.py).
+VALID_ANSWER_SOURCES = {"grounded", "insufficient_evidence", "fallback"}
+
 
 class QueryRequest(BaseModel):
     question: str = Field(
@@ -50,8 +53,13 @@ class SourceCitation(BaseModel):  # pragma: no cover — class def; coverage.py 
     chunk_id: str
     question: str
     category: str
-    distance: float
-    relevance_score: float = 0.0   # 0-1, higher = more relevant (normalised)
+    # Explicit, per-source ranking scores (P0.2 repair). `distance` /
+    # `relevance_score` were removed: BM25 and FAISS scores live on
+    # incomparable scales and were previously conflated into one mislabelled
+    # "distance" field. The list order IS the final relevance ranking.
+    faiss_score: Optional[float] = None   # inner product on L2-normalised vectors (cosine sim; higher = better)
+    bm25_score: Optional[float] = None    # BM25 relevance (unbounded; higher = better)
+    reranker_score: Optional[float] = None  # CrossEncoder logit (final ranking authority)
     excerpt: str = ""              # first 150 chars of retrieved context
 
 
@@ -60,6 +68,11 @@ class QueryResponse(BaseModel):
     category: str
     retrieved_sources: List[str]
     source_citations: List[SourceCitation] = Field(default_factory=list)
+    # Grounding status (P0.3 repair): "grounded" (answer from retrieved
+    # evidence), "insufficient_evidence" (explicit refusal — the retrieved
+    # evidence did not support an answer), or "fallback" (best-chunk /
+    # error fallback was used).
+    answer_source: str = "grounded"
     disclaimer: str
 
 

@@ -72,6 +72,7 @@ async def handle_query(request: QueryRequest) -> QueryResponse:
             category=cached["category"],
             retrieved_sources=cached["sources"],
             source_citations=cached["source_citations"],
+            answer_source=cached.get("answer_source", "grounded"),
             disclaimer=cached["disclaimer"],
         )
 
@@ -86,14 +87,20 @@ async def handle_query(request: QueryRequest) -> QueryResponse:
         )
 
         # Build rich source citations from detail data (backward-compat: also keep str list)
+        # Scores use explicit names (faiss_score / bm25_score / reranker_score);
+        # citation order is the final reranker ranking (P0.2 repair).
         raw_details = result.get("source_details", [])
         source_citations = [
             SourceCitation(
                 chunk_id=str(s["chunk_id"]),
                 question=s.get("question", ""),
                 category=s.get("category", "Unknown"),
-                distance=round(float(s.get("distance", 0.0)), 4),
-                relevance_score=round(float(s.get("relevance_score", 0.0)), 4),
+                faiss_score=(round(float(s["faiss_score"]), 4)
+                             if s.get("faiss_score") is not None else None),
+                bm25_score=(round(float(s["bm25_score"]), 4)
+                            if s.get("bm25_score") is not None else None),
+                reranker_score=(round(float(s["reranker_score"]), 4)
+                                if s.get("reranker_score") is not None else None),
                 excerpt=s.get("excerpt", ""),
             )
             for s in raw_details
@@ -104,6 +111,7 @@ async def handle_query(request: QueryRequest) -> QueryResponse:
             category=result.get("category", "General"),
             retrieved_sources=result.get("sources", []),
             source_citations=source_citations,
+            answer_source=result.get("answer_source", "grounded"),
             disclaimer=settings.disclaimer,
         )
 
@@ -113,6 +121,7 @@ async def handle_query(request: QueryRequest) -> QueryResponse:
             "category": response.category,
             "sources": response.retrieved_sources,
             "source_citations": [s.model_dump() for s in response.source_citations],
+            "answer_source": response.answer_source,
             "disclaimer": response.disclaimer,
         })
 
@@ -162,7 +171,7 @@ async def health_check() -> HealthResponse:
     )
 
 
-@router.get("/warmup")
+@router.get("/warmup", dependencies=[Depends(verify_api_key)])
 async def warmup():
     """
     Warm up the RAG pipeline by loading it into memory.

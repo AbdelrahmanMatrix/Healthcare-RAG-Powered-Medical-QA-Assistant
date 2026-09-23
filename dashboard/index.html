@@ -942,7 +942,7 @@ const TRANSLATIONS = {
 
     'source.label': 'المصدر',
     'source.relevance': 'الصلة:',
-    'source.distance': 'المسافة:',
+    'source.rank': 'الترتيب:',
     'source.show': 'عرض المصادر',
     'source.hide': 'إخفاء المصادر',
     'source.sources': 'مصادر',
@@ -1390,15 +1390,14 @@ function formatSources(sources) {
     var numLabel = tn('source.num', i + 1) || ('Source ' + (i + 1));
     var title = numLabel + ': ' + (s.question || s.chunk_id || (t('source.na') || 'N/A'));
     var relevance = t('source.relevance') || 'Relevance:';
-    var distance = t('source.distance') || 'Distance:';
-    var relVal = typeof s.relevance_score === 'number' ? s.relevance_score.toFixed(3) : (t('source.na') || 'N/A');
-    var distVal = typeof s.distance === 'number' ? s.distance.toFixed(4) : (t('source.na') || 'N/A');
+    var rank = t('source.rank') || 'Rank:';
+    var rankVal = (i + 1);
     var excerpt = '';
     if (s.excerpt) {
       var excerptText = s.excerpt.slice(0, 200) + (s.excerpt.length > 200 ? '...' : '');
       excerpt = '<div class="src-excerpt">"' + excerptText.replace(/</g, '&lt;') + '"</div>';
     }
-    return '<div class="source-card"><div class="src-title">' + title + '</div><div class="src-meta">' + (s.category || '—') + ' &middot; ' + relevance + ' ' + relVal + ' &middot; ' + distance + ' ' + distVal + '</div>' + excerpt + '</div>';
+    return '<div class="source-card"><div class="src-title">' + title + '</div><div class="src-meta">' + (s.category || '—') + ' &middot; ' + rank + ' #' + rankVal + '</div>' + excerpt + '</div>';
   }).join('');
 
   var showText = tn('source.show_count', sources.length) || ('Show ' + sources.length + ' Sources');

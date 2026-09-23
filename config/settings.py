@@ -25,9 +25,13 @@ class Settings(BaseSettings):
     EMBEDDING_MODEL: str = "pritamdeka/S-PubMedBert-MS-MARCO"
 
     # ── LLM ───────────────────────────────────────────────────────────────────
-    # Groq-hosted OpenAI GPT-OSS 120B (production).  Falls back to flan-t5-base locally.
-    LLM_MODEL: str = "openai/gpt-oss-120b"
+    # CANONICAL GENERATOR — single source of truth for the Groq-hosted LLM.
+    # This is the model used by the 2026-05 evaluation run (NB08) and by all
+    # reports. Runtime code must read settings.LLM_MODEL — never hardcode it.
+    LLM_MODEL: str = "meta-llama/llama-4-scout-17b-16e-instruct"
     LLM_BASE_URL: str = "https://api.groq.com/openai/v1"
+    # Local fallback used only when GROQ_API_KEY is unset (offline mode).
+    FALLBACK_LLM_MODEL: str = "google/flan-t5-base"
 
     # ── Reranker ──────────────────────────────────────────────────────────────
     # 12-layer MiniLM — higher precision than 6-layer variant.

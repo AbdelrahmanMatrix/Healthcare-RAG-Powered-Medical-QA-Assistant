@@ -1,10 +1,20 @@
 """
 Healthcare RAG — MLflow Experiment Tracking (M4)
 
+IMPORTANT — SCOPE (P1 repair):
+  MLflow here is OFFLINE EXPERIMENT TRACKING ONLY. It is NOT part of runtime
+  inference: the FastAPI service never imports MLflow, and metrics are logged
+  from local report artifacts after the fact.
+
 Instruments the RAG pipeline + classifier training to log:
   - embedding model, FAISS index size, retrieval top-k
-  - LLM model, chunk size / inject-k
+  - LLM model (read from config.settings — single source of truth)
+  - chunk size / inject-k
   - BLEU, ROUGE-L, macro F1, accuracy, avg latency
+
+Integrity policy (P1 repair): latency is logged ONLY from the real measured
+log (reports/rag_pipeline_test_log.json). If no measurement exists, the metric
+is OMITTED — simulated latency values were removed and must not come back.
 
 Usage (from project root):
     python mlops/mlflow_tracking.py
@@ -22,6 +32,8 @@ except (AttributeError, ValueError):
 import mlflow
 import mlflow.pyfunc
 from pathlib import Path
+
+from config.settings import settings
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
@@ -163,13 +175,13 @@ def _load_classifier_metrics() -> dict:
 def run_experiment(config: dict, base_metrics: dict, clf_metrics: dict) -> str:
     """Log one experiment run to MLflow; return run_id."""
     with mlflow.start_run(run_name=config["name"]) as run:
-        # Log parameters
+        # Log parameters — the generator model comes from central config (P0.1)
         mlflow.log_params({
             "top_k": config["top_k"],
             "inject_k": config["inject_k"],
             "max_context_words": config["max_context_words"],
             "embedding_model": config["embedding_model"],
-            "llm_model": "meta-llama/llama-4-scout-17b-16e-instruct (via Groq)",
+            "llm_model": settings.LLM_MODEL,
         })
 
         # Log FAISS index size (if index exists)
@@ -204,12 +216,14 @@ def run_experiment(config: dict, base_metrics: dict, clf_metrics: dict) -> str:
             except (json.JSONDecodeError, KeyError):
                 pass
 
+        # Log ACTUAL measured latency only (P1 repair).
+        # The previous simulated fallback ("800 + top_k*50 + inject_k*30")
+        # fabricated a metric and was removed. If no real measurement exists,
+        # latency is omitted and explicitly recorded as unavailable.
         if actual_latency:
             mlflow.log_metric("avg_latency_ms", round(actual_latency, 1))
         else:
-            # Simulate small latency measurement per config
-            simulated_latency = 800 + (config["top_k"] * 50) + (config["inject_k"] * 30)
-            mlflow.log_metric("avg_latency_ms", simulated_latency)
+            mlflow.set_tag("avg_latency_ms", "unavailable — run NB10 to measure real latency")
 
         # FIX: Log a pyfunc model artifact so register_best_model() can find it.
         # We log the classifier directory if it has weights; otherwise log a

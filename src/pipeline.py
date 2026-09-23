@@ -5,7 +5,10 @@ Top-level pipeline entry point — thread-safe singleton loading.
 """
 import threading
 from src.classification.classifier import predict
-from src.rag.pipeline import build_rag_pipeline
+from src.rag.pipeline import (
+    ANSWER_SOURCE_GROUNDED,
+    build_rag_pipeline,
+)
 
 _rag = None
 _rag_lock = threading.Lock()
@@ -85,6 +88,7 @@ def run_pipeline(question: str, top_k: int = None, category: str = None) -> dict
     # classifier's prediction is always shown in the response, even when the
     # retrieval-quality fallback switches to general (uncategorized) retrieval.
     predicted_category = None
+    answer_source = ANSWER_SOURCE_GROUNDED
 
     # Use classifier's per-class probabilities for continuous scoring
     if category:
@@ -123,6 +127,7 @@ def run_pipeline(question: str, top_k: int = None, category: str = None) -> dict
         retrieved = rag.retrieve(expanded_question, top_k)
 
     raw_answer = rag.generate(question, retrieved)
+    answer_source = getattr(rag, "_last_answer_source", ANSWER_SOURCE_GROUNDED)
     sources = rag.format_sources(retrieved)
 
     # Display the classifier's predicted category even when retrieval fell
@@ -132,6 +137,7 @@ def run_pipeline(question: str, top_k: int = None, category: str = None) -> dict
 
     return {
         "answer":         raw_answer,
+        "answer_source":  answer_source,
         "category":       display_category,
         "sources":        [str(s["chunk_id"]) for s in sources],
         "source_details": sources,

@@ -108,7 +108,7 @@ class TestBM25RetrieverRetrieve:
         assert len(results) == 4  # only 4 docs in the DataFrame
 
     def test_retrieve_structure(self, retriever):
-        """Each result has the expected keys."""
+        """Each result has the expected keys (explicit bm25_score, no distance — P0.2)."""
         results = retriever.retrieve("test query", top_k=1)
         r = results[0]
         assert "chunk_id" in r
@@ -117,8 +117,9 @@ class TestBM25RetrieverRetrieve:
         assert "answer" in r
         assert "category" in r
         assert "text_chunk" in r
-        assert "distance" in r
         assert "bm25_score" in r
+        # P0.2: the inverse-BM25 "distance" field was removed
+        assert "distance" not in r
 
     def test_retrieve_sorted_by_score(self, retriever):
         """Results are sorted by BM25 score descending."""
@@ -126,11 +127,11 @@ class TestBM25RetrieverRetrieve:
         scores = [r["bm25_score"] for r in results]
         assert scores == sorted(scores, reverse=True)
 
-    def test_retrieve_distance_normalized(self, retriever):
-        """distance is soft-normalized from BM25 score: 1/(1+score)."""
-        results = retriever.retrieve("test query", top_k=1)
-        expected = 1.0 / (1.0 + results[0]["bm25_score"])
-        assert results[0]["distance"] == pytest.approx(expected)
+    def test_retrieve_scores_ordered_descending(self, retriever):
+        """P0.2: strongest BM25 match comes first (no inverse 'distance')."""
+        results = retriever.retrieve("test query", top_k=3)
+        scores = [r["bm25_score"] for r in results]
+        assert scores == sorted(scores, reverse=True)
 
     def test_retrieve_category_fallback(self):
         """When category column is missing, defaults to 'Unknown'."""
@@ -735,7 +736,6 @@ class TestHybridRetrievalBasic:
                         "answer": f"bm25_a{i}",
                         "category": "General",
                         "text_chunk": f"bm25_t{i}",
-                        "distance": 1.0 / (1.0 + bm25_scores[i]),
                         "bm25_score": bm25_scores[i],
                     }
                     for i in range(n)
@@ -873,7 +873,8 @@ class TestHybridRetrievalBasic:
             assert "context" in r
             assert "answer" in r
             assert "category" in r
-            assert "distance" in r
+            assert "bm25_score" in r or "faiss_score" in r
+            assert "distance" not in r
 
     def test_reranker_integration(self):
         """When reranker is enabled, results have reranker_score key."""

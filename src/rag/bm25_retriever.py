@@ -4,6 +4,12 @@ For PubMedQA, BM25 often retrieves the exact paper by keyword match.
 
 Medical-aware tokeniser: preserves compound terms, removes punctuation,
 filters stopwords, and keeps meaningful medical keywords.
+
+Scoring contract (P0.2 repair): BM25 scores are unbounded and HIGHER =
+better. They are exposed as `bm25_score` and are never rescaled into a
+"distance" or compared with FAISS inner-product scores. Fusion = union of
+surviving BM25 hits and the FAISS pool, de-duplicated, then reranked by the
+CrossEncoder, which is the final ranking authority.
 """
 
 import re
@@ -68,6 +74,15 @@ class BM25Retriever:
         print(f"[OK] BM25 index built over {len(corpus):,} documents")
 
     def retrieve(self, query: str, top_k: int = 5) -> list[dict]:
+        """Return the top_k BM25 matches, strongest first.
+
+        P0.2 repair: results carry an explicit `bm25_score` (unbounded, higher
+        = better) and are ordered by descending score. The previous version
+        also fabricated a "distance = 1 / (1 + score)" field that inverted the
+        meaning of similarity — that field is gone. BM25 scores are never
+        compared to FAISS inner-product scores; the CrossEncoder reranker is
+        the only component that scores all candidates on one comparable scale.
+        """
         tokens = _tokenize(query)
         if not tokens:
             return []
@@ -77,15 +92,6 @@ class BM25Retriever:
         results = []
         for idx in top_indices:
             row = self.mapping_df.iloc[idx]
-            # Normalize BM25 score to a [0, 1] distance-like metric where
-            # lower = better match, consistent with FAISS IP distances.
-            # BM25 scores are unbounded but typically < 20 for medical text.
-            bm25_raw = float(scores[idx])
-            # Use a soft normalization: distance = 1 / (1 + score) ∈ (0, 1]
-            # score=0  → distance=1.0 (no match)
-            # score=10 → distance≈0.09 (strong match)
-            # score=20 → distance≈0.05 (near-perfect match)
-            dist = 1.0 / (1.0 + bm25_raw)
             results.append({
                 "chunk_id":   int(idx),
                 "question":   row["question"],
@@ -93,7 +99,6 @@ class BM25Retriever:
                 "answer":     row["answer"],
                 "category":   row.get("category", "Unknown"),
                 "text_chunk": row["text_chunk"],
-                "distance":   dist,
-                "bm25_score": bm25_raw,
+                "bm25_score": float(scores[idx]),
             })
         return results

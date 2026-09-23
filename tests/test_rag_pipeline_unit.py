@@ -434,21 +434,23 @@ class TestRowToDict:
     """Tests for RAGPipeline._row_to_dict()."""
 
     def test_basic_mapping(self, builder):
-        """_row_to_dict maps a row index and distance to a dict with expected keys."""
-        result = builder.pipeline._row_to_dict(idx=5, dist=0.75)
+        """_row_to_dict maps a row index and FAISS score to a dict with expected keys (P0.2)."""
+        result = builder.pipeline._row_to_dict(idx=5, faiss_score=0.75)
         assert result["chunk_id"] == 5
         assert result["question"] == "q5"
         assert result["answer"] == "a5"
         assert result["context"] == "c5"
         assert result["text_chunk"] == "t5"
         assert result["category"] in ("Symptoms", "General", "Treatment", "Diagnosis", "Medication")
-        assert result["distance"] == 0.75
+        assert result["faiss_score"] == 0.75
+        # The mislabelled "distance" field must be gone
+        assert "distance" not in result
 
     def test_category_from_dataframe(self, builder):
         """category comes from the DataFrame's category column."""
-        result = builder.pipeline._row_to_dict(idx=0, dist=0.5)
+        result = builder.pipeline._row_to_dict(idx=0, faiss_score=0.5)
         assert result["category"] == "Symptoms"
-        result = builder.pipeline._row_to_dict(idx=30, dist=0.5)
+        result = builder.pipeline._row_to_dict(idx=30, faiss_score=0.5)
         assert result["category"] == "General"
 
 
@@ -489,11 +491,11 @@ class TestFormatSources:
     """Tests for RAGPipeline.format_sources()."""
 
     def test_basic_formatting(self, builder):
-        """format_sources produces dicts with expected keys."""
+        """format_sources produces dicts with explicit score names (P0.2)."""
         pipeline = builder.pipeline
         retrieved = [
             {"chunk_id": 5, "question": "q5", "category": "Symptoms",
-             "distance": 0.75, "answer": "a5", "context": "some context here"},
+             "faiss_score": 0.75, "answer": "a5", "context": "some context here"},
         ]
         sources = pipeline.format_sources(retrieved)
         assert len(sources) == 1
@@ -501,38 +503,42 @@ class TestFormatSources:
         assert s["chunk_id"] == 5
         assert s["question"] == "q5"
         assert s["category"] == "Symptoms"
-        assert "distance" in s
-        assert "relevance_score" in s
+        assert "faiss_score" in s
         assert "reranker_score" in s
         assert "excerpt" in s
-        assert s["relevance_score"] == pytest.approx(0.75, abs=1e-4)
+        assert s["faiss_score"] == pytest.approx(0.75, abs=1e-4)
+        # P0.2: no mislabelled distance/relevance fields
+        assert "distance" not in s
+        assert "relevance_score" not in s
 
-    def test_distance_clamped(self, builder):
-        """distance is clamped to [0, 1]."""
+    def test_bm25_source_carries_bm25_score(self, builder):
+        """BM25-sourced candidates expose bm25_score, never a fake distance."""
+        pipeline = builder.pipeline
+        retrieved = [
+            {"chunk_id": 9, "question": "q9", "category": "General",
+             "bm25_score": 13.4, "answer": "a9", "context": "c9"},
+        ]
+        sources = pipeline.format_sources(retrieved)
+        assert sources[0]["bm25_score"] == pytest.approx(13.4, abs=1e-4)
+        assert "faiss_score" not in sources[0]
+        assert "distance" not in sources[0]
+
+    def test_scores_are_never_clamped_or_rescaled(self, builder):
+        """Scores are passed through (rounded), not clamped into [0, 1]."""
         pipeline = builder.pipeline
         retrieved = [
             {"chunk_id": 1, "question": "q", "category": "General",
-             "distance": 1.5, "answer": "a", "context": "c"},
+             "faiss_score": 1.5, "answer": "a", "context": "c"},
         ]
         sources = pipeline.format_sources(retrieved)
-        assert sources[0]["relevance_score"] == 1.0
-
-    def test_negative_distance(self, builder):
-        """Negative distance is clamped to 0."""
-        pipeline = builder.pipeline
-        retrieved = [
-            {"chunk_id": 1, "question": "q", "category": "General",
-             "distance": -0.5, "answer": "a", "context": "c"},
-        ]
-        sources = pipeline.format_sources(retrieved)
-        assert sources[0]["relevance_score"] == 0.0
+        assert sources[0]["faiss_score"] == 1.5
 
     def test_with_category_score(self, builder):
         """category_score is rounded to 4 decimal places."""
         pipeline = builder.pipeline
         retrieved = [
             {"chunk_id": 1, "question": "q", "category": "Symptoms",
-             "distance": 0.5, "answer": "a", "context": "c",
+             "faiss_score": 0.5, "answer": "a", "context": "c",
              "category_score": 0.854321},
         ]
         sources = pipeline.format_sources(retrieved)
@@ -549,7 +555,7 @@ class TestFormatSources:
         long_context = "x" * 300
         retrieved = [
             {"chunk_id": 1, "question": "q", "category": "General",
-             "distance": 0.5, "answer": "a", "context": long_context},
+             "faiss_score": 0.5, "answer": "a", "context": long_context},
         ]
         sources = pipeline.format_sources(retrieved)
         assert len(sources[0]["excerpt"]) <= 150
@@ -797,9 +803,14 @@ class TestGenerate:
         # No retry - hedging is skipped for non-Groq models
         assert result == "The evidence does not directly address this."
 
-    def test_disease_mismatch_triggers_general_knowledge_fallback(self, builder):
-        """When evidence is insufficient, generate() falls back to LLM general
-        knowledge instead of returning the refusal message."""
+    def test_disease_mismatch_returns_insufficient_evidence(self, builder):
+        """P0.3: when the LLM reports insufficient evidence, generate() returns
+        the explicit insufficient-evidence message — it NEVER calls the LLM for
+        an ungrounded general-knowledge answer."""
+        from src.rag.pipeline import (
+            ANSWER_SOURCE_INSUFFICIENT_EVIDENCE,
+            INSUFFICIENT_CONTEXT_MESSAGE,
+        )
         pipeline = builder.pipeline
         honest_response = (
             "The retrieved medical literature does not contain sufficient "
@@ -812,12 +823,22 @@ class TestGenerate:
         chunks = [{"answer": "Some irrelevant answer.", "context": "c1"}]
         result = pipeline.generate("test query", chunks)
 
-        # Should fall back to general knowledge instead of returning the refusal
-        assert result == "General knowledge answer about symptoms."
+        # Explicit grounded-refusal — never the ungrounded LLM output
+        assert result == INSUFFICIENT_CONTEXT_MESSAGE
+        assert result != "General knowledge answer about symptoms."
         # _is_hedging was checked but returned False — no retry
         pipeline._is_hedging.assert_called_once_with(honest_response)
-        # _call_groq was called for the general knowledge fallback
-        pipeline._call_groq.assert_called()
+        # No second LLM call may happen (no ungrounded fallback)
+        pipeline._call_groq.assert_not_called()
+        # Grounding status is tracked
+        assert pipeline._last_answer_source == ANSWER_SOURCE_INSUFFICIENT_EVIDENCE
+
+    def test_general_knowledge_path_is_removed(self, builder):
+        """P0.3: the removed ungrounded path raises loudly if invoked."""
+        import pytest as _pytest
+        pipeline = builder.pipeline
+        with _pytest.raises(NotImplementedError):
+            pipeline._generate_general_knowledge("any query")
 
     def test_disease_mismatch_not_flagged_as_hedging_in_is_hedging(self, builder):
         """_is_hedging() explicitly returns False for the prompt-mandated text."""
@@ -859,9 +880,9 @@ class TestAnswer:
 
         result = pipeline.answer("What causes disease X?")
         assert set(result.keys()) == {
-            "question", "answer", "answer_raw", "retrieved_sources",
-            "disclaimer_present", "top_k", "used_rag", "answer_source",
-            "retrieval_quality", "mean_cosine_similarity",
+            "question", "answer", "answer_raw", "answer_source",
+            "retrieved_sources", "disclaimer_present", "top_k",
+            "used_rag", "retrieval_quality", "mean_faiss_score",
         }
         assert result["question"] == "What causes disease X?"
         assert result["answer_raw"] == "Disease X causes fever."
@@ -869,31 +890,55 @@ class TestAnswer:
         assert result["disclaimer_present"] is True
         assert "MEDICAL DISCLAIMER" in result["answer"]
 
-    def test_no_rag_path_groq(self, builder):
-        """answer() with needs_rag=False uses direct Groq answer."""
+    def test_no_rag_path_returns_static_refusal(self, builder):
+        """P0.3: non-RAG queries (greetings etc.) get a static refusal — the
+        LLM is never called for an ungrounded answer."""
+        from src.rag.pipeline import ANSWER_SOURCE_INSUFFICIENT_EVIDENCE
         pipeline = builder.pipeline
         pipeline._needs_retrieval = MagicMock(return_value=False)
         pipeline._call_groq = MagicMock(return_value="Direct answer.")
 
         result = pipeline.answer("Hi, how are you?")
-        assert result["answer_raw"] == "Direct answer."
         assert result["used_rag"] is False
         assert result["top_k"] == 0
         assert result["retrieval_quality"] == 0.0
-        assert result["mean_cosine_similarity"] == 0.0
+        assert result["mean_faiss_score"] == 0.0
+        assert result["answer_source"] == ANSWER_SOURCE_INSUFFICIENT_EVIDENCE
+        # No LLM call — the ungrounded direct-answer path is removed
+        pipeline._call_groq.assert_not_called()
 
     def test_no_rag_path_no_groq(self, no_groq_builder):
-        """answer() with needs_rag=False and no Groq returns insufficient context."""
-        from src.rag.pipeline import INSUFFICIENT_CONTEXT_MESSAGE
+        """answer() with needs_rag=False and no Groq returns the static refusal."""
         pipeline = no_groq_builder.pipeline
         pipeline._needs_retrieval = MagicMock(return_value=False)
 
         result = pipeline.answer("Hi")
-        assert result["answer_raw"] == INSUFFICIENT_CONTEXT_MESSAGE
+        assert "grounded in retrieved research" in result["answer_raw"]
         assert result["used_rag"] is False
+        assert result["answer_source"] == "insufficient_evidence"
+
+    def test_answer_source_is_grounded_by_default(self, builder):
+        """answer_source defaults to 'grounded' when the answer comes from evidence."""
+        pipeline = builder.pipeline
+        pipeline._needs_retrieval = MagicMock(return_value=True)
+        pipeline.generate = MagicMock(return_value="An answer from evidence.")
+
+        result = pipeline.answer("test")
+        assert result["answer_source"] == "grounded"
+
+    def test_answer_source_follows_pipeline_state(self, builder):
+        """answer_source reflects the pipeline's grounding status (P0.3)."""
+        from src.rag.pipeline import ANSWER_SOURCE_INSUFFICIENT_EVIDENCE
+        pipeline = builder.pipeline
+        pipeline._needs_retrieval = MagicMock(return_value=True)
+        pipeline.generate = MagicMock(return_value="answer")
+        pipeline._last_answer_source = ANSWER_SOURCE_INSUFFICIENT_EVIDENCE
+
+        result = pipeline.answer("test")
+        assert result["answer_source"] == "insufficient_evidence"
 
     def test_retrieval_quality_scores(self, builder):
-        """answer() computes retrieval_quality and mean_cosine_similarity."""
+        """answer() computes retrieval_quality and mean_faiss_score."""
         pipeline = builder.pipeline
         pipeline._needs_retrieval = MagicMock(return_value=True)
         pipeline.generate = MagicMock(return_value="Answer text.")
@@ -902,10 +947,10 @@ class TestAnswer:
         def mock_retrieve(query, top_k=None):
             return [
                 {"chunk_id": 1, "question": "q1", "category": "General",
-                 "distance": 0.8, "reranker_score": 0.9, "answer": "a1",
+                 "faiss_score": 0.8, "reranker_score": 0.9, "answer": "a1",
                  "context": "c1", "text_chunk": "t1"},
                 {"chunk_id": 2, "question": "q2", "category": "General",
-                 "distance": 0.6, "reranker_score": 0.7, "answer": "a2",
+                 "faiss_score": 0.6, "reranker_score": 0.7, "answer": "a2",
                  "context": "c2", "text_chunk": "t2"},
             ]
         pipeline.retrieve = mock_retrieve
@@ -913,29 +958,8 @@ class TestAnswer:
         result = pipeline.answer("test query")
         # retrieval_quality = mean of reranker_score = (0.9 + 0.7) / 2 = 0.8
         assert result["retrieval_quality"] == pytest.approx(0.8, abs=1e-4)
-        # mean_cosine_similarity = mean of distance = (0.8 + 0.6) / 2 = 0.7
-        assert result["mean_cosine_similarity"] == pytest.approx(0.7, abs=1e-4)
-
-    def test_answer_source_is_rag_by_default(self, builder):
-        """answer_source defaults to 'rag' when using standard RAG."""
-        pipeline = builder.pipeline
-        pipeline._needs_retrieval = MagicMock(return_value=True)
-        pipeline.generate = MagicMock(return_value="An answer from evidence.")
-
-        result = pipeline.answer("test")
-        assert result["answer_source"] == "rag"
-
-    def test_answer_source_general_knowledge_when_fallback(self, builder):
-        """answer_source is 'general_knowledge' when fallback is triggered."""
-        pipeline = builder.pipeline
-        pipeline._needs_retrieval = MagicMock(return_value=True)
-        pipeline.generate = MagicMock(return_value="General knowledge answer.")
-        pipeline._last_answer_source = "general_knowledge"
-
-        result = pipeline.answer("test")
-        assert result["answer_source"] == "general_knowledge"
-        # No transparency note is appended; answer is just raw + disclaimer
-        assert result["answer_raw"] == "General knowledge answer."
+        # mean_faiss_score = mean of faiss_score = (0.8 + 0.6) / 2 = 0.7
+        assert result["mean_faiss_score"] == pytest.approx(0.7, abs=1e-4)
 
     def test_disclaimer_appended(self, builder):
         """answer appends disclaimer to answer_raw."""
@@ -1028,23 +1052,22 @@ class TestAnswerWithRouting:
         assert set(result.keys()) == expected_keys
 
     def test_answer_source_rag_default_routing(self, builder):
-        """answer_with_routing sets answer_source to 'rag' by default."""
+        """answer_with_routing sets answer_source to 'grounded' by default."""
         pipeline = builder.pipeline
         pipeline.generate = MagicMock(return_value="Answer text.")
 
         result = pipeline.answer_with_routing("test query", category="Symptoms")
-        assert result["answer_source"] == "rag"
-        # No transparency note is appended for rag answers
+        assert result["answer_source"] == "grounded"
 
-    def test_answer_source_general_knowledge_routing(self, builder):
-        """answer_with_routing includes answer_source and no transparency note."""
+    def test_answer_source_insufficient_routing(self, builder):
+        """answer_with_routing reflects the pipeline grounding status (P0.3)."""
+        from src.rag.pipeline import ANSWER_SOURCE_INSUFFICIENT_EVIDENCE
         pipeline = builder.pipeline
-        pipeline.generate = MagicMock(return_value="General knowledge answer.")
-        pipeline._last_answer_source = "general_knowledge"
+        pipeline.generate = MagicMock(return_value="Answer text.")
+        pipeline._last_answer_source = ANSWER_SOURCE_INSUFFICIENT_EVIDENCE
 
         result = pipeline.answer_with_routing("test query", category="Symptoms")
-        assert result["answer_source"] == "general_knowledge"
-        # No transparency note appended for general knowledge answers
+        assert result["answer_source"] == "insufficient_evidence"
 
 
 # ==============================================================================
@@ -1151,7 +1174,18 @@ class TestPipelineConstants:
 
     def test_insufficient_context_constant(self):
         from src.rag.pipeline import INSUFFICIENT_CONTEXT_MESSAGE
-        assert "enough information" in INSUFFICIENT_CONTEXT_MESSAGE
+        assert "sufficient" in INSUFFICIENT_CONTEXT_MESSAGE.lower()
+
+    def test_answer_source_constants(self):
+        """P0.3: grounding statuses are explicit constants."""
+        from src.rag.pipeline import (
+            ANSWER_SOURCE_FALLBACK,
+            ANSWER_SOURCE_GROUNDED,
+            ANSWER_SOURCE_INSUFFICIENT_EVIDENCE,
+        )
+        assert ANSWER_SOURCE_GROUNDED == "grounded"
+        assert ANSWER_SOURCE_INSUFFICIENT_EVIDENCE == "insufficient_evidence"
+        assert ANSWER_SOURCE_FALLBACK == "fallback"
 
     def test_inject_k_constant(self):
         from src.rag.pipeline import DEFAULT_INJECT_K

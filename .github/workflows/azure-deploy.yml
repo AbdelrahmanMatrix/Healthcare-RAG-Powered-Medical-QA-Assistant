@@ -9,6 +9,9 @@
 #   GROQ_API_KEY      — Groq LLM API key
 #   HF_TOKEN          — HuggingFace token (used as a Docker BuildKit secret)
 #   AZURE_ACR_NAME    — Container registry name (e.g. healthcareragacr)
+#   API_KEY           — (optional but RECOMMENDED) protects /query and /warmup.
+#                       Leave unset to deploy with authentication disabled
+#                       (NOT recommended — every call consumes Groq quota).
 #   AZURE_CREDENTIALS — Service principal JSON from:
 #                       az ad sp create-for-rbac --name "github-rag-deploy"
 #                         --role contributor
@@ -228,6 +231,9 @@ jobs:
       - name: Update environment variables
         # B2 plan has 3.5 GB RAM — skip reranker (~500 MB) to reduce memory pressure.
         # Models load lazily (not on startup) — UVICORN_WORKERS=1 keeps memory low.
+        # API_KEY: if the GitHub secret is set, /query and /warmup require the
+        # X-API-Key header. If unset, auth stays DISABLED (demo mode) — the app
+        # treats an empty API_KEY as "auth off" (P0.6 repair).
         run: |
           az webapp config appsettings set \
             --name $APP_NAME \
@@ -235,6 +241,7 @@ jobs:
             --settings \
               GROQ_API_KEY="${{ secrets.GROQ_API_KEY }}" \
               HF_TOKEN="${{ secrets.HF_TOKEN }}" \
+              API_KEY="${{ secrets.API_KEY }}" \
               DEPLOY_DATE="$(date +%Y-%m-%d)" \
               DEPLOY_ENV="azure" \
               AZURE_APP_URL="https://${APP_NAME}.azurewebsites.net" \
@@ -280,10 +287,17 @@ jobs:
 
           # Phase 2: call /warmup to pre-load models (allow up to 5 min).
           # This is best-effort — if warmup fails (OOM), the first user query
-          # will trigger lazy loading instead.
+          # will trigger lazy loading instead. Send the API key when one is
+          # configured (auth-enabled deployments reject unauthenticated calls).
           echo "Phase 2: calling /warmup to pre-load models..."
-          WARMUP_STATUS=$(curl -so /dev/null -w "%{http_code}" \
-            --max-time 300 "${URL}/warmup" || echo "000")
+          if [ -n "${{ secrets.API_KEY }}" ]; then
+            WARMUP_STATUS=$(curl -so /dev/null -w "%{http_code}" \
+              --max-time 300 -H "X-API-Key: ${{ secrets.API_KEY }}" \
+              "${URL}/warmup" || echo "000")
+          else
+            WARMUP_STATUS=$(curl -so /dev/null -w "%{http_code}" \
+              --max-time 300 "${URL}/warmup" || echo "000")
+          fi
           echo "  /warmup → HTTP ${WARMUP_STATUS}"
           if [ "$WARMUP_STATUS" = "200" ]; then
             echo "  ✅ Pipeline warmed up — API ready for traffic."
