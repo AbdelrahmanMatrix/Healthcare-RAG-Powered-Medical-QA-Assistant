@@ -1,0 +1,48 @@
+{
+  "labelled_csv_rows": 211186,
+  "rows_after_dropna_strip": 211186,
+  "duplicates_removed": 78,
+  "rows_after_dedup": 211108,
+  "rag_train_pool": 209108,
+  "holdout": 2000,
+  "clf_train": 167286,
+  "clf_val": 20911,
+  "clf_test": 20911,
+  "holdout_exact_parity_incl_order": true,
+  "holdout_content_parity": true,
+  "holdout_columns": [
+    "question",
+    "context",
+    "answer",
+    "category"
+  ],
+  "holdout_overlap_with_clf_splits": {
+    "train": 0,
+    "val": 0,
+    "test": 0
+  },
+  "clf_train_dist": {
+    "Medication": 56675,
+    "Treatment": 38472,
+    "Diagnosis": 25287,
+    "General": 22381,
+    "Prevention": 17565,
+    "Symptoms": 6906
+  },
+  "clf_val_dist": {
+    "Medication": 7084,
+    "Treatment": 4809,
+    "Diagnosis": 3161,
+    "General": 2798,
+    "Prevention": 2195,
+    "Symptoms": 864
+  },
+  "clf_test_dist": {
+    "Medication": 7085,
+    "Treatment": 4809,
+    "Diagnosis": 3161,
+    "General": 2797,
+    "Prevention": 2196,
+    "Symptoms": 863
+  }
+}

@@ -9,12 +9,14 @@ P0.2  BM25 / FAISS score semantics — explicit faiss_score / bm25_score /
       reranker_score, no inverted "distance", reranker is final authority.
 P0.3  Grounding — no ungrounded general-knowledge fallback; answer_source
       exposed as grounded / insufficient_evidence / fallback.
+P0.4  NB07 holdout exclusion — classifier never trains on RAG holdout rows.
 P0.6  Auth — API key required when settings.API_KEY set; disabled when empty.
 
 These tests are fully mocked (no model downloads, no network) and run in CI.
 """
 
 import pytest
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 
@@ -295,6 +297,65 @@ class TestGroundingContract:
         from src.rag.pipeline import INSUFFICIENT_CONTEXT_MESSAGE
         assert "sufficient" in INSUFFICIENT_CONTEXT_MESSAGE
         assert "not contain sufficient information" in INSUFFICIENT_CONTEXT_MESSAGE
+
+
+# ==============================================================================
+# ── P0.4 — classifier training excludes the RAG holdout (notebook 07) ───────
+# ==============================================================================
+
+class TestNotebook07HoldoutExclusion:
+    """Notebook 07 must exclude the RAG holdout from all classifier splits."""
+
+    @classmethod
+    def setup_class(cls):
+        import json
+        path = Path(__file__).resolve().parent.parent / (
+            "notebooks/07_classification_model.ipynb"
+        )
+        nb = json.loads(path.read_text(encoding="utf-8"))
+        cls.src = "\n".join(
+            "".join(c["source"]) if isinstance(c["source"], list) else c["source"]
+            for c in nb["cells"]
+            if c["cell_type"] == "code"
+        )
+
+    def test_holdout_split_reproduced_from_nb05(self):
+        assert 'train_test_split(\n    df, test_size=2000' in self.src or (
+            "test_size=2000" in self.src and "random_state=42" in self.src
+        ), "NB07 must reproduce NB05's 2,000-row holdout split"
+
+    def test_holdout_excluded_before_classifier_split(self):
+        assert "rag_train_pool" in self.src, (
+            "classifier split must start from the non-holdout pool"
+        )
+        assert 'drop_duplicates(subset=["question"]' in self.src, (
+            "NB07 must apply NB05's dedup before splitting (row counts must align)"
+        )
+
+    def test_leakage_guard_asserts_zero_overlap(self):
+        assert 'overlap == 0' in self.src, (
+            "NB07 must assert zero holdout overlap for train/val/test"
+        )
+
+    def test_holdout_parity_checked_against_artifact(self):
+        assert "eval_holdout.csv" in self.src, (
+            "NB07 must verify its reproduced holdout against the published artifact"
+        )
+
+    def test_weak_label_provenance_disclosed(self):
+        assert "weak label" in self.src.lower() or "programmatic keyword" in self.src.lower(), (
+            "NB07 must disclose that labels are programmatic, not human"
+        )
+
+    def test_class_weights_recomputed_on_train_split(self):
+        assert 'y=train_df["label_id"].values' in self.src, (
+            "class weights must be recomputed after holdout exclusion"
+        )
+
+    def test_training_manifest_written(self):
+        assert "classifier_training_manifest.json" in self.src, (
+            "NB07 must persist a reproducibility manifest"
+        )
 
 
 # ==============================================================================

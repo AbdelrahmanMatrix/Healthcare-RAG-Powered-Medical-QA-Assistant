@@ -1,3 +1,5 @@
+> **[HISTORICAL]** This is the pre-repair training run (full-dataset split — the 2,000-row RAG evaluation holdout was included in training data). Superseded by `reports/classification_report_v2.md` after the P0.4 leakage repair. Retained for the audit trail.
+
 # Classification Report — BioBERT Medical Classifier
 
 ## Model Details

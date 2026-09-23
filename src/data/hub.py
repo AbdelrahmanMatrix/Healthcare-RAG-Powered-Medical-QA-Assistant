@@ -126,7 +126,10 @@ def download_file(remote_path: str, local_path: Path) -> bool:
         shutil.copy2(cached_path, local_path)
         if local_path.exists():  # pragma: no cover — exercised by coverage_gaps; untraceable via huggingface_hub patch
             size_mb = local_path.stat().st_size / (1024 * 1024)
-            rel = local_path.relative_to(PROJECT_ROOT)
+            try:
+                rel = local_path.resolve().relative_to(PROJECT_ROOT)
+            except ValueError:  # path outside the project root
+                rel = Path(str(local_path))
             print(f"  ✅ Downloaded:"
                   f" {rel} ({size_mb:.1f} MB)")
             return True
