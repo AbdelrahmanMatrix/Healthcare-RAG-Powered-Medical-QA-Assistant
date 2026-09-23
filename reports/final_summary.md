@@ -1,3 +1,5 @@
+> **[HISTORICAL — PRE-REPAIR]** Written May 2026, before the Sept 2026 controlled repair (P0.1–P0.6). Model naming, grounding behavior, and metric claims here predate those repairs — see `reports/classification_report_v2.md` and the canonical `reports/evaluation_report.md` for current numbers.
+
 # 🏥 Final Project Summary — Healthcare RAG-Powered Medical Q&A Assistant
 
 **Generated:** 2026-05-25

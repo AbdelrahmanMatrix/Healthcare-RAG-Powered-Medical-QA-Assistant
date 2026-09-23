@@ -128,7 +128,9 @@ async def handle_query(request: QueryRequest) -> QueryResponse:
         return response
     except Exception as e:
         logger.error(f"Pipeline error: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Pipeline error: {str(e)}")
+        # Generic client-facing detail: the full exception (and traceback) is
+        # logged server-side above — internal errors must not leak to clients.
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/health", response_model=HealthResponse)

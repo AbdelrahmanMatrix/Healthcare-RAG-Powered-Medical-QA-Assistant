@@ -27,12 +27,12 @@ Final evaluation run — full numbers in [`reports/evaluation_report.md`](report
 
 ## ✨ Highlights
 
-- **Hybrid retrieval** — FAISS `IndexFlatIP` dense search fused with BM25; top-15 candidates reranked to top-3 with category-prioritised boosting
+- **Hybrid retrieval** — FAISS `IndexFlatIP` dense search fused with threshold-gated BM25; top-30 merged candidates reranked to top-3 by a cross-encoder (final ranking authority)
 - **Domain-tuned routing** — BioBERT (`dmis-lab/biobert-v1.1`) fine-tuned on 6 medical categories
 - **Biomedical embeddings** — `S-PubMedBert-MS-MARCO` (768-d), pre-trained on PubMed/PMC
 - **LLM inference** — `llama-4-scout-17b` via Groq API, with a local `flan-t5-base` fallback
 - **Full-stack delivery** — FastAPI + nginx-served SPA dashboard, three-service Docker Compose stack, CI/CD to Azure App Services
-- **MLOps** — MLflow experiment tracking, response caching, `/warmup` preloading
+- **MLOps** — MLflow offline experiment tracking, in-process response cache, `/warmup` endpoint (triggers lazy model loading)
 - **Bilingual UI** — English / العربية dashboard with live KPI board
 - **Tested** — 469 tests across 16 suites gating a 95% coverage floor in CI, plus a Docker image smoke build
 
@@ -144,7 +144,7 @@ flowchart TB
 
     subgraph SERVE["⚡ Inference Pipeline — FastAPI"]
         CLS["BioBERT classifier<br/>6 medical categories · Macro F1 90.66%"]
-        RET["Hybrid retrieval<br/>FAISS + BM25 fusion · top-15 → top-3<br/>category-prioritised reranking"]
+        RET["Hybrid retrieval<br/>FAISS + BM25 fusion · top-30 → top-3<br/>cross-encoder reranking"]
         GEN["LLM generation<br/>llama-4-scout-17b via Groq · flan-t5-base fallback"]
         CLS -->|"category routing"| RET
         RET -->|"grounded context"| GEN

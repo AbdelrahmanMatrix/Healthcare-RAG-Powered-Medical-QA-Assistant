@@ -1,3 +1,5 @@
+> **[HISTORICAL — PRE-REPAIR]** Written May 2026. Selection criteria, latency handling, and the Streamlit KPI-dashboard section below predate the Sept 2026 repair; MLflow here is confirmed as OFFLINE experiment tracking only (never runtime inference infrastructure). The dashboard is a vanilla-JS SPA (`dashboard/index.html`), not Streamlit. Latency simulation has been removed from `mlops/mlflow_tracking.py`.
+
 # MLOps Setup Summary
 
 **Healthcare RAG-Powered Medical Q&A Assistant**
