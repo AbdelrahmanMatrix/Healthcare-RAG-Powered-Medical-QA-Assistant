@@ -1,0 +1,11 @@
+{
+  "method": "exact normalized (lowercased, whitespace-collapsed) string match of each of the 200 sampled evaluation rows against the full 209,108-row indexed corpus (question, answer and context columns, checked separately)",
+  "n_eval": 200,
+  "seed": 42,
+  "index_rows": 209108,
+  "question_exact_matches": 0,
+  "answer_exact_matches": 0,
+  "context_exact_matches": 0,
+  "verdict": "PASS — no content overlap between eval sample and index",
+  "matched_eval_questions_preview": []
+}
