@@ -4,7 +4,9 @@ tests/test_p0_repairs.py
 
 Regression tests for the P0 controlled-repair work (2026-09).
 
-P0.1  Canonical generator model — single source of truth in config.settings.
+P0.1  Canonical generator model — single source of truth in config.settings
+      (openai/gpt-oss-120b since Sept 2026; llama-4-scout deprecated by Groq
+      and marked [HISTORICAL - DEPRECATED]).
 P0.2  BM25 / FAISS score semantics — explicit faiss_score / bm25_score /
       reranker_score, no inverted "distance", reranker is final authority.
 P0.3  Grounding — no ungrounded general-knowledge fallback; answer_source
@@ -29,28 +31,45 @@ class TestCanonicalGeneratorModel:
 
     def test_settings_declares_canonical_llm(self):
         from config.settings import settings
-        # Canonical evaluation/production model (Groq-hosted)
-        assert settings.LLM_MODEL == "meta-llama/llama-4-scout-17b-16e-instruct"
+        # CURRENT CANONICAL GENERATOR (Groq-hosted). llama-4-scout was
+        # deprecated by Groq; the canonical benchmark model is GPT-OSS 120B.
+        assert settings.LLM_MODEL == "openai/gpt-oss-120b"
+
+    def test_settings_declare_gpt_oss_reasoning_config(self):
+        """GPT-OSS reasoning is pinned for reproducible evaluation."""
+        from config.settings import settings
+        assert settings.REASONING_EFFORT in {"low", "medium", "high"}
+        assert settings.REASONING_FORMAT == "hidden"
+
+    def test_settings_declare_matched_eval_decoding(self):
+        """RAG and baseline must share one canonical completion-token budget."""
+        from config.settings import settings
+        assert settings.EVAL_MAX_TOKENS == 768
+
+    def test_no_hardcoded_models_in_runtime_code(self):
+        """P0.1: runtime code must not hardcode ANY generator model id.
+
+        The string "openai/gpt-oss" (without the model size suffix) IS allowed
+        in src/rag/pipeline.py — it gates which Groq models accept the
+        reasoning_effort parameter, it is not a model selection.
+        """
+        for rel in ("src/rag/pipeline.py", "src/pipeline.py", "api/routes/query.py",
+                    "api/main.py", "mlops/mlflow_tracking.py"):
+            with open(rel, "r", encoding="utf-8") as f:
+                text = f.read()
+            assert "openai/gpt-oss-120b" not in text, f"{rel} hardcodes a generator model"
+            assert "meta-llama/llama-4-scout" not in text, f"{rel} hardcodes a generator model"
 
     def test_settings_declares_fallback_llm(self):
         """The offline fallback is declared separately in settings."""
         from config.settings import settings
         assert settings.FALLBACK_LLM_MODEL == "google/flan-t5-base"
 
-    def test_no_hardcoded_gpt_oss_in_runtime_code(self):
-        """P0.1: runtime code must not hardcode a conflicting generator model."""
-        for rel in ("src/rag/pipeline.py", "src/pipeline.py", "api/routes/query.py",
-                    "api/main.py", "mlops/mlflow_tracking.py"):
-            with open(rel, "r", encoding="utf-8") as f:
-                text = f.read()
-            assert "gpt-oss" not in text, f"{rel} hardcodes a generator model"
-            assert "llama-4-scout" not in text, f"{rel} hardcodes the generator model"
-
     def test_build_rag_pipeline_reads_settings_llm(self):
         """build_rag_pipeline() passes settings.LLM_MODEL into RAGPipeline."""
         import importlib
         with patch("config.settings.settings") as mock_settings:
-            mock_settings.LLM_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
+            mock_settings.LLM_MODEL = "openai/gpt-oss-120b"
             mock_settings.EMBEDDING_MODEL = "pritamdeka/S-PubMedBert-MS-MARCO"
             mock_settings.RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-12-v2"
             mock_settings.USE_RERANKER = True
@@ -67,7 +86,7 @@ class TestCanonicalGeneratorModel:
                 rp._pipeline_instance = None
                 rp.build_rag_pipeline()
                 kwargs = mock_cls.call_args.kwargs
-                assert kwargs["llm_model"] == "meta-llama/llama-4-scout-17b-16e-instruct"
+                assert kwargs["llm_model"] == "openai/gpt-oss-120b"
                 rp._pipeline_instance = None
 
 

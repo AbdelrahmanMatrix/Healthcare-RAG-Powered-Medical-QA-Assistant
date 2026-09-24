@@ -1,3 +1,5 @@
+> **[HISTORICAL — PRE-REPAIR]** Written May 2026 from MLflow runs using meta-llama/llama-4-scout-17b-16e-instruct [HISTORICAL — DEPRECATED]. Model selection, inject_k=3 and all metrics here predate the Sept 2026 repairs AND the GPT-OSS 120B migration; they describe the old pipeline, not the current one.
+
 # MLflow Model Selection
 
 **Selected run:** `830d2493`

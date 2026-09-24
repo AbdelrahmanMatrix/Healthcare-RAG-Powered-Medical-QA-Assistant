@@ -1,6 +1,6 @@
 # M3 Integration Documentation
 
-> **[PARTIALLY HISTORICAL]** Written May 2026 (M3 phase). Structural content is accurate; some details predate the Sept 2026 repair — see `reports/security_notes.md` and `reports/evaluation_report.md` for current state.
+> **[PARTIALLY HISTORICAL]** Written May 2026 (M3 phase). Structural content is accurate; some details predate the Sept 2026 repair — see `reports/security_notes.md` and `reports/evaluation_report.md` for current state. The generator meta-llama/llama-4-scout-17b-16e-instruct shown below is [HISTORICAL — DEPRECATED]; the current canonical generator is openai/gpt-oss-120b.
 
 **Owner:** Ziad Ahmed El-Nady | eyouth × DEPI 2026
 **Milestone:** M3 — Azure Deployment

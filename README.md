@@ -15,6 +15,12 @@ Groq-hosted LLM generates the answer — served by FastAPI with a bilingual web 
 
 ## 🏆 Results at a Glance
 
+> **[HISTORICAL — DEPRECATED MODEL]** The numbers below are from the May 2026 evaluation run on
+> `meta-llama/llama-4-scout-17b-16e-instruct`, which Groq has since deprecated. They are kept for
+> the audit trail only. The current canonical generator is `openai/gpt-oss-120b` — its canonical
+> evaluation (NB08) and the classifier retrain (NB07) are pending; do not cite these values as
+> current performance.
+
 Final evaluation run — full numbers in [`reports/evaluation_report.md`](reports/evaluation_report.md):
 
 | KPI | Target | Result | Status |
@@ -27,10 +33,10 @@ Final evaluation run — full numbers in [`reports/evaluation_report.md`](report
 
 ## ✨ Highlights
 
-- **Hybrid retrieval** — FAISS `IndexFlatIP` dense search fused with threshold-gated BM25; top-30 merged candidates reranked to top-3 by a cross-encoder (final ranking authority)
+- **Hybrid retrieval** — FAISS `IndexFlatIP` dense search fused with threshold-gated BM25; top-30 merged candidates reranked by a cross-encoder (final ranking authority), top-5 injected into the LLM
 - **Domain-tuned routing** — BioBERT (`dmis-lab/biobert-v1.1`) fine-tuned on 6 medical categories
 - **Biomedical embeddings** — `S-PubMedBert-MS-MARCO` (768-d), pre-trained on PubMed/PMC
-- **LLM inference** — `llama-4-scout-17b` via Groq API, with a local `flan-t5-base` fallback
+- **LLM inference** — `openai/gpt-oss-120b` via Groq API (canonical; fixed `reasoning_effort=low`, `reasoning_format=hidden` for reproducible evaluation), with a local `flan-t5-base` fallback
 - **Full-stack delivery** — FastAPI + nginx-served SPA dashboard, three-service Docker Compose stack, CI/CD to Azure App Services
 - **MLOps** — MLflow offline experiment tracking, in-process response cache, `/warmup` endpoint (triggers lazy model loading)
 - **Bilingual UI** — English / العربية dashboard with live KPI board
@@ -144,8 +150,8 @@ flowchart TB
 
     subgraph SERVE["⚡ Inference Pipeline — FastAPI"]
         CLS["BioBERT classifier<br/>6 medical categories · Macro F1 90.66%"]
-        RET["Hybrid retrieval<br/>FAISS + BM25 fusion · top-30 → top-3<br/>cross-encoder reranking"]
-        GEN["LLM generation<br/>llama-4-scout-17b via Groq · flan-t5-base fallback"]
+        RET["Hybrid retrieval<br/>FAISS + BM25 fusion · top-30 pool → top-5 injected<br/>cross-encoder reranking"]
+        GEN["LLM generation<br/>gpt-oss-120b via Groq · flan-t5-base fallback"]
         CLS -->|"category routing"| RET
         RET -->|"grounded context"| GEN
     end
@@ -193,7 +199,7 @@ the inference pipeline (bottom) is what the FastAPI service runs on every query.
 |------|-------|
 | Embeddings | `pritamdeka/S-PubMedBert-MS-MARCO` (768d) |
 | Vector Store | FAISS IndexFlatIP + BM25 hybrid retrieval |
-| Generator | `meta-llama/llama-4-scout-17b-16e-instruct` via Groq API (falls back to `google/flan-t5-base` locally) |
+| Generator | `openai/gpt-oss-120b` via Groq API — CURRENT CANONICAL (`meta-llama/llama-4-scout-17b-16e-instruct` deprecated; falls back to `google/flan-t5-base` locally) |
 | Retrieval | Top-30 merged candidates (FAISS + threshold-gated BM25) → cross-encoder rerank → top-5 injected into the LLM, with category routing |
 | HTTP Client | `openai` Python SDK pointed at `api.groq.com/openai/v1` |
 

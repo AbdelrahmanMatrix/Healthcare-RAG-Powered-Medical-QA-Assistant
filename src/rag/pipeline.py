@@ -632,7 +632,8 @@ class RAGPipeline:
             n = self._groq_key_index + 1
         logger.info("[KEY ROTATE] Switching to key %d/%d", n, len(self._groq_clients))
 
-    def _call_groq(self, prompt: str, system_message: str = None, max_tokens: int = None) -> str:
+    def _call_groq(self, prompt: str, system_message: str = None,
+                   max_tokens: int = None, reasoning_effort: str = None) -> str:
         _system = system_message or (
             "You are a helpful health information assistant. Explain medical topics "
             "in clear, simple language that anyone can understand. Be accurate but "
@@ -650,15 +651,22 @@ class RAGPipeline:
             for _ in range(len(self._groq_clients)):
                 client = self._get_groq_client()
                 try:
-                    response = client.chat.completions.create(
+                    # GPT-OSS reasoning configuration (fixed for reproducible
+                    # evaluation). Sent ONLY for gpt-oss models - Groq rejects
+                    # the parameter on other model families.
+                    request_kwargs = dict(
                         model=self._groq_model,
                         messages=[
                             {"role": "system", "content": _system},
                             {"role": "user", "content": prompt},
                         ],
-                        max_tokens=max_tokens or self.max_new_tokens,
+                        max_tokens=max_tokens if max_tokens else self.max_new_tokens,
                         temperature=0.0,
                     )
+                    if self._groq_model.startswith("openai/gpt-oss"):
+                        request_kwargs["reasoning_effort"] = reasoning_effort or settings.REASONING_EFFORT
+                        request_kwargs["reasoning_format"] = settings.REASONING_FORMAT
+                    response = client.chat.completions.create(**request_kwargs)
                     return response.choices[0].message.content.strip()
                 except Exception as e:
                     last_error = e
@@ -889,12 +897,19 @@ class RAGPipeline:
             for attempt in range(len(self._groq_clients)):
                 try:
                     client = self._get_groq_client()
-                    resp = client.chat.completions.create(
+                    # GPT-OSS spends reasoning tokens from the completion
+                    # budget; 20 tokens can yield empty content, so the guard
+                    # gets a larger budget plus the fixed reasoning config.
+                    guard_kwargs = dict(
                         model=self._groq_model,
                         messages=[{"role": "user", "content": ROUTING_PROMPT}],
-                        max_tokens=20,
+                        max_tokens=100,
                         temperature=0.0,
                     )
+                    if self._groq_model.startswith("openai/gpt-oss"):
+                        guard_kwargs["reasoning_effort"] = settings.REASONING_EFFORT
+                        guard_kwargs["reasoning_format"] = settings.REASONING_FORMAT
+                    resp = client.chat.completions.create(**guard_kwargs)
                     raw = resp.choices[0].message.content.strip()
                     return json.loads(raw).get("needs_rag", True)
                 except Exception as exc:

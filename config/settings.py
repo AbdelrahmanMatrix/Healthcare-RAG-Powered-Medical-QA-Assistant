@@ -24,14 +24,31 @@ class Settings(BaseSettings):
     # PubMedBERT fine-tuned on MS-MARCO — biomedical retrieval specialist.
     EMBEDDING_MODEL: str = "pritamdeka/S-PubMedBert-MS-MARCO"
 
-    # ── LLM ───────────────────────────────────────────────────────────────────
-    # CANONICAL GENERATOR — single source of truth for the Groq-hosted LLM.
-    # This is the model used by the 2026-05 evaluation run (NB08) and by all
-    # reports. Runtime code must read settings.LLM_MODEL — never hardcode it.
-    LLM_MODEL: str = "meta-llama/llama-4-scout-17b-16e-instruct"
+    # ── LLM ───────────────────────────────────────────────────────────
+    # CURRENT CANONICAL GENERATOR — single source of truth for the Groq-hosted
+    # LLM. Migrated Sept 2026: Groq deprecated
+    # meta-llama/llama-4-scout-17b-16e-instruct [HISTORICAL - DEPRECATED],
+    # so the canonical benchmark generator is now openai/gpt-oss-120b.
+    # All Llama-4-Scout results in reports/ are historical and must not be
+    # compared with GPT-OSS results. Runtime code must read settings.LLM_MODEL
+    # - never hardcode a model id.
+    LLM_MODEL: str = "openai/gpt-oss-120b"
     LLM_BASE_URL: str = "https://api.groq.com/openai/v1"
     # Local fallback used only when GROQ_API_KEY is unset (offline mode).
     FALLBACK_LLM_MODEL: str = "google/flan-t5-base"
+
+    # ── GPT-OSS reasoning configuration (Groq-hosted GPT-OSS models) ─────
+    # reasoning_effort in {low, medium, high} for openai/gpt-oss-120b (Groq
+    # docs). Fixed at "low" for reproducible evaluation; reasoning_format
+    # "hidden" returns only the final answer (no <think> payload in content).
+    # Sent ONLY when the model id is a gpt-oss model - other models reject it.
+    REASONING_EFFORT: str = "low"
+    REASONING_FORMAT: str = "hidden"
+
+    # ── Canonical evaluation decoding ─────────────────────────────────
+    # Fixed for BOTH the RAG pipeline and the no-retrieval baseline in NB08
+    # (matched decoding). 768 completion tokens, temperature 0.0.
+    EVAL_MAX_TOKENS: int = 768
 
     # ── Reranker ──────────────────────────────────────────────────────────────
     # 12-layer MiniLM — higher precision than 6-layer variant.
