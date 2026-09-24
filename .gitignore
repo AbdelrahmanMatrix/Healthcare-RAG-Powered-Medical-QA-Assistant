@@ -108,3 +108,11 @@ tests/.github_workflow_schema.json
 .cache/
 huggingface/
 **/.cache/
+
+# ─── Local Validation Artifacts (never committed) ─────────────────────────────
+# Safety bundles + rewrite audit files generated during history maintenance.
+scripts/validation/_repo_state.bundle
+scripts/validation/_repo_state_pre_main_rewrite.bundle
+scripts/validation/_main_rewrite_before.txt
+scripts/validation/_nb07_stale_backup.ipynb
+scripts/validation/_nb07_done.flag
