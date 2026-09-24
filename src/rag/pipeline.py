@@ -77,9 +77,10 @@ INSUFFICIENT_CONTEXT_MESSAGE = (
 # Biomedical domain embedding model (PubMedBERT fine-tuned on MS-MARCO)
 DEFAULT_EMBEDDING_MODEL = "pritamdeka/S-PubMedBert-MS-MARCO"
 
-# Local fallback LLM when GROQ_API_KEY is not set.
-# Canonical generator model lives in config.settings.LLM_MODEL.
-DEFAULT_FALLBACK_MODEL = "google/flan-t5-base"
+# Canonical generator model lives in config.settings.LLM_MODEL — the
+# constructor reads it from settings (single source of truth), never from a
+# module-level constant.
+DEFAULT_LLM_FROM_SETTINGS = settings.LLM_MODEL
 
 # CrossEncoder reranker (12-layer, higher precision than 6-layer)
 DEFAULT_RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-12-v2"
@@ -214,7 +215,7 @@ class RAGPipeline:
     def __init__(
         self,
         embedding_model: str = DEFAULT_EMBEDDING_MODEL,
-        llm_model: str = DEFAULT_FALLBACK_MODEL,
+        llm_model: str = DEFAULT_LLM_FROM_SETTINGS,
         reranker_model: str = DEFAULT_RERANKER_MODEL,
         use_reranker: bool = True,
         top_k: int = DEFAULT_TOP_K,
@@ -326,7 +327,7 @@ class RAGPipeline:
             ]
             self._groq_key_index = 0
             self._groq_key_lock = threading.Lock()
-            self._groq_model = llm_model
+            self._groq_model = llm_model if llm_model else settings.LLM_MODEL
             self._use_groq = True
             logger.info("[OK] Groq client ready")
         else:
@@ -665,7 +666,11 @@ class RAGPipeline:
                     )
                     if self._groq_model.startswith("openai/gpt-oss"):
                         request_kwargs["reasoning_effort"] = reasoning_effort or settings.REASONING_EFFORT
-                        request_kwargs["reasoning_format"] = settings.REASONING_FORMAT
+                        # Groq extension, mutually exclusive with reasoning_format
+                        # (which GPT-OSS does not accept) - carried via extra_body.
+                        request_kwargs["extra_body"] = {
+                            "include_reasoning": settings.INCLUDE_REASONING,
+                        }
                     response = client.chat.completions.create(**request_kwargs)
                     return response.choices[0].message.content.strip()
                 except Exception as e:
@@ -908,7 +913,9 @@ class RAGPipeline:
                     )
                     if self._groq_model.startswith("openai/gpt-oss"):
                         guard_kwargs["reasoning_effort"] = settings.REASONING_EFFORT
-                        guard_kwargs["reasoning_format"] = settings.REASONING_FORMAT
+                        guard_kwargs["extra_body"] = {
+                            "include_reasoning": settings.INCLUDE_REASONING,
+                        }
                     resp = client.chat.completions.create(**guard_kwargs)
                     raw = resp.choices[0].message.content.strip()
                     return json.loads(raw).get("needs_rag", True)

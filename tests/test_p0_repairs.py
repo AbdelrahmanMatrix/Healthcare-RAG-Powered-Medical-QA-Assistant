@@ -36,10 +36,15 @@ class TestCanonicalGeneratorModel:
         assert settings.LLM_MODEL == "openai/gpt-oss-120b"
 
     def test_settings_declare_gpt_oss_reasoning_config(self):
-        """GPT-OSS reasoning is pinned for reproducible evaluation."""
+        """GPT-OSS reasoning is pinned for reproducible evaluation.
+
+        GPT-OSS does not accept the format parameter; answer-only behaviour
+        comes from include_reasoning=False (a Groq extension, mutually
+        exclusive with reasoning_format).
+        """
         from config.settings import settings
         assert settings.REASONING_EFFORT in {"low", "medium", "high"}
-        assert settings.REASONING_FORMAT == "hidden"
+        assert settings.INCLUDE_REASONING is False
 
     def test_settings_declare_matched_eval_decoding(self):
         """RAG and baseline must share one canonical completion-token budget."""
@@ -90,8 +95,177 @@ class TestCanonicalGeneratorModel:
                 rp._pipeline_instance = None
 
 
+class TestGptOssRequestContract:
+    """GPT-OSS request contract (Groq deprecation migration).
+
+    GPT-OSS accepts reasoning_effort but NOT reasoning_format. The
+    answer-only behaviour comes from include_reasoning=False, a Groq
+    extension that the openai SDK carries via extra_body. These tests prove
+    the serialized request wire format, not just the settings values.
+    """
+
+    def _make_pipeline(self):
+        """Minimal Groq-mode RAGPipeline with a mocked OpenAI client."""
+        import numpy as np
+        import pandas as pd
+        import sys
+
+        mock_index = MagicMock()
+        mock_index.ntotal = 10
+
+        mock_faiss = MagicMock()
+        mock_faiss.read_index.return_value = mock_index
+
+        def normalize_L2(vectors):
+            norms = np.linalg.norm(vectors, axis=1, keepdims=True)
+            norms[norms == 0] = 1.0
+            vectors[:] = vectors / norms
+
+        mock_faiss.normalize_L2.side_effect = normalize_L2
+
+        mock_encoder = MagicMock()
+        mock_encoder.encode.return_value = np.ones((1, 4), dtype=np.float32)
+
+        mock_st_mod = MagicMock()
+        mock_st_mod.SentenceTransformer.return_value = mock_encoder
+        mock_st_mod.CrossEncoder = MagicMock(return_value=MagicMock())
+
+        captured = {}
+
+        def fake_create(**kwargs):
+            captured.update(kwargs)
+            msg = MagicMock()
+            msg.content = "A grounded answer."
+            choice = MagicMock()
+            choice.message = msg
+            resp = MagicMock()
+            resp.choices = [choice]
+            return resp
+
+        mock_openai_client = MagicMock()
+        mock_openai_client.chat.completions.create.side_effect = fake_create
+        mock_openai_mod = MagicMock()
+        mock_openai_mod.OpenAI = MagicMock(return_value=mock_openai_client)
+
+        mock_df = pd.DataFrame({
+            "chunk_id": list(range(10)),
+            "question": [f"q{i}" for i in range(10)],
+            "answer": [f"a{i}" for i in range(10)],
+            "context": [f"c{i}" for i in range(10)],
+            "text_chunk": [f"t{i}" for i in range(10)],
+            "category": ["General"] * 10,
+        })
+
+        with patch.dict(sys.modules, {
+            "faiss": mock_faiss,
+            "sentence_transformers": mock_st_mod,
+            "openai": mock_openai_mod,
+            "src.classification.classifier": MagicMock(),
+        }):
+            with patch("builtins.open", MagicMock()), \
+                 patch("pickle.load", return_value=mock_df), \
+                 patch.dict("os.environ", {"GROQ_API_KEY": "test-key"}):
+                from src.rag.pipeline import RAGPipeline
+                pipeline = RAGPipeline(
+                    top_k=5,
+                    use_reranker=False,
+                    faiss_index_path="mock.faiss",
+                    chunk_mapping_path="mock.pkl",
+                )
+        pipeline._captured = captured
+        return pipeline
+
+    def test_gpt_oss_request_has_reasoning_effort_low(self):
+        pipeline = self._make_pipeline()
+        pipeline._call_groq("test prompt")
+        kwargs = pipeline._captured
+        assert kwargs["model"] == "openai/gpt-oss-120b"
+        assert kwargs["reasoning_effort"] == "low"
+        assert kwargs["extra_body"]["include_reasoning"] is False
+
+    def test_gpt_oss_request_never_contains_reasoning_format(self):
+        """The serialized GPT-OSS request must not contain reasoning_format."""
+        import json as _json
+        pipeline = self._make_pipeline()
+        pipeline._call_groq("test prompt")
+        kwargs = pipeline._captured
+        assert "reasoning_format" not in kwargs
+        body = _json.dumps(kwargs, default=str)
+        assert "reasoning_format" not in body
+
+    def test_include_reasoning_survives_sdk_serialization(self):
+        """extra_body include_reasoning must survive openai SDK serialization.
+
+        Mirrors how the SDK merges extra_body into the request body. If the
+        SDK or a version bump drops/renames the Groq extension, this fails
+        before any real API call wastes a benchmark run.
+        """
+        import json as _json
+        import threading
+        from src.rag.pipeline import RAGPipeline
+
+        rp = RAGPipeline.__new__(RAGPipeline)
+        rp._groq_clients = [MagicMock()]
+        rp._groq_key_index = 0
+        rp._groq_key_lock = threading.Lock()
+        rp._groq_model = "openai/gpt-oss-120b"
+        rp.max_new_tokens = 768
+
+        captured = {}
+
+        def fake_create(**kwargs):
+            captured.update(kwargs)
+            msg = MagicMock()
+            msg.content = "ok"
+            choice = MagicMock()
+            choice.message = msg
+            resp = MagicMock()
+            resp.choices = [choice]
+            return resp
+
+        rp._groq_clients[0].chat.completions.create.side_effect = fake_create
+        rp._call_groq("wire format probe")
+
+        body = dict(captured)
+        body.update(body.pop("extra_body", {}))  # emulate SDK extra_body merge
+        wire = _json.dumps(body, default=str)
+        parsed = _json.loads(wire)
+        assert parsed["include_reasoning"] is False
+        assert "reasoning_format" not in parsed
+        assert parsed["reasoning_effort"] == "low"
+
+    def test_non_gpt_oss_models_do_not_receive_reasoning_params(self):
+        import threading
+        from src.rag.pipeline import RAGPipeline
+
+        rp = RAGPipeline.__new__(RAGPipeline)
+        rp._groq_clients = [MagicMock()]
+        rp._groq_key_index = 0
+        rp._groq_key_lock = threading.Lock()
+        rp._groq_model = "meta-llama/llama-4-scout-17b-16e-instruct"
+        rp.max_new_tokens = 768
+
+        captured = {}
+
+        def fake_create(**kwargs):
+            captured.update(kwargs)
+            msg = MagicMock()
+            msg.content = "ok"
+            choice = MagicMock()
+            choice.message = msg
+            resp = MagicMock()
+            resp.choices = [choice]
+            return resp
+
+        rp._groq_clients[0].chat.completions.create.side_effect = fake_create
+        rp._call_groq("legacy probe")
+
+        assert "reasoning_effort" not in captured
+        assert "extra_body" not in captured
+
+
 # ==============================================================================
-# ── P0.2 — Score semantics & fusion ──────────────────────────────────────────
+# ── P0.2 — Score semantics & fusion ──────────────────────────────────────
 # ==============================================================================
 
 class TestScoreSemantics:

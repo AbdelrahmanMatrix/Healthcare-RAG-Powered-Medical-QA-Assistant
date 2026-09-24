@@ -36,7 +36,7 @@ Final evaluation run — full numbers in [`reports/evaluation_report.md`](report
 - **Hybrid retrieval** — FAISS `IndexFlatIP` dense search fused with threshold-gated BM25; top-30 merged candidates reranked by a cross-encoder (final ranking authority), top-5 injected into the LLM
 - **Domain-tuned routing** — BioBERT (`dmis-lab/biobert-v1.1`) fine-tuned on 6 medical categories
 - **Biomedical embeddings** — `S-PubMedBert-MS-MARCO` (768-d), pre-trained on PubMed/PMC
-- **LLM inference** — `openai/gpt-oss-120b` via Groq API (canonical; fixed `reasoning_effort=low`, `reasoning_format=hidden` for reproducible evaluation), with a local `flan-t5-base` fallback
+- **LLM inference** — `openai/gpt-oss-120b` via Groq API (canonical; fixed `reasoning_effort=low`, `include_reasoning=false` for reproducible evaluation), with a local `flan-t5-base` fallback
 - **Full-stack delivery** — FastAPI + nginx-served SPA dashboard, three-service Docker Compose stack, CI/CD to Azure App Services
 - **MLOps** — MLflow offline experiment tracking, in-process response cache, `/warmup` endpoint (triggers lazy model loading)
 - **Bilingual UI** — English / العربية dashboard with live KPI board

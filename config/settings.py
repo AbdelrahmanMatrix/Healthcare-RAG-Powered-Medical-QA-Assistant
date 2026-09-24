@@ -39,11 +39,14 @@ class Settings(BaseSettings):
 
     # ── GPT-OSS reasoning configuration (Groq-hosted GPT-OSS models) ─────
     # reasoning_effort in {low, medium, high} for openai/gpt-oss-120b (Groq
-    # docs). Fixed at "low" for reproducible evaluation; reasoning_format
-    # "hidden" returns only the final answer (no <think> payload in content).
-    # Sent ONLY when the model id is a gpt-oss model - other models reject it.
+    # docs). Fixed at "low" for reproducible evaluation.
+    # include_reasoning=False returns only the final answer (no reasoning
+    # payload). GPT-OSS does NOT accept the reasoning_format parameter, and
+    # include_reasoning is mutually exclusive with it - never send both.
+    # include_reasoning is a Groq extension: the openai SDK carries it via
+    # extra_body. Sent ONLY when the model id is a gpt-oss model.
     REASONING_EFFORT: str = "low"
-    REASONING_FORMAT: str = "hidden"
+    INCLUDE_REASONING: bool = False
 
     # ── Canonical evaluation decoding ─────────────────────────────────
     # Fixed for BOTH the RAG pipeline and the no-retrieval baseline in NB08
